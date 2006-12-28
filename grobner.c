@@ -47,12 +47,15 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 {
 	struct polynomial tmp[ss];
 	struct polynomial **aa;
+	struct polynomial *ppp;
 	struct term *aaterm[ss];
-	struct term *ppterm;
+	struct term **ptrterm;
 	struct term mon;
 	unsigned int i, dividing;
-	make_scalar(mon.c);
 
+	make_scalar(mon.c);
+	ppp = NULL;
+	make_pol(&ppp);
 	aa = (struct polynomial **)malloc(ss*sizeof(struct polynomial *));
 	if(!aa) {
 		perror("Malloc failed!");
@@ -63,57 +66,66 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 		aaterm[i] = NULL;
 		aa[i] = NULL;
 		make_pol(&aa[i]);
-		aa[i]->degree = (pp->degree > vh[i]->degree) ? (pp->degree - vh[i]->degree) : 0;
+		aa[i]->degree = (pp->degree > vh[i]->degree) ?
+			(pp->degree - vh[i]->degree) : 0;
 	};
 
-	ppterm = pp->leading;
-	while(ppterm) {
+	/* Copy pp into ppp. */
+	ppp->degree = pp->degree;
+	ppp->leading = pp->leading;
+	/* Set pp equal to ``zero'' */
+	pp->leading = NULL;
+	ptrterm = &pp->leading;
+
+	while (ppp->leading) {
 		i = 0;
 		dividing = 1;
-		while((i+1 <= ss) && dividing) {
-			if(deelbaar(vh[i]->leading,ppterm)) {
-				/* No sign in front of ppterm->c */
-				sc_div(ppterm->c,vh[i]->leading->c,mon.c);
+		while (i+1 <= ss && dividing) {
+			if (deelbaar(vh[i]->leading, ppp->leading)) {
+				/* No sign in front of pppterm->c */
+				sc_div(ppp->leading->c, vh[i]->leading->c,
+					mon.c);
 				/* Change sign mon.c */
 				sc_negate(mon.c);
-				mon.n1 = ppterm->n1 - vh[i]->leading->n1;
-				mon.n2 = ppterm->n2 - vh[i]->leading->n2;
-				mon.n3 = ppterm->n3 - vh[i]->leading->n3;
-				mon.n4 = ppterm->n4 - vh[i]->leading->n4;
+				mon.n1 = ppp->leading->n1 - vh[i]->leading->n1;
+				mon.n2 = ppp->leading->n2 - vh[i]->leading->n2;
+				mon.n3 = ppp->leading->n3 - vh[i]->leading->n3;
+				mon.n4 = ppp->leading->n4 - vh[i]->leading->n4;
 
 				if(tmp[i].leading) {
-					times_term(mon,*(vh[i]),&(tmp[i]));
+					times_term(mon, *(vh[i]), &(tmp[i]));
 					make_term(&aaterm[i]->next);
-					copy_term(&mon,aaterm[i]->next);
+					copy_term(&mon, aaterm[i]->next);
 					aaterm[i] = aaterm[i]->next;
 				} else {
 					tmp[i] = make_times_term(mon,*(vh[i]));
 					make_term(&aa[i]->leading);
-					copy_term(&mon,aa[i]->leading);
+					copy_term(&mon, aa[i]->leading);
 					aaterm[i] = aa[i]->leading;
 				};
-				copy_term(ppterm,&mon); /* Save till where.*/
-				rep_pol_add(pp,tmp[i]); /* destroys ppterm.*/
-				ppterm = pp->leading;
-				while((ppterm) && 
-				(kleiner(ppterm,&mon) == GROTER)) {
-					ppterm = ppterm->next;
-				}; /* Updates ppterm. This will give an	*
-				    * infinite loop if there is no 	*
-				    * cancellation in the spot of the	*
-				    * old ppterm.			*/
+
+				rep_pol_add(ppp, tmp[i]);
+
 				dividing = 0;
 			} else {
 				i=i+1;
 			};
 		};
+		/* dividing == 1 means that we cannot get rid of the leading
+		 * term. So we put it back in pp. */
 		if(dividing) {
-			ppterm = ppterm->next;
+			*ptrterm = ppp->leading;
+			ptrterm = &((*ptrterm)->next);
+			/* Move on to the next one. */
+			ppp->leading = ppp->leading->next;
+			/* Terminate pp. */
+			*ptrterm = NULL;
 		};
 	};
 	for(i=0;i+1<=ss;i++) {
 		free_tail(tmp[i].leading);
 	};
+	free(ppp);
 	free_scalar(mon.c);
 	return(aa);
 };
@@ -140,7 +152,7 @@ zero_on_division(struct polynomial ppp, unsigned int ss, struct polynomial **vh)
 		while((i+1<=ss) && dividing) {
 			if(deelbaar(vh[i]->leading, pp.leading)) {
 				/* No sign in front of ppterm->c */
-				sc_div(pp.leading->c,vh[i]->leading->c,mon.c);
+				sc_div(pp.leading->c, vh[i]->leading->c,mon.c);
 				/* Change sign mon.c */
 				sc_negate(mon.c);
 				mon.n1 = pp.leading->n1 - vh[i]->leading->n1;
@@ -148,11 +160,12 @@ zero_on_division(struct polynomial ppp, unsigned int ss, struct polynomial **vh)
 				mon.n3 = pp.leading->n3 - vh[i]->leading->n3;
 				mon.n4 = pp.leading->n4 - vh[i]->leading->n4;
 				if(tmp[i].leading) {
-					times_term(mon,*(vh[i]),&(tmp[i]));
+					times_term(mon, *(vh[i]), &(tmp[i]));
 				} else {
-					tmp[i] = make_times_term(mon,*(vh[i]));
+					tmp[i] = make_times_term(mon,
+						*(vh[i]));
 				};
-				rep_pol_add(&pp,tmp[i]);
+				rep_pol_add(&pp, tmp[i]);
 				dividing = 0;
 			} else {
 				i=i+1;
