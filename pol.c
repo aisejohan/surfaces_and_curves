@@ -170,7 +170,6 @@ int kleiner(struct term *mon1, struct term *mon2)
 	if(mon1->n1 != mon2->n1) return((mon1->n1 < mon2->n1));
 	if(mon1->n2 != mon2->n2) return((mon1->n2 < mon2->n2));
 	if(mon1->n3 != mon2->n3) return((mon1->n3 < mon2->n3));
-	if(mon1->n4 != mon2->n4) return((mon1->n4 < mon2->n4));
 	return(-1);
 };
 
@@ -223,10 +222,13 @@ struct polynomial pol_add(struct polynomial f, struct polynomial g)
 	uit.leading = NULL;
 	make_scalar(c);
 
+#ifdef KIJKEN
 	if(f.degree != g.degree) {
 		printf("Can't add these!\n");
 		exit(1);
 	};
+#endif
+
 	uit.degree = f.degree;
 	ptrterm = &(uit.leading); /* uit.leading will be set later.*/
 	fterm=f.leading;
@@ -287,6 +289,7 @@ void rep_pol_add(struct polynomial *f, struct polynomial g)
 	struct term *fterm, *gterm;
 	struct term **ptrterm;
 
+#ifdef KIJKEN
 	if(f->degree != g.degree) {
 		printf("Can't add these!\n");
 		printf("Degree f is %d and degree g is %d\n",
@@ -296,6 +299,8 @@ void rep_pol_add(struct polynomial *f, struct polynomial g)
 		print_pol(g);
 		exit(1);
 	};
+#endif
+
 	ptrterm = &(f->leading);
 	fterm=f->leading;
 	*ptrterm = NULL;
@@ -586,8 +591,6 @@ make_times_term_variant(struct term t, struct polynomial f)
 	return(uit);
 };
 
-static unsigned long int AANTAL;
-
 /* Only clean up and do modulo modulus at the very end. */
 struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 {
@@ -616,12 +619,9 @@ struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 	uit = make_times_term_variant(*tt, *b);
 	tt = tt->next;
 
-	AANTAL=0;
-
 	while(tt) {
 		times_term_variant(*tt, *b, &tmppol);
 		rep_pol_add_variant(&uit,tmppol);
-		AANTAL++;
 		tt = tt->next;
 	};
 
@@ -634,8 +634,6 @@ struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 	clean_pol(&uit);
 
 	free_tail(tmppol.leading);
-
-	if(AANTAL>100) printf("Here AANTAL = %lu.\n", AANTAL);
 
 	return(uit);
 };
