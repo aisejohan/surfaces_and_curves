@@ -400,7 +400,6 @@ void times_scalar(mscalar c, struct polynomial *f)
 	return;
 };
 
-
 /* This function assumes the data structures f and g	*
  * have the same length, and f is initialized, but	*
  * g need not be. The result t*f is put into g, but	*
@@ -452,7 +451,9 @@ make_times_term(struct term t, struct polynomial f)
 	return(uit);
 };
 
-struct polynomial pol_mult(struct polynomial f, struct polynomial g)
+/* This is the version which is better in that it knows
+ * nothing about the internals of the scalars.			 */
+struct polynomial pol_mult_variant(struct polynomial f, struct polynomial g)
 {
 	struct polynomial uit, tmppol;
 	struct term *fterm;
@@ -479,5 +480,162 @@ struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 	return(uit);
 };
 
+/* Do not compute reductions. */
+void times_term_variant(struct term t, struct polynomial f, struct polynomial *g)
+{
+	struct term *fterm, *gterm;
 
+	g->degree = f.degree + d1*t.n1 + d2*t.n2 + d3*t.n3 + d4*t.n4;
+	gterm = g->leading;
+	fterm = f.leading;
+	while(fterm) {
+		mpz_mul(gterm->c, t.c, fterm->c);
+		gterm->n1 = t.n1 + fterm->n1;
+		gterm->n2 = t.n2 + fterm->n2;
+		gterm->n3 = t.n3 + fterm->n3;
+		gterm->n4 = t.n4 + fterm->n4;
+		fterm = fterm->next;
+		gterm = gterm->next;
+	};
+	return;
+};
 
+/* We do not check for zero or reduce mod modulus. */
+void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
+{
+	int vergelijk;
+	struct term *fterm, *gterm;
+	struct term **ptrterm;
+
+#ifdef KIJKEN
+	if(f->degree != g.degree) {
+		printf("Can't add these!\n");
+		printf("Degree f is %d and degree g is %d\n",
+				f->degree,g.degree);
+		print_pol(*f);
+		printf("\n");
+		print_pol(g);
+		exit(1);
+	};
+#endif
+
+	ptrterm = &(f->leading);
+	fterm=f->leading;
+	*ptrterm = NULL;
+	gterm=g.leading;
+	while (1) {
+		if(!fterm) {
+			while(gterm)  {
+				make_term(ptrterm);
+				copy_term(gterm,*ptrterm);
+				ptrterm = &((*ptrterm)->next);
+				gterm = gterm->next;
+			};
+			return;
+		};
+
+		if(!gterm) {
+			*ptrterm = fterm;
+			return;
+		};
+
+		vergelijk=kleiner(fterm,gterm);
+		if (vergelijk == GROTER) {
+			*ptrterm = fterm;
+			ptrterm = &(fterm->next);
+			fterm = fterm->next;
+			*ptrterm = NULL;
+		} else if (vergelijk == KLEINER) {
+			make_term(ptrterm);
+			copy_term(gterm,*ptrterm);
+			ptrterm = &((*ptrterm)->next);
+			gterm = gterm->next;
+		} else {
+			/* vergelijk == GELIJK */
+			mpz_add(fterm->c, gterm->c, fterm->c);
+			*ptrterm = fterm;
+			ptrterm = &(fterm->next);
+			fterm = fterm->next;
+			*ptrterm = NULL;
+			gterm = gterm->next;
+		};
+	};
+};
+
+struct polynomial
+make_times_term_variant(struct term t, struct polynomial f)
+{
+	struct term *fterm;
+	struct term **ptrterm;
+	struct polynomial uit;
+	uit.leading = NULL;
+
+	uit.degree = f.degree + d1*t.n1 + d2*t.n2 + d3*t.n3 + d4*t.n4;
+	ptrterm = &(uit.leading);
+	fterm = f.leading;
+	while(fterm) {
+		make_term(ptrterm);
+		mpz_mul((*ptrterm)->c, t.c, fterm->c);
+		(*ptrterm)->n1 = t.n1 + fterm->n1;
+		(*ptrterm)->n2 = t.n2 + fterm->n2;
+		(*ptrterm)->n3 = t.n3 + fterm->n3;
+		(*ptrterm)->n4 = t.n4 + fterm->n4;
+		fterm = fterm->next;
+		ptrterm = &((*ptrterm)->next);
+	};
+	return(uit);
+};
+
+static unsigned long int AANTAL;
+
+/* Only clean up and do modulo modulus at the very end. */
+struct polynomial pol_mult(struct polynomial f, struct polynomial g)
+{
+	struct polynomial uit, tmppol;
+	struct polynomial *a, *b;
+	struct term *tt;
+	tmppol.leading = NULL;
+	uit.leading = NULL;
+
+	uit.degree = f.degree + g.degree;
+
+	if((!f.leading) || (!g.leading)) return(uit);
+
+	if (f.degree > g.degree) {
+		a = &g;
+		b = &f;
+	} else {
+		a = &f;
+		b = &g;
+	}
+
+	make_tail(b->leading, &(tmppol.leading));
+
+	tt = a->leading;
+
+	uit = make_times_term_variant(*tt, *b);
+	tt = tt->next;
+
+	AANTAL=0;
+
+	while(tt) {
+		times_term_variant(*tt, *b, &tmppol);
+		rep_pol_add_variant(&uit,tmppol);
+		AANTAL++;
+		tt = tt->next;
+	};
+
+	tt = uit.leading;
+	while(tt) {
+		mpz_mod(tt->c,tt->c,modulus);
+		tt = tt->next;
+	};
+
+	clean_pol(&uit);
+
+	free_tail(tmppol.leading);
+
+	if(AANTAL>100) printf("Here AANTAL = %lu.\n", AANTAL);
+
+	return(uit);
+};

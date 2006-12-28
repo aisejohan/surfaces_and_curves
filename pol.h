@@ -35,6 +35,7 @@ void free_tail(struct term *mon);
 void copy_tail(struct term *mon, struct term **ptrterm);
 struct polynomial copy_pol(struct polynomial f);
 struct polynomial pol_mult(struct polynomial f, struct polynomial g);
+struct polynomial pol_mult_variant(struct polynomial f, struct polynomial g);
 struct polynomial pol_add(struct polynomial f, struct polynomial g);
 void rep_pol_add(struct polynomial *f, struct polynomial g);
 struct polynomial copy_pol(struct polynomial f);

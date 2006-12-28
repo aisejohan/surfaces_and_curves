@@ -28,14 +28,14 @@
 #define GELIJK	-1
 #define GROTER	0
 
-#define d1	1
-#define d2	1
-#define d3	4
-#define d4	6
-#define d	12
-#define p	5
+#define d1	7
+#define d2	8
+#define d3	15
+#define d4	19
+#define d	64
+#define p	7
 #define r	20		/* Exponent. */
-#define q	5		/* Largest power of Delta. */
+#define q	4		/* Largest power of Delta. */
 
 #define maxlength	256
 

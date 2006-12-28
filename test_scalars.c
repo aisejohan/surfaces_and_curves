@@ -74,26 +74,20 @@ int main()
 	printmscalar(me);
 	printf(".\n");
 
-	A = make_random(500);
+	A = make_random(10);
 	F = copy_pol(A);
-	print_pol(A);
-	printf("\n");
-	B = make_random(500);
+/*	print_pol(A);
+	printf("\n"); */
+	B = make_random(11);
 	H = copy_pol(B);
-	print_pol(B);
-	printf("\n");
+/*	print_pol(B);
+	printf("\n"); */
 	C = pol_mult(A,B);
-	print_pol(C);
-	printf("\n");
-#ifdef DRAADJES
-	/* To test threads.	*/
-	D = pol_mult_threads(A,B);
-#else
-	/* Test AB = BA....	*/
-	D = pol_mult(B,A);
-#endif
-	print_pol(D);
-	printf("\n");
+/*	print_pol(C);
+	printf("\n"); */
+	D = pol_mult_variant(B,A);
+/*	print_pol(D);
+	printf("\n"); */
 	times_int(-1,&D);
 	E = pol_add(C,D);
 	print_pol(E);
