@@ -135,7 +135,7 @@ int main()
 	setup_scalars();
 
 	/* Seed the randomness. */
-	set_seed(131);
+	set_seed(0);
 
 	retry = 1;
 	while(retry == 1) {
