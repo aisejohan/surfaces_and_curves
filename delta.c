@@ -442,50 +442,6 @@ struct polynomial **split_up(struct polynomial *f)
 	return(uit);
 };
 
-#ifdef OLDVERSION
-/* Returns the product.						*
- * Does not modify f or g. 					*
- * The main term ``f[0]*g[0] mod myf'' is NOT zero since	*
- * neither f[0] nor g[0] is divisible by myf.			*/
-struct polynomial **mult_split(struct polynomial **f, struct polynomial **g)
-{
-	int i,j,k,uitlen,flen,glen;
-	struct polynomial tmp, **uit, **aa;
-	tmp.leading=NULL;
-
-	flen = 1 + f[0]->degree/d;
-	glen = 1 + g[0]->degree/d;
-	uitlen = flen + glen - 1;
-	uit=(struct polynomial **)malloc(uitlen*sizeof(struct polynomial *));
-	if(!uit) {
-		perror("Malloc failed!");
-		exit(1);
-	};
-	for(i=0;i+1<=uitlen;i++) {
-		uit[i] = NULL;
-		make_pol(&uit[i]);
-		uit[i]->degree = f[0]->degree + g[0]->degree - i*d; 
-	};
-	for(i=0;i+1<=uitlen;i++) {
-		j= (glen < i+1) ? (i+1-glen) : 0;
-		while((j<=i) && (j+1 <= flen)) {
-			tmp = pol_mult(*f[j],*g[i-j]);
-			aa = split_up(&tmp);
-			/* The number of terms of aa will be uitlen-i.	*/
-			/* We should also free aa again. 		*/
-			for(k=0; k+1 <= uitlen-i; k++) {
-				rep_pol_add(uit[i+k],*aa[k]);
-				free_tail(aa[k]->leading);
-				free(aa[k]);
-			};
-			free(aa);
-			j++;
-		};
-	};		
-	return(uit);
-};
-#endif /* OLDVERSION */
-
 /* Returns the product.						*
  * Does not modify f or g. 					*
  * The main term ``f[0]*g[0] mod myf'' is NOT zero since	*
