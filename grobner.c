@@ -30,6 +30,17 @@
 
 /* Generic routines... */
 
+/* This function tests for divisibility of terms.	*/
+int deelbaar(struct term *mon1, struct term *mon2)
+{
+	return(((mon1->n1 <= mon2->n1) &&
+		(mon1->n2 <= mon2->n2) &&
+		(mon1->n3 <= mon2->n3) &&
+		(mon1->n4 <= mon2->n4) &&
+		(valuation(mon1->c) <= valuation(mon2->c))));
+};
+
+
 /****************************************************************
  * Really insane and screwed up. Removes all monomials it can.	*
  * The remainder ends up in pp.					*

@@ -173,11 +173,6 @@ int kleiner(struct term *mon1, struct term *mon2)
 	return(-1);
 };
 
-/* This function tests for divisibility of terms.	*/
-int deelbaar(struct term *mon1, struct term *mon2)
-{
-	return(((mon1->n1 <= mon2->n1) && (mon1->n2 <= mon2->n2) && (mon1->n3 <= mon2->n3) && (mon1->n4 <= mon2->n4) && (valuation(mon1->c) <= valuation(mon2->c))));
-};
 
 /* Prints a polynomial. 				*/
 void print_pol(struct polynomial f)

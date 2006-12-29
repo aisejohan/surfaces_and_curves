@@ -27,7 +27,6 @@ void make_term(struct term **mon);
 void make_pol(struct polynomial **f);
 void free_term(struct term *mon);
 int kleiner(struct term *mon1, struct term *mon2);
-int deelbaar(struct term *mon1, struct term *mon2);
 void copy_term(struct term *mon1, struct term *mon2);
 void times_term(struct term t, struct polynomial f, struct polynomial *g);
 struct polynomial make_times_term(struct term t, struct polynomial f);
