@@ -33,7 +33,7 @@
 #define d3	15
 #define d4	19
 #define d	64
-#define p	7
+#define p	5
 #define r	20		/* Exponent. */
 #define q	4		/* Largest power of Delta. */
 
