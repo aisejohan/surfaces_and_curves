@@ -423,6 +423,31 @@ unsigned int test_G(void)
 	return(success);
 };
 
+/* Silly sort should be OK since the length of G is at most maxlength. */
+void sort_G(void)
+{
+	int i,j;
+	struct exponents *s_ee;
+	struct base_change *s_bc;
+	struct polynomial *s_ff;
+
+	for(i = 0; i+1 <= G.len; i++) {
+		for(j = i+1; j+1 <= G.len; j++) {
+			if (smaller(*G.ee[j], *G.ee[i])) {
+				s_ee = G.ee[i];
+				s_bc = G.BC[i];
+				s_ff = G.ff[i];
+				G.ee[i] = G.ee[j];
+				G.BC[i] = G.BC[j];
+				G.ff[i] = G.ff[j];
+				G.ee[j] = s_ee;
+				G.BC[j] = s_bc;
+				G.ff[j] = s_ff;
+			}
+		}
+	}
+}
+
 
 unsigned int test_skip(struct pair try, struct exponents least)
 {
@@ -972,7 +997,7 @@ while((m>0) || (check == 1)) {
 	/* Weed out G. 						*
 	 * Do not need to update M,m,V since they are no	*
 	 * longer used.						*
-	 * FIXME: order the elements of G.			*/
+	 * Below we order the elements of G.			*/
 	old = G.len; /* Remember for freeing bb later. */
 	bb = (struct polynomial **)malloc(G.len*sizeof(struct polynomial *));
 	if(!bb) {
@@ -1103,6 +1128,8 @@ while((m>0) || (check == 1)) {
 		free(bb[j]);
 	};
 	free(bb);
+
+	sort_G();
 
 	printf("The final length of G is %d\n",G.len);
 	print_G();
