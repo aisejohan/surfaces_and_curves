@@ -96,7 +96,7 @@ int check_flatness(unsigned int degree)
 	int i,j,b1,b2,blen,aantal;
 	int count,count1,count2,goodcount;
 	mscalar c;
-	unsigned int a1,a2,a3,a4;
+	unsigned int a1,a2,a3;
 	struct term tmp, least;
 	struct term **tt;
 	struct polynomial T,TT;
@@ -118,59 +118,40 @@ int check_flatness(unsigned int degree)
 	count = 0;
 	count1 = 0;
 	count2 = 0;
+
 	goodcount = count_sum(degree);
-	
 	if(degree >= d-d1) 
 		goodcount -= count_sum(degree-d+d1);
 	if(degree >= d-d2) 
 		goodcount -= count_sum(degree-d+d2);
 	if(degree >= d-d3) 
 		goodcount -= count_sum(degree-d+d3);
-	if(degree >= d-d4) 
-		goodcount -= count_sum(degree-d+d4);
 	if(degree >= 2*d-(d1+d2)) 
 		goodcount += count_sum(degree-2*d+(d1+d2));
 	if(degree >= 2*d-(d1+d3)) 
 		goodcount += count_sum(degree-2*d+(d1+d3));
-	if(degree >= 2*d-(d1+d4)) 
-		goodcount += count_sum(degree-2*d+(d1+d4));
 	if(degree >= 2*d-(d2+d3)) 
 		goodcount += count_sum(degree-2*d+(d2+d3));
-	if(degree >= 2*d-(d2+d4)) 
-		goodcount += count_sum(degree-2*d+(d2+d4));
-	if(degree >= 2*d-(d3+d4)) 
-		goodcount += count_sum(degree-2*d+(d3+d4));
 	if(degree >= 3*d-(d1+d2+d3)) 
 		goodcount -= count_sum(degree-3*d+(d1+d2+d3));
-	if(degree >= 3*d-(d1+d2+d4)) 
-		goodcount -= count_sum(degree-3*d+(d1+d2+d4));
-	if(degree >= 3*d-(d1+d3+d4)) 
-		goodcount -= count_sum(degree-3*d+(d1+d3+d4));
-	if(degree >= 3*d-(d2+d3+d4)) 
-		goodcount -= count_sum(degree-3*d+(d2+d3+d4));
-	if(degree >= 4*d-(d1+d2+d3+d4))
-		goodcount += count_sum(degree-4*d+(d1+d2+d3+d4));
 	
 	for(a1=0;(d1*a1 <= degree);a1++) {
 	  for(a2=0;(d1*a1+d2*a2 <= degree);a2++) {
-	    for(a3=0;(d1*a1+d2*a2+d3*a3 <= degree);a3++) {
-	      if((degree - (a1*d1+a2*d2+a3*d3)) % d4 == 0) {
-		a4 = (degree - (a1*d1+a2*d2+a3*d3))/d4;
+	      if((degree - (a1*d1+a2*d2)) % d3 == 0) {
+		a3 = (degree - (a1*d1+a2*d2))/d3;
 		b1=0;
 		b2=0;
 		for(i=0;i+1<=G.len;i++) {
 			if((G.ee[i]->e1 <= a1) &&
 			(G.ee[i]->e2 <= a2) &&
-			(G.ee[i]->e3 <= a3) &&
-			(G.ee[i]->e4 <= a4)) {
+			(G.ee[i]->e3 <= a3)) {
 				b1=1;
-				if(G.ee[i]->e5 == 0) b2=1;
+				if(G.ee[i]->e4 == 0) b2=1;
 			};
 		};
 		if(!b1) count1++;
 		if(!b2) count2++;
 	      };
-	    };
 	  };
 	};
 	if((count1 != goodcount) || (count2 != goodcount)) {
@@ -216,18 +197,15 @@ int check_flatness(unsigned int degree)
 		tmp.next = NULL;
 		for(a1=0;(d1*a1 <= degree);a1++) {
 		  for(a2=0;(d1*a1+d2*a2 <= degree);a2++) {
-		    for(a3=0;(d1*a1+d2*a2+d3*a3 <= degree);a3++) {
-		      if((degree - (a1*d1+a2*d2+a3*d3)) % d4 == 0) {
-			a4 = (degree - (a1*d1+a2*d2+a3*d3))/d4;
+		      if((degree - (a1*d1+a2*d2)) % d3 == 0) {
+			a3 = (degree - (a1*d1+a2*d2))/d3;
 			tmp.n1 = a1;
 			tmp.n2 = a2;
 			tmp.n3 = a3;
-			tmp.n4 = a4;
 			copy_term(&tmp,tt[i]);
 			tt[i]->next = NULL;
 			i++;
 		      };
-		    };
 		  };
 		};
 
@@ -318,7 +296,7 @@ int check_flatness(unsigned int degree)
  * run previsouly and has returned a positive integer blen.	*/
 struct term **find_basis(unsigned int degree, int blen)
 {
-	int a1,a2,a3,a4,count2,i,j,b2;	
+	int a1,a2,a3,count2,i,j,b2;	
 	struct term tmp;
 	struct term **tt;
 	make_scalar(tmp.c);
@@ -337,16 +315,14 @@ struct term **find_basis(unsigned int degree, int blen)
 	sc_one(tmp.c);
 	for(a1=0;(d1*a1 <= degree);a1++) {
 	  for(a2=0;(d1*a1+d2*a2 <= degree);a2++) {
-	    for(a3=0;(d1*a1+d2*a2+d3*a3 <= degree);a3++) {
-	      if((degree - (a1*d1+a2*d2+a3*d3)) % d4 == 0) {
-		a4 = (degree - (a1*d1+a2*d2+a3*d3))/d4;
+	      if((degree - (a1*d1+a2*d2)) % d3 == 0) {
+		a3 = (degree - (a1*d1+a2*d2))/d3;
 		b2=0;
 		for(i=0;i+1<=G.len;i++) {
 			if((G.ee[i]->e1 <= a1) &&
 			(G.ee[i]->e2 <= a2) &&
-			(G.ee[i]->e3 <= a3) &&
-			(G.ee[i]->e4 <= a4)) {
-				if(G.ee[i]->e5 == 0) b2=1;
+			(G.ee[i]->e3 <= a3)) {
+				if(G.ee[i]->e4 == 0) b2=1;
 			};
 		};
 		if(!b2) {
@@ -359,12 +335,10 @@ struct term **find_basis(unsigned int degree, int blen)
 			tmp.n1 = a1;
 			tmp.n2 = a2;
 			tmp.n3 = a3;
-			tmp.n4 = a4;
 			copy_term(&tmp,tt[count2-1]);
 			tt[count2-1]->next = NULL;
 		};
 	      };
-	    };
 	  };
 	};
 	
