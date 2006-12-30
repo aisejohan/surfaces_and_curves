@@ -599,12 +599,16 @@ struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 		b = &g;
 	}
 
-	make_tail(b->leading, &(tmppol.leading));
-
 	tt = a->leading;
 
 	uit = make_times_term_variant(*tt, *b);
 	tt = tt->next;
+
+	if (tt) {
+		tmppol = make_times_term_variant(*tt, *b);
+		rep_pol_add_variant(&uit,tmppol);
+		tt = tt->next;
+	}
 
 	while(tt) {
 		times_term_variant(*tt, *b, &tmppol);
