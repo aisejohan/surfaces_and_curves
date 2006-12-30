@@ -45,7 +45,7 @@ struct pair {
 
 /* Extern variables only used in this file.			*/	
 unsigned char V[maxlength][maxlength];
-struct polynomial myf1,myf2,myf3,myf4;
+struct polynomial myf1,myf2,myf3;
 
 /* Note that this produces a segfault or hangs if either	*
  * f.leading is NULL or if f.leading->c == 0.			*/
@@ -55,8 +55,7 @@ struct exponents take_exponents(struct polynomial f)
 	uit.e1 = f.leading->n1;
 	uit.e2 = f.leading->n2;
 	uit.e3 = f.leading->n3;
-	uit.e4 = f.leading->n4;
-	uit.e5 = (unsigned int) valuation(f.leading->c);
+	uit.e4 = (unsigned int) valuation(f.leading->c);
 	return(uit);
 };
 
@@ -68,7 +67,6 @@ struct exponents lcm(struct exponents *mon1, struct exponents *mon2)
 	uit.e2 = (mon1->e2 > mon2->e2) ? mon1->e2 : mon2->e2;
 	uit.e3 = (mon1->e3 > mon2->e3) ? mon1->e3 : mon2->e3;
 	uit.e4 = (mon1->e4 > mon2->e4) ? mon1->e4 : mon2->e4;
-	uit.e5 = (mon1->e5 > mon2->e5) ? mon1->e5 : mon2->e5;
 	return(uit);
 };
 
@@ -79,15 +77,13 @@ unsigned int rel_prime(struct exponents *mon1, struct exponents *mon2)
 	if((mon1->e2 > 0) && (mon2->e2 > 0)) return(0);
 	if((mon1->e3 > 0) && (mon2->e3 > 0)) return(0);
 	if((mon1->e4 > 0) && (mon2->e4 > 0)) return(0);
-	if((mon1->e5 > 0) && (mon2->e5 > 0)) return(0);
 	return(1);
 };
 
 unsigned int divides(struct exponents *mon1, struct exponents *mon2)
 {
 	return((mon1->e1 <= mon2->e1) && (mon1->e2 <= mon2->e2) && 
-	(mon1->e3 <= mon2->e3) && (mon1->e4 <= mon2->e4) && 
-	(mon1->e5 <= mon2->e5));
+	(mon1->e3 <= mon2->e3) && (mon1->e4 <= mon2->e4));
 };
 
 /* Smaller degree means smaller. Otherwise:				*
@@ -96,16 +92,15 @@ unsigned int divides(struct exponents *mon1, struct exponents *mon2)
  * valuation of the coefficients being smaller means smaller.		*/
 unsigned int smaller(struct exponents mon1, struct exponents mon2)
 {
-	if(d1*mon1.e1+d2*mon1.e2+d3*mon1.e3+d4*mon1.e4 !=
-	d1*mon2.e1+d2*mon2.e2+d3*mon2.e3+d4*mon2.e4) return((
-	d1*mon1.e1+d2*mon1.e2+d3*mon1.e3+d4*mon1.e4 < 
-	d1*mon2.e1+d2*mon2.e2+d3*mon2.e3+d4*mon2.e4));
+	if(d1*mon1.e1+d2*mon1.e2+d3*mon1.e3 !=
+	d1*mon2.e1+d2*mon2.e2+d3*mon2.e3) return((
+	d1*mon1.e1+d2*mon1.e2+d3*mon1.e3 < 
+	d1*mon2.e1+d2*mon2.e2+d3*mon2.e3));
 	/* Same as in kleiner...				*/
 	if(mon1.e1 != mon2.e1) return((mon1.e1 < mon2.e1));
 	if(mon1.e2 != mon2.e2) return((mon1.e2 < mon2.e2));
-	if(mon1.e3 != mon2.e3) return((mon1.e3 < mon2.e3));
 	/* Extra measuring valuation. 				*/
-	if(mon1.e5 != mon2.e5) return((mon1.e5 < mon2.e5));
+	if(mon1.e4 != mon2.e4) return((mon1.e4 < mon2.e4));
 	/* Means equal so not smaller. 				*/
 	return(0);
 };
@@ -133,13 +128,6 @@ void s_pol_terms(struct term *a, struct term *b, struct term *fterm, struct term
 	} else {
 		a->n3 = gterm->n3 - fterm->n3;
 		b->n3 = 0;
-	};
-	if(fterm->n4 > gterm->n4) {
-		a->n4 = 0;
-		b->n4 = fterm->n4 - gterm->n4;
-	} else {
-		a->n4 = gterm->n4 - fterm->n4;
-		b->n4 = 0;
 	};
 	sc_copy(gterm->c,a->c);
 	sc_copy(fterm->c,b->c);
@@ -263,25 +251,6 @@ struct base_change s_pol_BC(unsigned int i, unsigned int j)
 		uit.bc4.degree = 0; /* Not correct! */
 		uit.bc4.leading = NULL;
 	};
-	if((G.BC[i]->bc5.leading) && (G.BC[j]->bc5.leading)) {
-		A = make_times_term(a,G.BC[i]->bc5);
-		clean_pol(&A);
-		B = make_times_term(b,G.BC[j]->bc5);
-		rep_pol_add(&A,B);
-		free_tail(B.leading);
-		uit.bc5 = A;
-	} else if (G.BC[i]->bc5.leading) {
-		A = make_times_term(a,G.BC[i]->bc5);
-		clean_pol(&A);
-		uit.bc5 = A;
-	} else if (G.BC[j]->bc5.leading) {
-		B = make_times_term(b,G.BC[j]->bc5);
-		clean_pol(&B);
-		uit.bc5 = B;
-	} else {
-		uit.bc5.degree = 0; /* Not correct! */
-		uit.bc5.leading = NULL;
-	};
 		
 	free_scalar(a.c);
 	free_scalar(b.c);
@@ -301,8 +270,7 @@ void test_base_change(struct base_change B, struct polynomial new)
 	if(B.bc1.leading) lijst[0] = pol_mult(B.bc1,myf1);
 	if(B.bc2.leading) lijst[1] = pol_mult(B.bc2,myf2);
 	if(B.bc3.leading) lijst[2] = pol_mult(B.bc3,myf3);
-	if(B.bc4.leading) lijst[3] = pol_mult(B.bc4,myf4);
-	if(B.bc5.leading) lijst[4] = pol_mult(B.bc5,myf);
+	if(B.bc4.leading) lijst[3] = pol_mult(B.bc4,myf);
 	lijst[5] = pol_add(lijst[0],lijst[1]);
 	lijst[6] = pol_add(lijst[2],lijst[3]);
 	lijst[7] = pol_add(lijst[5],lijst[6]);
@@ -329,8 +297,8 @@ void print_M(unsigned int mm, struct pair *MM)
 	for(i=0; i+1 <= mm; i++) {
 		printf("[%d, %d] ",MM[i].i,MM[i].j);
 		tmp = lcm(G.ee[MM[i].i],G.ee[MM[i].j]);
-		printf("[%d, %d, %d, %d, %d] ",tmp.e1,tmp.e2,tmp.e3,tmp.e4,tmp.e5);
-		printf("%d ",d1*tmp.e1 + d2*tmp.e2 + d3*tmp.e3 + d4*tmp.e4);
+		printf("[%d, %d, %d, %d] ",tmp.e1,tmp.e2,tmp.e3,tmp.e4);
+		printf("%d ",d1*tmp.e1 + d2*tmp.e2 + d3*tmp.e3);
 		printf("\n");
 	};
 	return;
@@ -353,73 +321,62 @@ void print_V(unsigned int mm)
 /* Outputs G.							*/
 unsigned int print_G(void)
 {
-	int i, s1=0, s2=0, s3=0, s4=0, success;
+	int i, s1=0, s2=0, s3=0, success;
 	struct exponents tmp;
 
 	for(i=0;i+1<=G.len;i++) {
 		tmp = *G.ee[i];
-		printf("[%d, %d, %d, %d, %d]  \t",tmp.e1,tmp.e2,tmp.e3,tmp.e4,tmp.e5);
-		printf("%d\t",d1*tmp.e1 + d2*tmp.e2 + d3*tmp.e3 + d4*tmp.e4);
+		printf("[%d, %d, %d, %d]  \t",tmp.e1,tmp.e2,tmp.e3,tmp.e4);
+		printf("%d\t",d1*tmp.e1 + d2*tmp.e2 + d3*tmp.e3);
 		printf("%d ",number_terms(*G.ff[i]));
-		if((!tmp.e5) && ((tmp.e1 + tmp.e2 + tmp.e3) == 0)) {
-			printf(" <--- 4");
-			s1=1;
-		};
-		if((!tmp.e5) && ((tmp.e1 + tmp.e2 + tmp.e4) == 0)) {
+		if((!tmp.e4) && ((tmp.e1 + tmp.e2) == 0)) {
 			printf(" <--- 3");
-			s2=1;
-		};
-		if((!tmp.e5) && ((tmp.e1 + tmp.e3 + tmp.e4) == 0)) {
-			printf(" <--- 2");
 			s3=1;
 		};
-		if((!tmp.e5) && ((tmp.e2 + tmp.e3 + tmp.e4) == 0)) {
+		if((!tmp.e4) && ((tmp.e1 + tmp.e3) == 0)) {
+			printf(" <--- 2");
+			s2=1;
+		};
+		if((!tmp.e4) && ((tmp.e2 + tmp.e3) == 0)) {
 			printf(" <--- 1");
-			s4=1;
+			s1=1;
 		};
 #ifdef KIJKEN
-		if((tmp.e1 != G.ff[i]->leading->n1) || (tmp.e2 != G.ff[i]->leading->n2) || (tmp.e3 != G.ff[i]->leading->n3) || (tmp.e4 != G.ff[i]->leading->n4) || (tmp.e5 != valuation(G.ff[i]->leading->c))) {
+		if((tmp.e1 != G.ff[i]->leading->n1) ||
+			(tmp.e2 != G.ff[i]->leading->n2) ||
+			(tmp.e3 != G.ff[i]->leading->n3) ||
+			(tmp.e4 != valuation(G.ff[i]->leading->c))) {
 			printf("Wrong exponents!\n");
 			exit(1);
 		};
 #endif
 		printf("\n");
 	};
-	success=s1+s2+s3+s4;
+	success=s1+s2+s3;
 	return(success);
 };
 
 unsigned int test_G(void)
 {
-	int i, s1=0, s2=0, s3=0, s4=0, success;
+	int i, s1=0, s2=0, s3=0, success;
 	struct exponents tmp;
 
 	for(i=0;i+1<=G.len;i++) {
 		tmp = *G.ee[i];
-		if((!tmp.e5) && ((tmp.e1 + tmp.e2 + tmp.e3) == 0)) {
-			s1=1;
-		};
-		if((!tmp.e5) && ((tmp.e1 + tmp.e2 + tmp.e4) == 0)) {
-			s2=1;
-		};
-		if((!tmp.e5) && ((tmp.e1 + tmp.e3 + tmp.e4) == 0)) {
-			s3=1;
-		};
-		if((!tmp.e5) && ((tmp.e2 + tmp.e3 + tmp.e4) == 0)) {
-			s4=1;
-		};
+		if((!tmp.e4) && ((tmp.e1 + tmp.e2) == 0)) s3=1;
+		if((!tmp.e4) && ((tmp.e1 + tmp.e3) == 0)) s2=1;
+		if((!tmp.e4) && ((tmp.e2 + tmp.e3) == 0)) s1=1;
 #ifdef KIJKEN
 		if((tmp.e1 != G.ff[i]->leading->n1) ||
 		(tmp.e2 != G.ff[i]->leading->n2) || 
 		(tmp.e3 != G.ff[i]->leading->n3) || 
-		(tmp.e4 != G.ff[i]->leading->n4) || 
-		(tmp.e5 != valuation(G.ff[i]->leading->c))) {
+		(tmp.e4 != valuation(G.ff[i]->leading->c))) {
 			printf("Wrong exponents!\n");
 			exit(1);
 		};
 #endif
 	};
-	success=s1+s2+s3+s4;
+	success=s1+s2+s3;
 	return(success);
 };
 
@@ -502,7 +459,6 @@ int setup(void)
 	EEN.leading->n1 = 0;
 	EEN.leading->n2 = 0;
 	EEN.leading->n3 = 0;
-	EEN.leading->n4 = 0;
 	
 	/* Zero polynomial of degree 0. */
 	NIKS.degree = 0;
@@ -526,6 +482,7 @@ int setup(void)
 		return(1);
 	};
 	printf("\n");
+
 	myf2 = deriv(myf,2);
 	print_pol(myf2);
 	if(!myf2.leading) {
@@ -536,6 +493,7 @@ int setup(void)
 		return(1);
 	};
 	printf("\n");
+
 	myf3 = deriv(myf,3);
 	print_pol(myf3);
 	if(!myf3.leading) {
@@ -547,19 +505,7 @@ int setup(void)
 		return(1);
 	};
 	printf("\n");
-	myf4 = deriv(myf,4);
-	print_pol(myf4);
-	if(!myf4.leading) {
-		printf("Polynomial does not depend on w!\n");
-		free_tail(EEN.leading);
-		free_tail(myf.leading);
-		free_tail(myf1.leading);
-		free_tail(myf2.leading);
-		free_tail(myf3.leading);
-		return(1);
-	};
-	printf("\n");
-	
+
 	/* Allocate memory for G */
 	G.BC=(struct base_change **)
 		malloc(maxlength*sizeof(struct base_change *));
@@ -595,55 +541,43 @@ int setup(void)
 	};
 	
 	/* Initialize G */
-	*G.ff[0] = copy_pol(myf4);
+	*G.ff[0] = copy_pol(myf3);
 	G.BC[0]->bc1 = copy_pol(NIKS);
 	G.BC[0]->bc2 = copy_pol(NIKS);
-	G.BC[0]->bc3 = copy_pol(NIKS);
-	G.BC[0]->bc4 = copy_pol(EEN);
-	G.BC[0]->bc5 = copy_pol(NIKS);
-	*G.ee[0] = take_exponents(myf4);
+	G.BC[0]->bc3 = copy_pol(EEN);
+	G.BC[0]->bc4 = copy_pol(NIKS);
+	*G.ee[0] = take_exponents(myf3);
 
-	*G.ff[1] = copy_pol(myf3);
+	*G.ff[1] = copy_pol(myf2);
 	G.BC[1]->bc1 = copy_pol(NIKS);
-	G.BC[1]->bc2 = copy_pol(NIKS);
-	G.BC[1]->bc3 = copy_pol(EEN);
+	G.BC[1]->bc2 = copy_pol(EEN);
+	G.BC[1]->bc3 = copy_pol(NIKS);
 	G.BC[1]->bc4 = copy_pol(NIKS);
-	G.BC[1]->bc5 = copy_pol(NIKS);
-	*G.ee[1] = take_exponents(myf3);
+	*G.ee[1] = take_exponents(myf2);
 
-	*G.ff[2] = copy_pol(myf2);
-	G.BC[2]->bc1 = copy_pol(NIKS);
-	G.BC[2]->bc2 = copy_pol(EEN);
+	*G.ff[2] = copy_pol(myf1);
+	G.BC[2]->bc1 = copy_pol(EEN);
+	G.BC[2]->bc2 = copy_pol(NIKS);
 	G.BC[2]->bc3 = copy_pol(NIKS);
 	G.BC[2]->bc4 = copy_pol(NIKS);
-	G.BC[2]->bc5 = copy_pol(NIKS);
-	*G.ee[2] = take_exponents(myf2);
+	*G.ee[2] = take_exponents(myf1);
 
-	*G.ff[3] = copy_pol(myf1);
-	G.BC[3]->bc1 = copy_pol(EEN);
+	*G.ff[3] = copy_pol(myf);
+	G.BC[3]->bc1 = copy_pol(NIKS);
 	G.BC[3]->bc2 = copy_pol(NIKS);
 	G.BC[3]->bc3 = copy_pol(NIKS);
-	G.BC[3]->bc4 = copy_pol(NIKS);
-	G.BC[3]->bc5 = copy_pol(NIKS);
-	*G.ee[3] = take_exponents(myf1);
+	G.BC[3]->bc4 = copy_pol(EEN);
+	*G.ee[3] = take_exponents(myf);
 
-	*G.ff[4] = copy_pol(myf);
-	G.BC[4]->bc1 = copy_pol(NIKS);
-	G.BC[4]->bc2 = copy_pol(NIKS);
-	G.BC[4]->bc3 = copy_pol(NIKS);
-	G.BC[4]->bc4 = copy_pol(NIKS);
-	G.BC[4]->bc5 = copy_pol(EEN);
-	*G.ee[4] = take_exponents(myf);
-
-	G.len = 5;
+	G.len = 4;
 
 	/* Deal with leading coefficients being divisible by p! */
 	i=0;
 	while(i+1<=G.len) {
-		if(G.ee[i]->e5 > 0) {
+		if(G.ee[i]->e4 > 0) {
 			T = copy_pol(*G.ff[i]);
 			sc_one(c);
-			for(j=1;j<=r-G.ee[i]->e5;j++) 
+			for(j=1;j<=r-G.ee[i]->e4;j++) 
 				sc_imult_replace(p,c);
 			times_scalar(c,&T);
 			if(T.leading) {
@@ -662,9 +596,6 @@ int setup(void)
 				T = copy_pol(G.BC[i]->bc4);
 				times_scalar(c,&T);
 				G.BC[G.len-1]->bc4 = T;
-				T = copy_pol(G.BC[i]->bc5);
-				times_scalar(c,&T);
-				G.BC[G.len-1]->bc5 = T;
 			};
 		};
 		i++;
@@ -711,7 +642,7 @@ while((m>0) || (check == 1)) {
 		 * of p to cancel off the leading term and we see if	*
 		 * there is anything left.				*/
 		sc_one(c);
-		for(i=1;i<=r-G.ee[G.len-1]->e5;i++)
+		for(i=1;i<=r-G.ee[G.len-1]->e4;i++)
 			sc_imult_replace(p,c);
 		SS = copy_pol(*G.ff[G.len-1]);
 		/* Multiply by power of p. */
@@ -726,14 +657,12 @@ while((m>0) || (check == 1)) {
 				free_tail(myf1.leading);
 				free_tail(myf2.leading);
 				free_tail(myf3.leading);
-				free_tail(myf4.leading);
 				free_tail(SS.leading);
 				for(i=0;i+1+1<=G.len;i++) {
 					free_tail(G.BC[i]->bc1.leading);
 					free_tail(G.BC[i]->bc2.leading);
 					free_tail(G.BC[i]->bc3.leading);
 					free_tail(G.BC[i]->bc4.leading);
-					free_tail(G.BC[i]->bc5.leading);
 					free_tail(G.ff[i]->leading);
 				};
 				for(i=0;i+1<=maxlength;i++) {
@@ -758,9 +687,6 @@ while((m>0) || (check == 1)) {
 			T = copy_pol(G.BC[G.len-1-1]->bc4);
 			times_scalar(c,&T);
 			G.BC[G.len-1]->bc4 = T;
-			T = copy_pol(G.BC[G.len-1-1]->bc5);
-			times_scalar(c,&T);
-			G.BC[G.len-1]->bc5 = T;
 			check = 2; /* success. */
 		} else {
 			free_tail(SS.leading);
@@ -785,14 +711,12 @@ while((m>0) || (check == 1)) {
 					free_tail(myf1.leading);
 					free_tail(myf2.leading);
 					free_tail(myf3.leading);
-					free_tail(myf4.leading);
 					free_tail(SS.leading);
 					for(i=0;i+1+1<=G.len;i++) {
 					  free_tail(G.BC[i]->bc1.leading);
 					  free_tail(G.BC[i]->bc2.leading);
 					  free_tail(G.BC[i]->bc3.leading);
 					  free_tail(G.BC[i]->bc4.leading);
-					  free_tail(G.BC[i]->bc5.leading);
 					  free_tail(G.ff[i]->leading);
 					};
 					for(i=0;i+1<=maxlength;i++) {
@@ -857,15 +781,6 @@ while((m>0) || (check == 1)) {
 			} else if (G.BC[i]->bc4.leading) {
 				G.BC[G.len-1]->bc4 = 
 					pol_mult(*aa[i],G.BC[i]->bc4);
-			};
-			if((G.BC[i]->bc5.leading) && 
-					(G.BC[G.len-1]->bc5.leading)) {
-				T = pol_mult(*aa[i],G.BC[i]->bc5);
-				rep_pol_add(&(G.BC[G.len-1]->bc5),T);
-				free_tail(T.leading);
-			} else if (G.BC[i]->bc5.leading) {
-				G.BC[G.len-1]->bc5 = 
-					pol_mult(*aa[i],G.BC[i]->bc5);
 			};
 		};
 		*G.ee[G.len-1] = take_exponents(SS); /* Done updating G. */
@@ -950,7 +865,7 @@ while((m>0) || (check == 1)) {
 		/* Do it again for the powers of p times the new one!	*
 		 * This is needed to deal with something like		*
 		 * p*x + y.						*/
-		if(G.ee[G.len-1]->e5 > 0) {
+		if(G.ee[G.len-1]->e4 > 0) {
 			check = 1;
 		} else {
 			check = 0;
@@ -959,20 +874,18 @@ while((m>0) || (check == 1)) {
 }; /* End loop computing Grobner basis. */
 
 	i=test_G();
-	if(i<4) {
+	if(i<3) {
 		/* These are safe to free. */
 		free_tail(EEN.leading);
 		free_tail(myf.leading);
 		free_tail(myf1.leading);
 		free_tail(myf2.leading);
 		free_tail(myf3.leading);
-		free_tail(myf4.leading);
 		for(i=0;i+1<=G.len;i++) {
 			free_tail(G.BC[i]->bc1.leading);
 			free_tail(G.BC[i]->bc2.leading);
 			free_tail(G.BC[i]->bc3.leading);
 			free_tail(G.BC[i]->bc4.leading);
-			free_tail(G.BC[i]->bc5.leading);
 			free_tail(G.ff[i]->leading);
 		};
 		for(i=0;i+1<=maxlength;i++) {
@@ -1049,7 +962,6 @@ while((m>0) || (check == 1)) {
 			free_tail(TBC->bc2.leading);
 			free_tail(TBC->bc3.leading);
 			free_tail(TBC->bc4.leading);
-			free_tail(TBC->bc5.leading);
 			G.BC[G.len-1] = TBC;
 			G.len--;
 		} else {
@@ -1090,13 +1002,6 @@ while((m>0) || (check == 1)) {
 						} else if (G.BC[j]->bc4.leading) {
 							G.BC[i]->bc4 = pol_mult(*aa[j-epsilon],G.BC[j]->bc4);
 						};
-						if((G.BC[j]->bc5.leading) && (G.BC[i]->bc5.leading)) {
-							T = pol_mult(*aa[j-epsilon],G.BC[j]->bc5);
-							rep_pol_add(&(G.BC[i]->bc5),T);
-							free_tail(T.leading);
-						} else if (G.BC[j]->bc5.leading) {
-							G.BC[i]->bc5 = pol_mult(*aa[j-epsilon],G.BC[j]->bc5);
-						};	
 					}; /* Endif(( j !=0 ) */
 				}; /* Endif ( aa[j-epsilon]->leading )) */
 			}; /* Endfor(j=0... */
@@ -1186,7 +1091,6 @@ while((m>0) || (check == 1)) {
 	free_tail(myf1.leading);
 	free_tail(myf2.leading);
 	free_tail(myf3.leading);
-	free_tail(myf4.leading);
 
 	/* Success. */
 	return(0);
