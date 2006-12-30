@@ -85,7 +85,7 @@ int main()
 	C = pol_mult(A,B);
 /*	print_pol(C);
 	printf("\n"); */
-	D = pol_mult_variant(B,A);
+	D = pol_mult(B,A);
 /*	print_pol(D);
 	printf("\n"); */
 	times_int(-1,&D);
