@@ -67,14 +67,12 @@ void set_seed(unsigned int zaadje)
 
 unsigned int count_sum(unsigned int degree)
 {
-	unsigned int count,a1,a2,a3;
+	unsigned int count,a1,a2;
 	count=0;
 	for(a1=0;(d1*a1 <= degree);a1++) {
 		for(a2=0;(d1*a1+d2*a2 <= degree);a2++) {
-			for(a3=0;(d1*a1+d2*a2+d3*a3 <= degree);a3++) {
-				if((degree - (a1*d1+a2*d2+a3*d3)) % d4 == 0) {
-					count++;
-				};
+			if((degree - (a1*d1+a2*d2)) % d3 == 0) {
+				count++;
 			};
 		};
 	};
@@ -83,15 +81,13 @@ unsigned int count_sum(unsigned int degree)
 
 void print_sum(unsigned int degree)
 {
-	unsigned int a1,a2,a3;
+	unsigned int a1,a2;
 	for(a1=0;(d1*a1 <= degree);a1++) {
 	  for(a2=0;(d1*a1+d2*a2 <= degree);a2++) {
-	    for(a3=0;(d1*a1+d2*a2+d3*a3 <= degree);a3++) {
-	      if((degree - (a1*d1+a2*d2+a3*d3)) % d4 == 0) {
-		printf("[%d, %d, %d, %d]\n",a1,a2,a3,
-				(degree - (a1*d1+a2*d2+a3*d3))/d4);
+	    if((degree - (a1*d1+a2*d2)) % d3 == 0) {
+		printf("[%d, %d, %d]\n",a1,a2,
+			(degree - (a1*d1+a2*d2))/d3);
 	      };
-	    };
 	  };
 	};
 	return;
@@ -101,7 +97,7 @@ void print_sum(unsigned int degree)
  * The result may be the zero polynomial!		*/
 struct polynomial make_random(unsigned int degree)
 {
-	unsigned int a1,a2,a3,a4;
+	unsigned int a1,a2,a3;
 	int c;
 	struct polynomial uit;
 	struct term *uitterm;
@@ -123,19 +119,16 @@ struct polynomial make_random(unsigned int degree)
 #endif
 	for(a1=0;(d1*a1 <= degree);a1++) {
 	  for(a2=0;(d1*a1+d2*a2 <= degree);a2++) {
-	    for(a3=0;(d1*a1+d2*a2+d3*a3 <= degree);a3++) {
-	      if((degree - (a1*d1+a2*d2+a3*d3)) % d4 == 0) {
-		a4 = (degree - (a1*d1+a2*d2+a3*d3))/d4;
+	      if((degree - (a1*d1+a2*d2)) % d3 == 0) {
+		a3 = (degree - (a1*d1+a2*d2))/d3;
 #ifdef INPUT_F
 		c=0;
 		printf("Coefficient of   ");
 		if(a1) {printf("x^%d",a1); c++;};
-		if((a1) && (a2+a3+a4)) {printf(" * "); c++;};
+		if((a1) && (a2+a3)) {printf(" * "); c++;};
 		if(a2) {printf("y^%d",a2); c++;};
-		if((a2) && (a3+a4)) {printf(" * "); c++;};
+		if((a2) && (a3)) {printf(" * "); c++;};
 		if(a3) {printf("z^%d",a3); c++;};
-		if((a3) && (a4)) {printf(" * "); c++;};
-		if(a4) {printf("w^%d",a4); c++;};
 		while(8-c) {printf("   ");c++;};
 		printf("= ");
  #ifdef OUTPUT_LIST
@@ -157,7 +150,6 @@ struct polynomial make_random(unsigned int degree)
 			uitterm->n1 = a1;
 			uitterm->n2 = a2;
 			uitterm->n3 = a3;
-			uitterm->n4 = a4;
 			ito_sc(c,uitterm->c);
 			ptrterm = &(uit.leading);
 			while((*ptrterm) && (kleiner(uitterm, *ptrterm) == KLEINER)) {
@@ -170,7 +162,6 @@ struct polynomial make_random(unsigned int degree)
 	      };
 	    };
 	  };
-	};
 #ifdef OUTPUT_LIST
 	exit(0);
 #endif
@@ -223,7 +214,6 @@ struct polynomial frobenius(struct polynomial f)
 		(*ptrterm)->n1 = p*fterm->n1;
 		(*ptrterm)->n2 = p*fterm->n2;
 		(*ptrterm)->n3 = p*fterm->n3;
-		(*ptrterm)->n4 = p*fterm->n4;
 		ptrterm = &((*ptrterm)->next);
 		fterm = fterm->next;
 	};
@@ -255,7 +245,6 @@ struct polynomial deriv(struct polynomial f, unsigned int i)
 				(*ptrterm)->n1 = fterm->n1 - 1;
 				(*ptrterm)->n2 = fterm->n2;
 				(*ptrterm)->n3 = fterm->n3;
-				(*ptrterm)->n4 = fterm->n4;
 				ptrterm = &((*ptrterm)->next);
 			};
 			fterm = fterm->next;
@@ -274,7 +263,6 @@ struct polynomial deriv(struct polynomial f, unsigned int i)
 				(*ptrterm)->n1 = fterm->n1;
 				(*ptrterm)->n2 = fterm->n2 - 1;
 				(*ptrterm)->n3 = fterm->n3;
-				(*ptrterm)->n4 = fterm->n4;
 				ptrterm = &((*ptrterm)->next);
 			};
 			fterm = fterm->next;
@@ -293,26 +281,6 @@ struct polynomial deriv(struct polynomial f, unsigned int i)
 				(*ptrterm)->n1 = fterm->n1;
 				(*ptrterm)->n2 = fterm->n2;
 				(*ptrterm)->n3 = fterm->n3 - 1;
-				(*ptrterm)->n4 = fterm->n4;
-				ptrterm = &((*ptrterm)->next);
-			};
-			fterm = fterm->next;
-		};
-		free_scalar(c);
-		return(uit);
-		
-		case 4:
-		uit.degree = (f.degree > d4) ? (f.degree - d4) : 0;
-		ptrterm = &(uit.leading);
-		while(fterm) {
-			sc_imult(fterm->n4,fterm->c,c);
-			if (!sc_is_zero(c)) {
-				make_term(ptrterm);
-				sc_copy(c,(*ptrterm)->c);
-				(*ptrterm)->n1 = fterm->n1;
-				(*ptrterm)->n2 = fterm->n2;
-				(*ptrterm)->n3 = fterm->n3;
-				(*ptrterm)->n4 = fterm->n4 - 1;
 				ptrterm = &((*ptrterm)->next);
 			};
 			fterm = fterm->next;
@@ -377,23 +345,6 @@ void rep_deriv(struct polynomial *f, unsigned int i)
 			sc_imult_replace(fterm->n3,fterm->c);
 			if(!sc_is_zero(fterm->c)) {
 				fterm->n3 = fterm->n3 - 1;
-				*ptrterm = fterm;
-				ptrterm = &(fterm->next);
-				fterm = fterm->next;
-			} else {
-				*ptrterm = fterm->next;
-				free_term(fterm);
-				fterm = *ptrterm;
-			};
-		};
-		return;
-
-		case 4:
-		f->degree = (f->degree > d4) ? (f->degree - d4) : 0;
-		while(fterm) {
-			sc_imult_replace(fterm->n4,fterm->c);
-			if(!sc_is_zero(fterm->c)) {
-				fterm->n4 = fterm->n4 - 1;
 				*ptrterm = fterm;
 				ptrterm = &(fterm->next);
 				fterm = fterm->next;
