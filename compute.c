@@ -101,9 +101,16 @@ unsigned int smaller(struct exponents mon1, struct exponents mon2)
 	d1*mon1.e1+d2*mon1.e2+d3*mon1.e3+d4*mon1.e4 < 
 	d1*mon2.e1+d2*mon2.e2+d3*mon2.e3+d4*mon2.e4));
 	/* Same as in kleiner...				*/
+#ifdef REVLEX_ORDER
+	if(mon1.e4 != mon2.e4) return((mon1.e4 > mon2.e4));
+	if(mon1.e3 != mon2.e3) return((mon1.e3 > mon2.e3));
+	if(mon1.e2 != mon2.e2) return((mon1.e2 > mon2.e2));
+#endif
+#ifdef LEX_ORDER
 	if(mon1.e1 != mon2.e1) return((mon1.e1 < mon2.e1));
 	if(mon1.e2 != mon2.e2) return((mon1.e2 < mon2.e2));
 	if(mon1.e3 != mon2.e3) return((mon1.e3 < mon2.e3));
+#endif
 	/* Extra measuring valuation. 				*/
 	if(mon1.e5 != mon2.e5) return((mon1.e5 < mon2.e5));
 	/* Means equal so not smaller. 				*/

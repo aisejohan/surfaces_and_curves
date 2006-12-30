@@ -28,14 +28,16 @@
 #define GELIJK	-1
 #define GROTER	0
 
+#define REVLEX_ORDER
+
 #define d1	8
 #define d2	9
 #define d3	17
 #define d4	21
 #define d	72
-#define p	11
+#define p	5
 #define r	20		/* Exponent. */
-#define q	5		/* Largest power of Delta. */
+#define q	8		/* Largest power of Delta. */
 
 #define maxlength	256
 
