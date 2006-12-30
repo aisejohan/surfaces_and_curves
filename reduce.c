@@ -44,11 +44,11 @@ struct polynomial one_step_down(struct polynomial *f)
 	struct base_change fBC;
 	make_scalar(c);
 	
-	if(((f->degree+d1+d2+d3+d4) % d != 0) || (f->degree+d1+d2+d3+d4 == d)) {
+	if (f->degree + d1 + d2 + d3 % d != 0) {
 		printf("Incorrect degree. Stop.");
 		exit(1);
 	};
-	j = (f->degree + d1 + d2 + d3 + d4) / d;
+	j = (f->degree + d1 + d2 + d3) / d;
 	
 	fBC.bc1.leading = NULL;
 	fBC.bc1.degree = f->degree - (d - d1);
@@ -57,9 +57,7 @@ struct polynomial one_step_down(struct polynomial *f)
 	fBC.bc3.leading = NULL;
 	fBC.bc3.degree = f->degree - (d - d3);
 	fBC.bc4.leading = NULL;
-	fBC.bc4.degree = f->degree - (d - d4);
-	fBC.bc5.leading = NULL;
-	fBC.bc5.degree = f->degree - d;
+	fBC.bc4.degree = f->degree - d;
 	
 	aa = gen_division(f,G.len,G.ff);
 	
@@ -94,13 +92,6 @@ if(aa[i]->leading) {
 		} else if (G.BC[i]->bc4.leading) {
 			fBC.bc4 = pol_mult(*aa[i],G.BC[i]->bc4);
 		};
-		if((G.BC[i]->bc5.leading) && (fBC.bc5.leading)) {
-			T = pol_mult(*aa[i],G.BC[i]->bc5);
-			rep_pol_add(&(fBC.bc5),T);
-			free_tail(T.leading);
-		} else if (G.BC[i]->bc5.leading) {
-			fBC.bc5 = pol_mult(*aa[i],G.BC[i]->bc5);
-		};
 };
 	};
 	
@@ -115,10 +106,9 @@ if(aa[i]->leading) {
 	rep_deriv(&(fBC.bc1),1);
 	rep_deriv(&(fBC.bc2),2);
 	rep_deriv(&(fBC.bc3),3);
-	rep_deriv(&(fBC.bc4),4);
 	
 	/* Divide fBC.bci by p-primary part of j-1. 	*
-	 * and multiply fBC.bc5 by p-part of j-1.	*/
+	 * and multiply fBC.bc4 by p-part of j-1.	*/
 	k = 1;
 	i = j-1;
 	/* Note that j is not 1, so i is not 0.		*/
@@ -133,34 +123,30 @@ if(aa[i]->leading) {
 	times_scalar(c,&(fBC.bc1));
 	times_scalar(c,&(fBC.bc2));
 	times_scalar(c,&(fBC.bc3));
-	times_scalar(c,&(fBC.bc4));
 
 	ito_sc(k,c);
-	times_scalar(c,&(fBC.bc5));
+	times_scalar(c,&(fBC.bc4));
 
 	/* Adding up to get the result. */	
-	rep_pol_add(&(fBC.bc5), fBC.bc4);
-	free_tail(fBC.bc4.leading);
-	rep_pol_add(&(fBC.bc5), fBC.bc3);
+	rep_pol_add(&(fBC.bc4), fBC.bc3);
 	free_tail(fBC.bc3.leading);
-	rep_pol_add(&(fBC.bc5), fBC.bc2);
+	rep_pol_add(&(fBC.bc4), fBC.bc2);
 	free_tail(fBC.bc2.leading);
-	rep_pol_add(&(fBC.bc5), fBC.bc1);
+	rep_pol_add(&(fBC.bc4), fBC.bc1);
 	free_tail(fBC.bc1.leading);
 
 	free_scalar(c);
-	return(fBC.bc5);
+	return(fBC.bc4);
 };
 
 /* This returns the complete reduction and destroys f.		*/
 struct polynomial **all_the_way(struct polynomial *f)
 {
 	struct polynomial tmp;
-	struct polynomial *g;
 	struct polynomial **uit;
 	tmp.leading=NULL;
 	
-	while(f->degree + d1+d2+d3+d4 > 3*d) {
+	while(f->degree + d1+d2+d3 > 2*d) {
 		tmp = one_step_down(f);
 #ifdef KIJKEN
 		if(f->leading) {
@@ -173,34 +159,24 @@ struct polynomial **all_the_way(struct polynomial *f)
 		tmp.degree = 0;
 		tmp.leading = NULL;
 	};
-	uit=(struct polynomial **)malloc(3*sizeof(struct polynomial *));
+	uit=(struct polynomial **)malloc(2*sizeof(struct polynomial *));
 	if(!uit) {
 		perror("Malloc failed!");
 		exit(1);
 	};
 	uit[0] = NULL;
 	uit[1] = NULL;
-	uit[2] = NULL;
 	make_pol(&uit[0]);
 	make_pol(&uit[1]);
-	make_pol(&uit[2]);
 	
-	uit[0]->degree = 3*d - (d1+d2+d3+d4);
-	uit[1]->degree = 2*d - (d1+d2+d3+d4);
-	uit[2]->degree = d - (d1+d2+d3+d4);
+	uit[0]->degree = 2*d - (d1+d2+d3);
+	uit[1]->degree = d - (d1+d2+d3);
 
-	if(f->degree + d1+d2+d3+d4 == 3*d) {
-		g = NULL;
-		make_pol(&g);
-		*g = one_step_down(f);
+	if(f->degree + d1+d2+d3 == 2*d) {
+		*uit[1] = one_step_down(f);
 		uit[0] = f;
-		*uit[2] = one_step_down(g);
-		uit[1] = g;
-	} else if(f->degree + d1+d2+d3+d4 == 2*d) {
-		*uit[2] = one_step_down(f);
+	} else if(f->degree + d1+d2+d3 == d) {
 		uit[1] = f;
-	} else if(f->degree + d1+d2+d3+d4 == d) {
-		uit[2] = f;
 	} else {
 		printf("Wrong degree again!");
 		exit(1);
@@ -222,28 +198,25 @@ struct polynomial **all_the_way_split(struct polynomial **bb)
 	jj = 1 + bb[0]->degree/d;
 	/* This means we have bb[0],...,bb[jj-1] */
 	
-	aa = (struct polynomial **)malloc(3*sizeof(struct polynomial *));
+	aa = (struct polynomial **)malloc(2*sizeof(struct polynomial *));
 	if(!aa) {
 		perror("Malloc failed!");
 		exit(1);
 	};
 	aa[0] = NULL;
 	aa[1] = NULL;
-	aa[2] = NULL;
 	make_pol(&aa[0]);
 	make_pol(&aa[1]);
-	make_pol(&aa[2]);
 
-	aa[0]->degree = 3*d-d1-d2-d3-d4;
-	aa[1]->degree = 2*d-d1-d2-d3-d4;
-	aa[2]->degree = d-d1-d2-d3-d4;
+	aa[0]->degree = 2*d - (d1+d2+d3);
+	aa[1]->degree = d - (d1+d2+d3);
 	
 	for(ii=0;ii+1<=jj;ii++) {
 		
 		/* bb[ii] has degree 	*
 		 * (jj-ii)d-s = jd-s,	*
 		 * so j=jj-ii 		*/
-		j = (bb[ii]->degree+d1+d2+d3+d4)/d;
+		j = (bb[ii]->degree+d1+d2+d3)/d;
 
 		/* In the one_step_down function (inside all_the_way)	*
 		 * we multiply by the correct factor up to factors of	*
@@ -272,13 +245,10 @@ struct polynomial **all_the_way_split(struct polynomial **bb)
 		};
 	};
 
-	rep_pol_add(aa[0],*bb[jj-3]);
-	free_tail(bb[jj-3]->leading);
-	free(bb[jj-3]);
-	rep_pol_add(aa[1],*bb[jj-2]);
+	rep_pol_add(aa[0],*bb[jj-2]);
 	free_tail(bb[jj-2]->leading);
 	free(bb[jj-2]);
-	rep_pol_add(aa[2],*bb[jj-1]);
+	rep_pol_add(aa[1],*bb[jj-1]);
 	free_tail(bb[jj-1]->leading);
 	free(bb[jj-1]);
 	free(bb);
