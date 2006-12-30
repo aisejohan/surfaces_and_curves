@@ -32,9 +32,9 @@
 #define d2	1
 #define d3	1
 #define d	3
-#define p	11
-#define r	30		/* Exponent. */
-#define q	15		/* Largest power of Delta. */
+#define p	7
+#define r	60		/* Exponent. */
+#define q	20		/* Largest power of Delta. */
 
 #define maxlength	256
 

@@ -367,7 +367,7 @@ int main()
 					};
 				};
 			};
-			/* For aa[1] and aa[2] we			*
+			/* For aa[1] we					*
 			 * 	multiply by p^2				*
 			 * 	multiply by p^i				*
 			 * 	multiply by (2-1+i choose i)		*
@@ -378,22 +378,11 @@ int main()
 			if(p_pow >= 0) {
 				for(k=1;k<=p_pow;k++) {
 					times_int(p,aa[1]);
-					times_int(p,aa[2]);
 				};
 			} else {
 				if(p_pow < precision) precision = p_pow;
 				for(k=1;k<=-p_pow;k++) {
 					aaterm =aa[1]->leading;
-					while(aaterm) {
-						if(valuation(aaterm->c) > 0) {
-							div_p(aaterm->c);
-							aaterm = aaterm->next;
-						} else {
-							printf("FIXME!\n");
-							exit(1);
-						};
-					};
-					aaterm =aa[2]->leading;
 					while(aaterm) {
 						if(valuation(aaterm->c) > 0) {
 							div_p(aaterm->c);
@@ -448,7 +437,7 @@ int main()
 					};
 				};
 			};
-			/* For aa[1] and aa[2] we 			*
+			/* For aa[1] we 				*
 			 * 	multiply by p^3				*
 			 * 	multiply by p^i				*
 			 * 	multiply by (1-1+i choose i)=1		*
@@ -464,16 +453,6 @@ int main()
 				if(p_pow < precision) precision = p_pow;
 				for(k=1;k<=-p_pow;k++) {
 					aaterm = aa[1]->leading;
-					while(aaterm) {
-						if(valuation(aaterm->c) > 0) {
-							div_p(aaterm->c);
-							aaterm = aaterm->next;
-						} else {
-							printf("FIXME!\n");
-							exit(1);
-						};
-					};
-					aaterm = aa[2]->leading;
 					while(aaterm) {
 						if(valuation(aaterm->c) > 0) {
 							div_p(aaterm->c);
