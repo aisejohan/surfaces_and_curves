@@ -28,14 +28,13 @@
 #define GELIJK	-1
 #define GROTER	0
 
-#define d1	8
-#define d2	9
-#define d3	17
-#define d4	21
-#define d	72
+#define d1	1
+#define d2	1
+#define d3	1
+#define d	8
 #define p	11
-#define r	20		/* Exponent. */
-#define q	5		/* Largest power of Delta. */
+#define r	30		/* Exponent. */
+#define q	15		/* Largest power of Delta. */
 
 #define maxlength	256
 
@@ -48,7 +47,6 @@ struct term {
 	unsigned int n1;
 	unsigned int n2;
 	unsigned int n3;
-	unsigned int n4;
 	struct term *next;
 };
 
