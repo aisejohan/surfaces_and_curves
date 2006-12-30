@@ -174,6 +174,12 @@ struct polynomial make_random(unsigned int degree)
 #ifdef OUTPUT_LIST
 	exit(0);
 #endif
+#ifdef INPUT_F
+printf("\n");
+printf("\n");
+printf("\n");
+printf("\n");
+#endif
 	return(uit);
 };
 
