@@ -938,8 +938,7 @@ while((m>0) || (check == 1)) {
 		if((G.ff[i]->leading) && 
 		((G.ff[i]->leading->n1 != G.ee[i]->e1) || 
 		 (G.ff[i]->leading->n2 != G.ee[i]->e2) || 
-		 (G.ff[i]->leading->n3 != G.ee[i]->e3) || 
-		 (G.ff[i]->leading->n4 != G.ee[i]->e4))) {
+		 (G.ff[i]->leading->n3 != G.ee[i]->e3))) {
 			printf("The following should have been zero: ");
 			print_pol(*G.ff[i]);
 			exit(1);
@@ -1044,9 +1043,9 @@ while((m>0) || (check == 1)) {
 	/* Sanity Check! Takes some time... */
 	printf("Checking p-powers!\n");
 	for(i=0;i<=G.len-1;i++) {
-		if(G.ee[i]->e5 > 0) {
+		if(G.ee[i]->e4 > 0) {
 			sc_one(c);
-			for(j=1;j<=r-G.ee[i]->e5;j++)
+			for(j=1;j<=r-G.ee[i]->e4;j++)
 				sc_imult_replace(p,c);
 			T = copy_pol(*G.ff[i]);
 			times_scalar(c,&T);

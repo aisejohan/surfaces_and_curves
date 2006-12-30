@@ -263,11 +263,6 @@ int main()
 		 * For all p we multiply by p.			*/
 		c = p;
 		times_int(c,aa[1]);
-		/* For aa[2] we					*
-		 * 	multiply by p^2				*
-		 * 	divide by p-parts of 2p-1,...,1.	*
-		 * For all p we multiply by p			*/
-		times_int(c,aa[2]);
 		add_coefficients(aa,i);
 	};
 
@@ -295,11 +290,6 @@ int main()
 		 * 	divide by p-parts of p-1,...,2		*
 		 * For all p we get p^2				*/
 		times_int(c,aa[1]);
-		/* For aa[2] we 				*
-		 * 	multiply by p^2				*
-		 * 	divide by p-parts of p-1,...,1		*
-		 * For all p we multiply by p^2			*/
-		times_int(c,aa[2]);
 		add_coefficients(aa,blen2+i);
 	};
 
@@ -384,7 +374,6 @@ int main()
 			 * 	and divde by p-parts of 		*
 			 * 		(2+i)p-1,...,2.			*/
 			times_int(c,aa[1]);
-			times_int(c,aa[2]);
 			p_pow -= ivaluation(2);
 			if(p_pow >= 0) {
 				for(k=1;k<=p_pow;k++) {
@@ -466,12 +455,10 @@ int main()
 			 * 	divide by p-parts of 			*
 			 * 		(1+i)p-1,...,2.			*/
 			times_int(c,aa[1]);
-			times_int(c,aa[2]);
 			p_pow -= ivaluation(2);
 			if(p_pow >= 0) {
 				for(k=1;k<=p_pow;k++) {
 					times_int(p,aa[1]);
-					times_int(p,aa[2]);
 				};
 			} else {
 				if(p_pow < precision) precision = p_pow;

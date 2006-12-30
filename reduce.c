@@ -44,7 +44,7 @@ struct polynomial one_step_down(struct polynomial *f)
 	struct base_change fBC;
 	make_scalar(c);
 	
-	if (f->degree + d1 + d2 + d3 % d != 0) {
+	if ((f->degree + d1 + d2 + d3) % d != 0) {
 		printf("Incorrect degree. Stop.");
 		exit(1);
 	};
