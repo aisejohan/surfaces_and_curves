@@ -21,20 +21,25 @@
  *
  *									*/
 
-
 /* #define KIJKEN */
 
 #define KLEINER	1
 #define GELIJK	-1
 #define GROTER	0
 
+/* Define one of REVLEX_ORDER or LEX_ORDER, not both.	*
+ * If d1=d2=d3 the LEX_ORDER is best, if not then it 	*
+ * depends. 						*/
+/* #define REVLEX_ORDER */
+#define LEX_ORDER
+
 #define d1	1
 #define d2	1
 #define d3	1
-#define d	3
-#define p	7
-#define r	60		/* Exponent. */
-#define q	20		/* Largest power of Delta. */
+#define d	6
+#define p	5
+#define r	20		/* Exponent. */
+#define q	6		/* Largest power of Delta. */
 
 #define maxlength	256
 
