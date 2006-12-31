@@ -55,12 +55,14 @@ int deelbaar(struct term *mon1, struct term *mon2)
 struct polynomial ** 
 gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 {
-	struct polynomial tmp[ss];
+	struct polynomial vh_rest[ss];
+	struct polynomial save_the_spot, uit;
 	struct polynomial **aa;
 	struct polynomial *ppp;
 	struct term *aaterm[ss];
 	struct term **ptrterm;
-	struct term mon;
+	struct term *pppterm;
+	struct term mon, test;
 	unsigned int i, dividing;
 
 	make_scalar(mon.c);
@@ -72,7 +74,6 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 		exit(1);
 	};
 	for(i=0;i+1<=ss;i++) {
-		tmp[i].leading = NULL;
 		aaterm[i] = NULL;
 		aa[i] = NULL;
 		make_pol(&aa[i]);
@@ -101,19 +102,53 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 				mon.n2 = ppp->leading->n2 - vh[i]->leading->n2;
 				mon.n3 = ppp->leading->n3 - vh[i]->leading->n3;
 
-				if(tmp[i].leading) {
-					times_term(mon, *(vh[i]), &(tmp[i]));
+				pppterm = ppp->leading;
+				ppp->leading = ppp->leading->next;
+				free_term(pppterm);
+
+				if (aaterm[i]) {
 					make_term(&aaterm[i]->next);
 					copy_term(&mon, aaterm[i]->next);
 					aaterm[i] = aaterm[i]->next;
 				} else {
-					tmp[i] = make_times_term(mon,*(vh[i]));
+					vh_rest[i].degree = vh[i]->degree;
+					vh_rest[i].leading = vh[i]->leading->next;
 					make_term(&aa[i]->leading);
 					copy_term(&mon, aa[i]->leading);
 					aaterm[i] = aa[i]->leading;
 				};
 
-				rep_pol_add(ppp, tmp[i]);
+	save_the_spot.degree = aa[i]->degree;
+	save_the_spot.leading = aaterm[i];
+
+	if (vh_rest[i].leading) {
+		test.n1 = mon.n1 + vh_rest[i].leading->n1;
+		test.n2 = mon.n2 + vh_rest[i].leading->n2;
+		test.n3 = mon.n3 + vh_rest[i].leading->n3;
+	}
+
+	while ((ppp->leading) && deelbaar(vh[i]->leading, ppp->leading) && 
+	((!vh_rest[i].leading) || GROTER == kleiner(ppp->leading, &test))) {
+		/* No sign in front of pppterm->c */
+		sc_div(ppp->leading->c, vh[i]->leading->c, mon.c);
+		/* Change sign mon.c */
+		sc_negate(mon.c);
+		mon.n1 = ppp->leading->n1 - vh[i]->leading->n1;
+		mon.n2 = ppp->leading->n2 - vh[i]->leading->n2;
+		mon.n3 = ppp->leading->n3 - vh[i]->leading->n3;
+
+		pppterm = ppp->leading;
+		ppp->leading = ppp->leading->next;
+		free_term(pppterm);
+
+		make_term(&aaterm[i]->next);
+		copy_term(&mon, aaterm[i]->next);
+		aaterm[i] = aaterm[i]->next;
+	}
+	
+	uit = pol_mult(save_the_spot, vh_rest[i]);
+	rep_pol_add(ppp, uit);
+	free_tail(uit.leading);
 
 				dividing = 0;
 			} else {
@@ -130,9 +165,6 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 			/* Terminate pp. */
 			*ptrterm = NULL;
 		};
-	};
-	for(i=0;i+1<=ss;i++) {
-		free_tail(tmp[i].leading);
 	};
 	free(ppp);
 	free_scalar(mon.c);
