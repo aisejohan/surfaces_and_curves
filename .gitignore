@@ -12,6 +12,7 @@
 *.ko
 *.so
 *.mod.c
+*.patch
 gmon.out
 tester
 tijdelijk

@@ -803,20 +803,16 @@ while((m>0) || (check == 1)) {
 		free(aa); 
 
 		/* Update M. */
-		/* Save the M we have sofar into Mold. */
-		for(i=0;i+1<=m;i++) {
-			Mold[i] = M[i];
-		}
-		mold = m;
+
 		/* List the new pairs in order in Mnew. */
 		mnew = 0;
 		for(i=0;i<=(G.len-1)-1;i++) {
 			if(!rel_prime(G.ee[i],G.ee[G.len-1])) {
 				lcm_new = lcm(G.ee[i],G.ee[G.len-1]);
 				j = 0;
-				while((j+1 <= mnew) && (smaller(lcm_new,lcm(G.ee[Mnew[j].i],G.ee[Mnew[j].j])))) {
-				       j++;
-				};		
+				while((j+1 <= mnew) &&
+					(smaller(lcm_new,lcm(G.ee[Mnew[j].i],
+						G.ee[Mnew[j].j])))) j++;
 				if(j == mnew) {
 					mnew = mnew + 1;
 					Mnew[mnew-1].i = i;
@@ -833,40 +829,49 @@ while((m>0) || (check == 1)) {
 				};
 			};
 		};
-		/* Merge old and new into M. */
-		old = 0;
-		lcm_old = lcm(G.ee[Mold[old].i],G.ee[Mold[old].j]);
-		new = 0;
-		lcm_new = lcm(G.ee[Mnew[new].i],G.ee[Mnew[new].j]);
-		m = mold + mnew;
-		i=0;
-		while((new+1 <= mnew) && (old+1 <= mold)) {
-			if(smaller(lcm_new,lcm_old)) {
+
+		if (mnew > 0) {
+			/* Save the M we have sofar into Mold. */
+			for(i=0;i+1<=m;i++) {
+				Mold[i] = M[i];
+			}
+			mold = m;
+
+			/* Merge old and new into M. */
+			old = 0;
+			lcm_old = lcm(G.ee[Mold[old].i],G.ee[Mold[old].j]);
+			new = 0;
+			lcm_new = lcm(G.ee[Mnew[new].i],G.ee[Mnew[new].j]);
+			m = mold + mnew;
+			i=0;
+			while((new+1 <= mnew) && (old+1 <= mold)) {
+				if(smaller(lcm_new,lcm_old)) {
+					M[i] = Mold[old];
+					i = i + 1;
+					old = old + 1;
+					if(old+1 <= mold) lcm_old =
+						lcm(G.ee[Mold[old].i],
+						G.ee[Mold[old].j]);
+				} else {
+					M[i] = Mnew[new];
+					i = i + 1;
+					new = new + 1;
+					if(new+1 <= mnew) lcm_new = 
+						lcm(G.ee[Mnew[new].i],
+						G.ee[Mnew[new].j]);
+				};
+			};
+			while(old+1 <= mold) {
 				M[i] = Mold[old];
 				i = i + 1;
 				old = old + 1;
-				if(old+1 <= mold) {
-					lcm_old = lcm(G.ee[Mold[old].i],G.ee[Mold[old].j]);
-				};
-			} else {
+			};
+			while(new+1 <= mnew) {
 				M[i] = Mnew[new];
 				i = i + 1;
 				new = new + 1;
-				if(new+1 <= mnew) {
-					lcm_new = lcm(G.ee[Mnew[new].i],G.ee[Mnew[new].j]);
-				};
 			};
-		};
-		while(old+1 <= mold) {
-			M[i] = Mold[old];
-			i = i + 1;
-			old = old + 1;
-		};
-		while(new+1 <= mnew) {
-			M[i] = Mnew[new];
-			i = i + 1;
-			new = new + 1;
-		};
+		}
 
 		/* Do it again for the powers of p times the new one!	*
 		 * This is needed to deal with something like		*
