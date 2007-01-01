@@ -56,14 +56,19 @@ int deelbaar(struct term *mon1, struct term *mon2)
 struct polynomial ** 
 gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 {
+#ifdef OLD_GROBNER
+	struct polynomial tmp[ss];
+#else
+	struct polynomial save_the_spot,uit;
+	struct term test;
+#endif
 	struct polynomial vh_rest[ss];
-	struct polynomial save_the_spot, uit;
 	struct polynomial **aa;
 	struct polynomial *ppp;
 	struct term *aaterm[ss];
 	struct term **ptrterm;
 	struct term *pppterm;
-	struct term mon, test;
+	struct term mon;
 	unsigned int i, dividing;
 
 	make_scalar(mon.c);
@@ -75,6 +80,9 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 		exit(1);
 	};
 	for(i=0;i+1<=ss;i++) {
+#ifdef OLD_GROBNER
+tmp[i].leading = NULL;
+#endif
 		aaterm[i] = NULL;
 		aa[i] = NULL;
 		make_pol(&aa[i]);
@@ -109,17 +117,27 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 				free_term(pppterm);
 
 				if (aaterm[i]) {
+#ifdef OLD_GROBNER
+times_term(mon, vh_rest[i], &(tmp[i]));
+#endif
 					make_term(&aaterm[i]->next);
 					copy_term(&mon, aaterm[i]->next);
 					aaterm[i] = aaterm[i]->next;
 				} else {
 					vh_rest[i].degree = vh[i]->degree;
-					vh_rest[i].leading = vh[i]->leading->next;
+					vh_rest[i].leading = 
+						vh[i]->leading->next;
+#ifdef OLD_GROBNER
+tmp[i] = make_times_term(mon, vh_rest[i]);
+#endif
 					make_term(&aa[i]->leading);
 					copy_term(&mon, aa[i]->leading);
 					aaterm[i] = aa[i]->leading;
 				};
 
+#ifndef OLD_GROBNER
+/* New part. This part seems to work better with LEX_ORDER
+ * than with REVLEX_ORDER. */
 	save_the_spot.degree = aa[i]->degree;
 	save_the_spot.leading = aaterm[i];
 
@@ -153,6 +171,10 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	uit = pol_mult(save_the_spot, vh_rest[i]);
 	rep_pol_add(ppp, uit);
 	free_tail(uit.leading);
+/* End new part. */
+#else
+rep_pol_add(ppp, tmp[i]);
+#endif
 
 				dividing = 0;
 			} else {
@@ -170,6 +192,11 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 			*ptrterm = NULL;
 		};
 	};
+#ifdef OLD_GROBNER
+	for(i=0;i+1<=ss;i++) {
+		free_tail(tmp[i].leading);
+	};
+#endif
 	free(ppp);
 	free_scalar(mon.c);
 	return(aa);
