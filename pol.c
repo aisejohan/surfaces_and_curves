@@ -437,35 +437,6 @@ make_times_term(struct term t, struct polynomial f)
 	return(uit);
 };
 
-/* This is the version which is better in that it knows
- * nothing about the internals of the scalars.			 */
-struct polynomial pol_mult_variant(struct polynomial f, struct polynomial g)
-{
-	struct polynomial uit, tmppol;
-	struct term *fterm;
-	tmppol.leading = NULL;
-	uit.leading = NULL;
-
-	if((!f.leading) || (!g.leading)) {
-		uit.degree = f.degree + g.degree;
-		return(uit);
-	};
-	make_tail(g.leading, &(tmppol.leading));
-	fterm = f.leading;
-	while((!uit.leading) && (fterm)) {
-		uit = make_times_term(*fterm, g);
-		clean_pol(&uit);
-		fterm = fterm->next;
-	};
-	while(fterm) {
-		times_term(*fterm, g, &tmppol);
-		rep_pol_add(&uit,tmppol);
-		fterm = fterm->next;
-	};
-	free_tail(tmppol.leading);
-	return(uit);
-};
-
 /* Do not compute reductions. */
 void times_term_variant(struct term t, struct polynomial f, struct polynomial *g)
 {
