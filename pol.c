@@ -26,6 +26,7 @@
 
 #include "data.h"
 #include "scalar.h"
+#include "pol.h"
 
 /* Makes a term.				*/
 void make_term(struct term **mon)
@@ -158,27 +159,6 @@ struct polynomial copy_pol(struct polynomial f)
 	return(uit);
 };
 
-/* This function assumes terms of the same degree. 	*
- * It compares the monomials not the coefficients.	*
- * Returns						*
- * 		GELIJK if equal				*
- * 		KLEINER if mon1 < mon2			*
- * 		GROTER if mon1 > mon2			*
- * 							*/
-int kleiner(struct term *mon1, struct term *mon2)
-{
-#ifdef REVLEX_ORDER
-	if(mon1->n4 != mon2->n4) return((mon1->n4 > mon2->n4));
-	if(mon1->n3 != mon2->n3) return((mon1->n3 > mon2->n3));
-	if(mon1->n2 != mon2->n2) return((mon1->n2 > mon2->n2));
-#endif
-#ifdef LEX_ORDER
-	if(mon1->n1 != mon2->n1) return((mon1->n1 < mon2->n1));
-	if(mon1->n2 != mon2->n2) return((mon1->n2 < mon2->n2));
-	if(mon1->n3 != mon2->n3) return((mon1->n3 < mon2->n3));
-#endif
-	return(-1);
-};
 
 
 /* Prints a polynomial. 				*/
