@@ -21,5 +21,4 @@
  *
  *									*/
 
-struct polynomial **all_the_way(struct polynomial *f);
 struct polynomial **all_the_way_split(struct polynomial **bb);

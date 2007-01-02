@@ -66,29 +66,25 @@ if(aa[i]->leading) {
 		times_int(-1,aa[i]); /* Sign! */
 		if((G.BC[i]->bc1.leading) && (fBC.bc1.leading)) {
 			T = pol_mult(*aa[i],G.BC[i]->bc1);
-			rep_pol_add(&(fBC.bc1),T);
-			free_tail(T.leading);
+			merge_add(&(fBC.bc1),T);
 		} else if (G.BC[i]->bc1.leading) {
 			fBC.bc1 = pol_mult(*aa[i],G.BC[i]->bc1);
 		};
 		if((G.BC[i]->bc2.leading) && (fBC.bc2.leading)) {
 			T = pol_mult(*aa[i],G.BC[i]->bc2);
-			rep_pol_add(&(fBC.bc2),T);
-			free_tail(T.leading);
+			merge_add(&(fBC.bc2),T);
 		} else if (G.BC[i]->bc2.leading) {
 			fBC.bc2 = pol_mult(*aa[i],G.BC[i]->bc2);
 		};
 		if((G.BC[i]->bc3.leading) && (fBC.bc3.leading)) {
 			T = pol_mult(*aa[i],G.BC[i]->bc3);
-			rep_pol_add(&(fBC.bc3),T);
-			free_tail(T.leading);
+			merge_add(&(fBC.bc3),T);
 		} else if (G.BC[i]->bc3.leading) {
 			fBC.bc3 = pol_mult(*aa[i],G.BC[i]->bc3);
 		};
 		if((G.BC[i]->bc4.leading) && (fBC.bc4.leading)) {
 			T = pol_mult(*aa[i],G.BC[i]->bc4);
-			rep_pol_add(&(fBC.bc4),T);
-			free_tail(T.leading);
+			merge_add(&(fBC.bc4),T);
 		} else if (G.BC[i]->bc4.leading) {
 			fBC.bc4 = pol_mult(*aa[i],G.BC[i]->bc4);
 		};
@@ -128,12 +124,9 @@ if(aa[i]->leading) {
 	times_scalar(c,&(fBC.bc4));
 
 	/* Adding up to get the result. */	
-	rep_pol_add(&(fBC.bc4), fBC.bc3);
-	free_tail(fBC.bc3.leading);
-	rep_pol_add(&(fBC.bc4), fBC.bc2);
-	free_tail(fBC.bc2.leading);
-	rep_pol_add(&(fBC.bc4), fBC.bc1);
-	free_tail(fBC.bc1.leading);
+	merge_add(&(fBC.bc4), fBC.bc3);
+	merge_add(&(fBC.bc4), fBC.bc2);
+	merge_add(&(fBC.bc4), fBC.bc1);
 
 	free_scalar(c);
 	return(fBC.bc4);
@@ -237,19 +230,16 @@ struct polynomial **all_the_way_split(struct polynomial **bb)
 			c = k;
 			for(tel=1;tel+ii+1<=jj;tel++){
 				times_int(c,bb[ii+tel]);
-				rep_pol_add(bb[ii+tel],*cc[tel-1]);
-				free_tail(cc[tel-1]->leading);
+				merge_add(bb[ii+tel],*cc[tel-1]);
 				free(cc[tel-1]);
 			};
 			free(cc);
 		};
 	};
 
-	rep_pol_add(aa[0],*bb[jj-2]);
-	free_tail(bb[jj-2]->leading);
+	merge_add(aa[0],*bb[jj-2]);
 	free(bb[jj-2]);
-	rep_pol_add(aa[1],*bb[jj-1]);
-	free_tail(bb[jj-1]->leading);
+	merge_add(aa[1],*bb[jj-1]);
 	free(bb[jj-1]);
 	free(bb);
 	

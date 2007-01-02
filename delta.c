@@ -447,16 +447,14 @@ struct polynomial **mult_split(struct polynomial **f, struct polynomial **g)
 		j= (glen < i+1) ? (i+1-glen) : 0;
 		while((j<=i) && (j+1 <= flen)) {
 			tmp1 = pol_mult(*f[j],*g[i-j]);
-			rep_pol_add(&tmp2,tmp1);
-			free_tail(tmp1.leading);
+			merge_add(&tmp2,tmp1);
 			j++;
 		};
 		aa = split_up(&tmp2);
 		/* The number of terms of aa will be uitlen-i.	*/
 		/* We should also free aa again. 		*/
 		for(k=0; k+1 <= uitlen-i; k++) {
-			rep_pol_add(uit[i+k],*aa[k]);
-			free_tail(aa[k]->leading);
+			merge_add(uit[i+k],*aa[k]);
 			free(aa[k]);
 		};
 		free(aa);
@@ -484,8 +482,7 @@ void test_split(struct polynomial **aa, struct polynomial orig)
 		printf(" %d \n",i);
 		tmp = pol_mult(myf,*aa[i]);
 		free_tail(aa[i]->leading);
-		rep_pol_add(aa[0],tmp);
-		free_tail(tmp.leading);
+		merge_add(aa[0],tmp);
 		for(j = i+1; j+1 <= aalen; j++) {
 			tmp = pol_mult(myf,*aa[j]);
 			free_tail(aa[j]->leading);

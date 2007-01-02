@@ -160,8 +160,7 @@ struct polynomial s_pol(struct polynomial f, struct polynomial g)
 	A = make_times_term(a,f);
 	clean_pol(&A);
 	B = make_times_term(b,g);
-	rep_pol_add(&A,B);
-	free_tail(B.leading);
+	merge_add(&A,B);
 	free_scalar(a.c);
 	free_scalar(b.c);
 	return(A);
@@ -185,8 +184,7 @@ struct base_change s_pol_BC(unsigned int i, unsigned int j)
 		A = make_times_term(a,G.BC[i]->bc1);
 		clean_pol(&A);
 		B = make_times_term(b,G.BC[j]->bc1);
-		rep_pol_add(&A,B);
-		free_tail(B.leading);
+		merge_add(&A,B);
 		uit.bc1 = A;
 	} else if (G.BC[i]->bc1.leading) {
 		A = make_times_term(a,G.BC[i]->bc1);
@@ -204,8 +202,7 @@ struct base_change s_pol_BC(unsigned int i, unsigned int j)
 		A = make_times_term(a,G.BC[i]->bc2);
 		clean_pol(&A);
 		B = make_times_term(b,G.BC[j]->bc2);
-		rep_pol_add(&A,B);
-		free_tail(B.leading);
+		merge_add(&A,B);
 		uit.bc2 = A;
 	} else if (G.BC[i]->bc2.leading) {
 		A = make_times_term(a,G.BC[i]->bc2);
@@ -223,8 +220,7 @@ struct base_change s_pol_BC(unsigned int i, unsigned int j)
 		A = make_times_term(a,G.BC[i]->bc3);
 		clean_pol(&A);
 		B = make_times_term(b,G.BC[j]->bc3);
-		rep_pol_add(&A,B);
-		free_tail(B.leading);
+		merge_add(&A,B);
 		uit.bc3 = A;
 	} else if (G.BC[i]->bc3.leading) {
 		A = make_times_term(a,G.BC[i]->bc3);
@@ -242,8 +238,7 @@ struct base_change s_pol_BC(unsigned int i, unsigned int j)
 		A = make_times_term(a,G.BC[i]->bc4);
 		clean_pol(&A);
 		B = make_times_term(b,G.BC[j]->bc4);
-		rep_pol_add(&A,B);
-		free_tail(B.leading);
+		merge_add(&A,B);
 		uit.bc4 = A;
 	} else if (G.BC[i]->bc4.leading) {
 		A = make_times_term(a,G.BC[i]->bc4);
@@ -755,8 +750,7 @@ while((m>0) || (check == 1)) {
 			if((G.BC[i]->bc1.leading) && 
 			(G.BC[G.len-1]->bc1.leading)) {
 				T = pol_mult(*aa[i],G.BC[i]->bc1);
-				rep_pol_add(&(G.BC[G.len-1]->bc1),T);
-				free_tail(T.leading);
+				merge_add(&(G.BC[G.len-1]->bc1),T);
 			} else if (G.BC[i]->bc1.leading) {
 				G.BC[G.len-1]->bc1 = 
 					pol_mult(*aa[i],G.BC[i]->bc1);
@@ -764,8 +758,7 @@ while((m>0) || (check == 1)) {
 			if((G.BC[i]->bc2.leading) && 
 			(G.BC[G.len-1]->bc2.leading)) {
 				T = pol_mult(*aa[i],G.BC[i]->bc2);
-				rep_pol_add(&(G.BC[G.len-1]->bc2),T);
-				free_tail(T.leading);
+				merge_add(&(G.BC[G.len-1]->bc2),T);
 			} else if (G.BC[i]->bc2.leading) {
 				G.BC[G.len-1]->bc2 = 
 					pol_mult(*aa[i],G.BC[i]->bc2);
@@ -773,8 +766,7 @@ while((m>0) || (check == 1)) {
 			if((G.BC[i]->bc3.leading) && 
 					(G.BC[G.len-1]->bc3.leading)) {
 				T = pol_mult(*aa[i],G.BC[i]->bc3);
-				rep_pol_add(&(G.BC[G.len-1]->bc3),T);
-				free_tail(T.leading);
+				merge_add(&(G.BC[G.len-1]->bc3),T);
 			} else if (G.BC[i]->bc3.leading) {
 				G.BC[G.len-1]->bc3 = 
 					pol_mult(*aa[i],G.BC[i]->bc3);
@@ -782,8 +774,7 @@ while((m>0) || (check == 1)) {
 			if((G.BC[i]->bc4.leading) && 
 					(G.BC[G.len-1]->bc4.leading)) {
 				T = pol_mult(*aa[i],G.BC[i]->bc4);
-				rep_pol_add(&(G.BC[G.len-1]->bc4),T);
-				free_tail(T.leading);
+				merge_add(&(G.BC[G.len-1]->bc4),T);
 			} else if (G.BC[i]->bc4.leading) {
 				G.BC[G.len-1]->bc4 = 
 					pol_mult(*aa[i],G.BC[i]->bc4);
@@ -986,29 +977,25 @@ while((m>0) || (check == 1)) {
 					if(aa[j-epsilon]->leading) {
 						if((G.BC[j]->bc1.leading) && (G.BC[i]->bc1.leading)) {
 							T = pol_mult(*aa[j-epsilon],G.BC[j]->bc1);
-							rep_pol_add(&(G.BC[i]->bc1),T);
-							free_tail(T.leading);
+							merge_add(&(G.BC[i]->bc1),T);
 						} else if (G.BC[j]->bc1.leading) {
 							G.BC[i]->bc1 = pol_mult(*aa[j-epsilon],G.BC[j]->bc1);
 						};
 						if((G.BC[j]->bc2.leading) && (G.BC[i]->bc2.leading)) {
 							T = pol_mult(*aa[j-epsilon],G.BC[j]->bc2);
-							rep_pol_add(&(G.BC[i]->bc2),T);
-							free_tail(T.leading);
+							merge_add(&(G.BC[i]->bc2),T);
 						} else if (G.BC[j]->bc2.leading) {
 							G.BC[i]->bc2 = pol_mult(*aa[j-epsilon],G.BC[j]->bc2);
 						};
 						if((G.BC[j]->bc3.leading) && (G.BC[i]->bc3.leading)) {
 							T = pol_mult(*aa[j-epsilon],G.BC[j]->bc3);
-							rep_pol_add(&(G.BC[i]->bc3),T);
-							free_tail(T.leading);
+							merge_add(&(G.BC[i]->bc3),T);
 						} else if (G.BC[j]->bc3.leading) {
 							G.BC[i]->bc3 = pol_mult(*aa[j-epsilon],G.BC[j]->bc3);
 						};
 						if((G.BC[j]->bc4.leading) && (G.BC[i]->bc4.leading)) {
 							T = pol_mult(*aa[j-epsilon],G.BC[j]->bc4);
-							rep_pol_add(&(G.BC[i]->bc4),T);
-							free_tail(T.leading);
+							merge_add(&(G.BC[i]->bc4),T);
 						} else if (G.BC[j]->bc4.leading) {
 							G.BC[i]->bc4 = pol_mult(*aa[j-epsilon],G.BC[j]->bc4);
 						};
