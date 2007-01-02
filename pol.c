@@ -262,6 +262,92 @@ struct polynomial pol_add(struct polynomial f, struct polynomial g)
 	exit(1);
 };
 
+/* Almost the same as rep_pol_add:			*
+ * 	replace f by (f+g)				*
+ * 	empty out g					*
+ * Here g may have terms that are zero but not f.	*/
+void merge_add(struct polynomial *f, struct polynomial g)
+{
+	int vergelijk;
+	struct term *fterm, *gterm;
+	struct term **ptrterm;
+
+	ptrterm = &(f->leading);
+	fterm = f->leading;
+	*ptrterm = NULL;
+	gterm = g.leading;
+	g.leading = NULL;
+	while (1) {
+		if(!fterm) {
+			/* if(!gterm) return; */
+			*ptrterm = gterm;
+			while(*ptrterm)  {
+				if(sc_is_zero((*ptrterm)->c)) {
+					gterm = *ptrterm;
+					*ptrterm = (*ptrterm)->next;
+					free_term(gterm);
+				} else {
+					ptrterm = &((*ptrterm)->next);
+				}
+			}
+			return;
+		};
+
+		if(!gterm) {
+			*ptrterm = fterm;
+			return;
+		};
+
+		vergelijk=kleiner(fterm,gterm);
+		if (vergelijk == GROTER) {
+			*ptrterm = fterm;
+			ptrterm = &(fterm->next);
+			fterm = fterm->next;
+			*ptrterm = NULL;
+		} else if (vergelijk == KLEINER) {
+			/* Check for zero in g. */
+			if(!sc_is_zero(gterm->c)) {
+				*ptrterm = gterm;
+				ptrterm = &(gterm->next);
+				gterm = gterm->next;
+				*ptrterm = NULL;
+			} else {
+				*ptrterm = gterm->next;
+				free_term(gterm);
+				gterm = *ptrterm;
+				*ptrterm = NULL;
+			}
+		} else {
+			/* vergelijk == GELIJK */
+			sc_add_replace(gterm->c,fterm->c);
+			if(sc_is_zero(fterm->c)) {
+				/* Here we use *ptrterm as temp	*
+				 * storage. A little ugly.	*/
+				*ptrterm = fterm->next;
+				free_term(fterm);
+				fterm = *ptrterm;
+
+				*ptrterm = gterm->next;
+				free_term(gterm);
+				gterm = *ptrterm;
+				/* Now we put *ptrterm back to NULL. */
+				*ptrterm = NULL;
+			} else {
+				*ptrterm = fterm;
+				ptrterm = &(fterm->next);
+				fterm = fterm->next;
+				*ptrterm = gterm->next;
+				free_term(gterm);
+				gterm = *ptrterm;
+				*ptrterm = NULL;
+			};
+		};
+	};
+	printf("Fall through! Cannot happen.");
+	exit(1);
+};
+
+
 /* Same as above but replace f by (f+g).		*
  * Here g may have terms that are zero but not f.	*/
 void rep_pol_add(struct polynomial *f, struct polynomial g)

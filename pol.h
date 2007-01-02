@@ -58,5 +58,6 @@ struct polynomial copy_pol(struct polynomial f);
 struct polynomial pol_mult(struct polynomial f, struct polynomial g);
 struct polynomial pol_add(struct polynomial f, struct polynomial g);
 void rep_pol_add(struct polynomial *f, struct polynomial g);
+void merge_add(struct polynomial *f, struct polynomial g);
 struct polynomial copy_pol(struct polynomial f);
 void print_pol(struct polynomial f);

@@ -169,8 +169,7 @@ tmp[i] = make_times_term(mon, vh_rest[i]);
 	}
 	
 	uit = pol_mult(save_the_spot, vh_rest[i]);
-	rep_pol_add(ppp, uit);
-	free_tail(uit.leading);
+	merge_add(ppp, uit);
 /* End new part. */
 #else
 rep_pol_add(ppp, tmp[i]);
