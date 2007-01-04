@@ -56,12 +56,9 @@ int deelbaar(struct term *mon1, struct term *mon2)
 struct polynomial ** 
 gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 {
-#ifdef OLD_GROBNER
 	struct polynomial tmp[ss];
-#else
-	struct polynomial save_the_spot,uit;
+	struct polynomial save_the_spot, uit;
 	struct term test;
-#endif
 	struct polynomial vh_rest[ss];
 	struct polynomial **aa;
 	struct polynomial *ppp;
@@ -80,9 +77,7 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 		exit(1);
 	};
 	for(i=0;i+1<=ss;i++) {
-#ifdef OLD_GROBNER
-tmp[i].leading = NULL;
-#endif
+		tmp[i].leading = NULL;
 		aaterm[i] = NULL;
 		aa[i] = NULL;
 		make_pol(&aa[i]);
@@ -117,9 +112,9 @@ tmp[i].leading = NULL;
 				free_term(pppterm);
 
 				if (aaterm[i]) {
-#ifdef OLD_GROBNER
-times_term(mon, vh_rest[i], &(tmp[i]));
-#endif
+					if (ss > 1) /* Old part. */
+						times_term(mon, vh_rest[i],
+							&(tmp[i]));
 					make_term(&aaterm[i]->next);
 					copy_term(&mon, aaterm[i]->next);
 					aaterm[i] = aaterm[i]->next;
@@ -127,53 +122,65 @@ times_term(mon, vh_rest[i], &(tmp[i]));
 					vh_rest[i].degree = vh[i]->degree;
 					vh_rest[i].leading = 
 						vh[i]->leading->next;
-#ifdef OLD_GROBNER
-tmp[i] = make_times_term(mon, vh_rest[i]);
-#endif
+					if (ss > 1) /* Old part. */
+						tmp[i] = make_times_term(mon,
+							vh_rest[i]);
 					make_term(&aa[i]->leading);
 					copy_term(&mon, aa[i]->leading);
 					aaterm[i] = aa[i]->leading;
 				};
 
-#ifndef OLD_GROBNER
-/* New part. This part seems to work better with LEX_ORDER
- * than with REVLEX_ORDER. */
-	save_the_spot.degree = aa[i]->degree;
-	save_the_spot.leading = aaterm[i];
+				if (ss == 1) {
+					/* New part. This part seems to
+					 * work better with LEX_ORDER
+					 * than with REVLEX_ORDER. */
+					save_the_spot.degree = aa[i]->degree;
+					save_the_spot.leading = aaterm[i];
+					test.n1 = mon.n1 +
+						vh_rest[i].leading->n1;
+					test.n2 = mon.n2 +
+						vh_rest[i].leading->n2;
+					test.n3 = mon.n3 +
+						vh_rest[i].leading->n3;
+					test.n4 = mon.n4 +
+						vh_rest[i].leading->n4;
 
-	if (vh_rest[i].leading) {
-		test.n1 = mon.n1 + vh_rest[i].leading->n1;
-		test.n2 = mon.n2 + vh_rest[i].leading->n2;
-		test.n3 = mon.n3 + vh_rest[i].leading->n3;
-		test.n4 = mon.n4 + vh_rest[i].leading->n4;
-	}
-
-	while ((ppp->leading) && deelbaar(vh[i]->leading, ppp->leading) && 
-	((!vh_rest[i].leading) || GROTER == kleiner(ppp->leading, &test))) {
-		/* No sign in front of pppterm->c */
-		sc_div(ppp->leading->c, vh[i]->leading->c, mon.c);
-		/* Change sign mon.c */
-		sc_negate(mon.c);
-		mon.n1 = ppp->leading->n1 - vh[i]->leading->n1;
-		mon.n2 = ppp->leading->n2 - vh[i]->leading->n2;
-		mon.n3 = ppp->leading->n3 - vh[i]->leading->n3;
-		mon.n4 = ppp->leading->n4 - vh[i]->leading->n4;
-
-		pppterm = ppp->leading;
-		ppp->leading = ppp->leading->next;
-		free_term(pppterm);
-
-		make_term(&aaterm[i]->next);
-		copy_term(&mon, aaterm[i]->next);
-		aaterm[i] = aaterm[i]->next;
-	}
-	
-	uit = pol_mult(save_the_spot, vh_rest[i]);
-	merge_add(ppp, uit);
-/* End new part. */
-#else
-rep_pol_add(ppp, tmp[i]);
-#endif
+					while ((ppp->leading) &&
+					deelbaar(vh[i]->leading, ppp->leading)
+					&& (GROTER == kleiner(ppp->leading,
+					&test))) {
+						/* No sign in front of
+						 * pppterm->c */
+						sc_div(ppp->leading->c,
+						vh[i]->leading->c, mon.c);
+						/* Change sign mon.c */
+						sc_negate(mon.c);
+						mon.n1 = ppp->leading->n1 -
+							vh[i]->leading->n1;
+						mon.n2 = ppp->leading->n2 -
+							vh[i]->leading->n2;
+						mon.n3 = ppp->leading->n3 -
+							vh[i]->leading->n3;
+						mon.n4 = ppp->leading->n4 -
+							vh[i]->leading->n4;
+						pppterm = ppp->leading;
+						ppp->leading = 
+							ppp->leading->next;
+						free_term(pppterm);
+						make_term(&aaterm[i]->next);
+						copy_term(&mon,
+							aaterm[i]->next);
+						aaterm[i] = aaterm[i]->next;
+					}
+					uit = pol_mult(save_the_spot,
+						vh_rest[i]);
+					merge_add(ppp, uit);
+					/* End new part. */
+				} else {
+					/* Old part. */
+					rep_pol_add(ppp, tmp[i]);
+					/* End old part. */
+				}
 
 				dividing = 0;
 			} else {
@@ -191,11 +198,11 @@ rep_pol_add(ppp, tmp[i]);
 			*ptrterm = NULL;
 		};
 	};
-#ifdef OLD_GROBNER
-	for(i=0;i+1<=ss;i++) {
-		free_tail(tmp[i].leading);
-	};
-#endif
+	if (ss > 1) {
+		for(i=0;i+1<=ss;i++) {
+			free_tail(tmp[i].leading);
+		};
+	}
 	free(ppp);
 	free_scalar(mon.c);
 	return(aa);
