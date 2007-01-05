@@ -132,6 +132,7 @@ if(aa[i]->leading) {
 	return(fBC.bc4);
 };
 
+#if 0
 /* This returns the complete reduction and destroys f.		*/
 struct polynomial **all_the_way(struct polynomial *f)
 {
@@ -177,6 +178,7 @@ struct polynomial **all_the_way(struct polynomial *f)
 	
 	return(uit);
 };
+#endif
 
 /* Deals with a split up polynomial and reduces all the		*
  * way down. Destroys bb. 					*

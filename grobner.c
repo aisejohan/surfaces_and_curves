@@ -31,7 +31,7 @@
 /* Generic routines... */
 
 /* This function tests for divisibility of terms.	*/
-int deelbaar(struct term *mon1, struct term *mon2)
+static int deelbaar(struct term *mon1, struct term *mon2)
 {
 	return(((mon1->n1 <= mon2->n1) &&
 		(mon1->n2 <= mon2->n2) &&

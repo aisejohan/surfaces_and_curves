@@ -123,18 +123,6 @@ void clean_pol(struct polynomial *pol)
 	return;
 };
 
-/* Create data structure of the same length.		*/
-void make_tail(struct term *mon, struct term **ptrterm)
-{
-	while(mon) {
-		make_term(ptrterm);
-		ptrterm = &((*ptrterm)->next);
-		mon = mon->next;
-	};
-	*ptrterm = NULL;
-};
-
-
 /* Copies tail of pol.					*/
 void copy_tail(struct term *mon, struct term **ptrterm)
 {
@@ -516,7 +504,7 @@ make_times_term(struct term t, struct polynomial f)
 };
 
 /* Do not compute reductions. */
-void times_term_variant(struct term t, struct polynomial f, struct polynomial *g)
+static void times_term_variant(struct term t, struct polynomial f, struct polynomial *g)
 {
 	struct term *fterm, *gterm;
 
@@ -535,7 +523,7 @@ void times_term_variant(struct term t, struct polynomial f, struct polynomial *g
 };
 
 /* We do not check for zero or reduce mod modulus. */
-void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
+static void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 {
 	int vergelijk;
 	struct term *fterm, *gterm;
@@ -596,7 +584,7 @@ void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 	};
 };
 
-struct polynomial
+static struct polynomial
 make_times_term_variant(struct term t, struct polynomial f)
 {
 	struct term *fterm;

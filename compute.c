@@ -49,7 +49,7 @@ struct polynomial myf1,myf2,myf3;
 
 /* Note that this produces a segfault or hangs if either	*
  * f.leading is NULL or if f.leading->c == 0.			*/
-struct exponents take_exponents(struct polynomial f)
+static struct exponents take_exponents(struct polynomial f)
 {
 	struct exponents uit;
 	uit.e1 = f.leading->n1;
@@ -60,7 +60,7 @@ struct exponents take_exponents(struct polynomial f)
 };
 
 /* Least common multiple.					*/
-struct exponents lcm(struct exponents *mon1, struct exponents *mon2)
+static struct exponents lcm(struct exponents *mon1, struct exponents *mon2)
 {
 	struct exponents uit;
 	uit.e1 = (mon1->e1 > mon2->e1) ? mon1->e1 : mon2->e1;
@@ -71,7 +71,7 @@ struct exponents lcm(struct exponents *mon1, struct exponents *mon2)
 };
 
 /* Rarely the case.							*/
-unsigned int rel_prime(struct exponents *mon1, struct exponents *mon2)
+static unsigned int rel_prime(struct exponents *mon1, struct exponents *mon2)
 {
 	if((mon1->e1 > 0) && (mon2->e1 > 0)) return(0);
 	if((mon1->e2 > 0) && (mon2->e2 > 0)) return(0);
@@ -80,7 +80,7 @@ unsigned int rel_prime(struct exponents *mon1, struct exponents *mon2)
 	return(1);
 };
 
-unsigned int divides(struct exponents *mon1, struct exponents *mon2)
+static unsigned int divides(struct exponents *mon1, struct exponents *mon2)
 {
 	return((mon1->e1 <= mon2->e1) && (mon1->e2 <= mon2->e2) && 
 	(mon1->e3 <= mon2->e3) && (mon1->e4 <= mon2->e4));
@@ -90,7 +90,7 @@ unsigned int divides(struct exponents *mon1, struct exponents *mon2)
  * Make sure the ordering on the first 4 is the same as in the 		*
  * function kleiner, and finally if these are the same, then the	*
  * valuation of the coefficients being smaller means smaller.		*/
-unsigned int smaller(struct exponents mon1, struct exponents mon2)
+static unsigned int smaller(struct exponents mon1, struct exponents mon2)
 {
 	if(d1*mon1.e1+d2*mon1.e2+d3*mon1.e3 !=
 	d1*mon2.e1+d2*mon2.e2+d3*mon2.e3) return((
@@ -112,7 +112,7 @@ unsigned int smaller(struct exponents mon1, struct exponents mon2)
 };
 
 /* Computes the coefficient terms needed to make the s_pol.	*/
-void s_pol_terms(struct term *a, struct term *b, struct term *fterm, struct term *gterm)
+static void s_pol_terms(struct term *a, struct term *b, struct term *fterm, struct term *gterm)
 {
 	if(fterm->n1 > gterm->n1) {
 		a->n1 = 0;
@@ -147,7 +147,7 @@ void s_pol_terms(struct term *a, struct term *b, struct term *fterm, struct term
 }
 
 /* Computes the s_pol.						*/
-struct polynomial s_pol(struct polynomial f, struct polynomial g)
+static struct polynomial s_pol(struct polynomial f, struct polynomial g)
 {
 	struct term a,b;
 	struct polynomial A,B;
@@ -168,7 +168,7 @@ struct polynomial s_pol(struct polynomial f, struct polynomial g)
 
 /* The copy paste method of programming.			*
  * Computes the base change vector of the s_pol.		*/
-struct base_change s_pol_BC(unsigned int i, unsigned int j)
+static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 {
 	struct base_change uit;
 	struct polynomial A,B;
@@ -258,8 +258,9 @@ struct base_change s_pol_BC(unsigned int i, unsigned int j)
 	return(uit);
 };
 
+#ifdef KIJKEN
 /* Test function. 						*/
-void test_base_change(struct base_change B, struct polynomial new)
+static void test_base_change(struct base_change B, struct polynomial new)
 {
 	unsigned int degree,i;
 	struct polynomial lijst[10];
@@ -291,7 +292,7 @@ void test_base_change(struct base_change B, struct polynomial new)
 }
 
 /* Outputs M.							*/
-void print_M(unsigned int mm, struct pair *MM)
+static void print_M(unsigned int mm, struct pair *MM)
 {
 	int i;
 	struct exponents tmp;
@@ -306,7 +307,7 @@ void print_M(unsigned int mm, struct pair *MM)
 };
 
 /* Outputs V.							*/
-void print_V(unsigned int mm)
+static void print_V(unsigned int mm)
 {
 	int i,j;
 
@@ -318,9 +319,10 @@ void print_V(unsigned int mm)
 	};
 	return;
 };
+#endif
 
 /* Outputs G.							*/
-unsigned int print_G(void)
+static unsigned int print_G(void)
 {
 	int i, s1=0, s2=0, s3=0, success;
 	struct exponents tmp;
@@ -357,7 +359,7 @@ unsigned int print_G(void)
 	return(success);
 };
 
-unsigned int test_G(void)
+static unsigned int test_G(void)
 {
 	int i, s1=0, s2=0, s3=0, success;
 	struct exponents tmp;
@@ -382,7 +384,7 @@ unsigned int test_G(void)
 };
 
 /* Silly sort should be OK since the length of G is at most maxlength. */
-void sort_G(void)
+static void sort_G(void)
 {
 	int i,j;
 	struct exponents *s_ee;
@@ -407,7 +409,7 @@ void sort_G(void)
 }
 
 
-unsigned int test_skip(struct pair try, struct exponents least)
+static unsigned int test_skip(struct pair try, struct exponents least)
 {
 	int k;
 

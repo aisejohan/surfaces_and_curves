@@ -41,7 +41,7 @@ mscalar **fmatrix;
 
 
 /* Takes the coefficients and frees aa. */
-void add_coefficients(struct polynomial **aa, int column)
+static void add_coefficients(struct polynomial **aa, int column)
 {
 	int row;
 	struct term *aaterm;
@@ -81,7 +81,7 @@ void add_coefficients(struct polynomial **aa, int column)
 	return;
 }
 
-void print_fmatrix(void)
+static void print_fmatrix(void)
 {
 	int i,j;
 	printf("[");
@@ -94,7 +94,7 @@ void print_fmatrix(void)
 	};
 	printf("]\n");
 	return;
-};	
+};
 
 int main() 
 {
