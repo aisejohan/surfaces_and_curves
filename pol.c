@@ -619,6 +619,16 @@ make_times_term_variant(struct term t, struct polynomial f)
 	return(uit);
 };
 
+static unsigned int nr_terms(struct term *aa)
+{
+	unsigned int na=0;
+	while(aa) {
+		na++;
+		aa = aa->next;
+	}
+	return(na);
+}
+
 /* Only clean up and do modulo modulus at the very end. */
 struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 {
@@ -632,7 +642,7 @@ struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 
 	if((!f.leading) || (!g.leading)) return(uit);
 
-	if (f.degree > g.degree) {
+	if (nr_terms(f.leading) > nr_terms(g.leading)) {
 		a = &g;
 		b = &f;
 	} else {
