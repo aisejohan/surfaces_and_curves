@@ -74,7 +74,7 @@ struct polynomial compute_delta(void)
 		tmpterm = tmpterm->next;
 	};
 	return(C);
-};
+}
 
 /* This functions checks flatness in degree degree.			*
  * Returns: 								*
@@ -311,7 +311,7 @@ int check_flatness(unsigned int degree)
 	free_scalar(tmp.c);
 	free_scalar(c);
 	return(goodcount);
-};
+}
 
 /* Finds the basis of terms in degree degree.			*
  * This function assumes the function check_flatness has been	*
@@ -382,7 +382,7 @@ struct term **find_basis(unsigned int degree, int blen)
 	};
 	free_scalar(tmp.c);
 	return(tt);
-};
+}
 
 struct polynomial **copy_pol_star(struct polynomial **bb)
 {
@@ -401,7 +401,7 @@ struct polynomial **copy_pol_star(struct polynomial **bb)
 		*uit[i] = copy_pol(*bb[i]);
 	};
 	return(uit);
-};
+}
 
 /* Splits up a polynomial into pieces.				*
  * Removes the tail of f, and sets f.leading=NULL		*/
@@ -440,7 +440,7 @@ struct polynomial **split_up(struct polynomial *f)
 		free(aa);
 	};
 	return(uit);
-};
+}
 
 /* Returns the product.						*
  * Does not modify f or g. 					*
@@ -486,7 +486,7 @@ struct polynomial **mult_split(struct polynomial **f, struct polynomial **g)
 		free(aa);
 	};		
 	return(uit);
-};
+}
 
 
 #ifdef KIJKEN
@@ -519,5 +519,5 @@ void test_split(struct polynomial **aa, struct polynomial orig)
 	printf("Here is the test result: \n");
 	print_pol(pol_add(*aa[0],orig));
 	return;
-};
+}
 #endif

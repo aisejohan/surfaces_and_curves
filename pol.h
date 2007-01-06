@@ -47,7 +47,7 @@ static inline int kleiner(struct term *mon1, struct term *mon2)
 	if(mon1->n3 != mon2->n3) return((mon1->n3 < mon2->n3));
 #endif
 	return(-1);
-};
+}
 
 void copy_term(struct term *mon1, struct term *mon2);
 void times_term(struct term t, struct polynomial f, struct polynomial *g);

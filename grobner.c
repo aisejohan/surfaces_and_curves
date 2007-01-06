@@ -38,7 +38,7 @@ static int deelbaar(struct term *mon1, struct term *mon2)
 		(mon1->n3 <= mon2->n3) &&
 		(mon1->n4 <= mon2->n4) &&
 		(valuation(mon1->c) <= valuation(mon2->c))));
-};
+}
 
 
 /****************************************************************
@@ -150,7 +150,7 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	free(ppp);
 	free_scalar(mon.c);
 	return(aa);
-};
+}
 #endif
 
 #ifdef MIXED_GROBNER
@@ -307,7 +307,7 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	free(ppp);
 	free_scalar(mon.c);
 	return(aa);
-};
+}
 #endif
 
 #ifdef NEW_GROBNER
@@ -444,7 +444,7 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	free(ppp);
 	free_scalar(mon.c);
 	return(aa);
-};
+}
 #endif
 
 /* ppp does not get changed */
@@ -503,4 +503,4 @@ zero_on_division(struct polynomial ppp, unsigned int ss, struct polynomial **vh)
 	free_tail(pp.leading);
 	free_scalar(mon.c);
 	return(1);
-};
+}

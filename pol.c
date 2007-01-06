@@ -44,7 +44,7 @@ void make_term(struct term **mon)
 	};
 	make_scalar((*mon)->c);
 	(*mon)->next=NULL;
-};
+}
 
 void make_pol(struct polynomial **f)
 {
@@ -60,7 +60,7 @@ void make_pol(struct polynomial **f)
 		exit(1);
 	};
 	(*f)->leading=NULL;
-};
+}
 
 /* Frees a term. */
 void free_term(struct term *mon)
@@ -74,7 +74,7 @@ void free_term(struct term *mon)
 	free_scalar(mon->c);
 	free(mon);
 	mon=NULL;
-};
+}
 
 /* Copies data not pointer.						*/
 /* sc_copy does allocation.						*/
@@ -85,7 +85,7 @@ void copy_term(struct term *mon1, struct term *mon2)
 	mon2->n2 = mon1->n2;
 	mon2->n3 = mon1->n3;
 	mon2->n4 = mon1->n4;
-};
+}
 
 /* This frees memory starting with mon.					*
  * It does not set mon=NULL. This means you will/might			*
@@ -99,7 +99,7 @@ void free_tail(struct term *mon)
 		mon = tmp;
 	};
 	return;
-};
+}
 
 /* Remove terms with zero coefficient from putative pol.	*
  * The result is a polynomial of the same degree as the input	*
@@ -122,7 +122,7 @@ void clean_pol(struct polynomial *pol)
 		};
 	};
 	return;
-};
+}
 
 /* Copies tail of pol.					*/
 void copy_tail(struct term *mon, struct term **ptrterm)
@@ -133,7 +133,7 @@ void copy_tail(struct term *mon, struct term **ptrterm)
 		ptrterm = &((*ptrterm)->next);
 		mon = mon->next;
 	};
-};
+}
 
 
 /* Copies a polynomial.					*/
@@ -145,7 +145,7 @@ struct polynomial copy_pol(struct polynomial f)
 	uit.degree = f.degree;
 	copy_tail(f.leading,&(uit.leading));
 	return(uit);
-};
+}
 
 
 
@@ -175,7 +175,7 @@ void print_pol(struct polynomial f)
 		fterm = fterm->next;
 	};
 	return;
-};
+}
 
 /* This function adds polynomials of the same degree	*
  * into a new polynomial structure: 			*
@@ -248,7 +248,7 @@ struct polynomial pol_add(struct polynomial f, struct polynomial g)
 	};
 	printf("Fall through! Cannot happen.");
 	exit(1);
-};
+}
 
 /* Almost the same as rep_pol_add:			*
  * 	replace f by (f+g)				*
@@ -333,7 +333,7 @@ void merge_add(struct polynomial *f, struct polynomial g)
 	};
 	printf("Fall through! Cannot happen.");
 	exit(1);
-};
+}
 
 
 /* Same as above but replace f by (f+g).		*
@@ -417,7 +417,7 @@ void rep_pol_add(struct polynomial *f, struct polynomial g)
 	};
 	printf("Fall through! Cannot happen.");
 	exit(1);
-};
+}
 
 /* Replaces f by the product (possibly null).		*/
 void times_int(int c, struct polynomial *f)
@@ -437,7 +437,7 @@ void times_int(int c, struct polynomial *f)
 		};
 	};
 	return;
-};
+}
 
 
 /* Replaces f by the product (possibly null).		*/
@@ -458,7 +458,7 @@ void times_scalar(mscalar c, struct polynomial *f)
 		};
 	};
 	return;
-};
+}
 
 /* This function assumes the data structures f and g	*
  * have the same length, and f is initialized, but	*
@@ -482,7 +482,7 @@ void times_term(struct term t, struct polynomial f, struct polynomial *g)
 		gterm = gterm->next;
 	};
 	return;
-};
+}
 
 
 /* Same as above but it creates and outputs the product. 	*
@@ -509,7 +509,7 @@ make_times_term(struct term t, struct polynomial f)
 		ptrterm = &((*ptrterm)->next);
 	};
 	return(uit);
-};
+}
 
 /* Do not compute reductions. */
 static void times_term_variant(struct term t, struct polynomial f, struct polynomial *g)
@@ -529,7 +529,7 @@ static void times_term_variant(struct term t, struct polynomial f, struct polyno
 		gterm = gterm->next;
 	};
 	return;
-};
+}
 
 /* We do not check for zero or reduce mod modulus. */
 static void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
@@ -591,7 +591,7 @@ static void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 			gterm = gterm->next;
 		};
 	};
-};
+}
 
 static struct polynomial
 make_times_term_variant(struct term t, struct polynomial f)
@@ -615,7 +615,7 @@ make_times_term_variant(struct term t, struct polynomial f)
 		ptrterm = &((*ptrterm)->next);
 	};
 	return(uit);
-};
+}
 
 static unsigned int nr_terms(struct term *aa)
 {
@@ -676,4 +676,4 @@ struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 	free_tail(tmppol.leading);
 
 	return(uit);
-};
+}
