@@ -94,7 +94,7 @@ static void print_fmatrix(void)
 	};
 	printf("]\n");
 	return;
-};
+}
 
 int main() 
 {
@@ -540,4 +540,4 @@ int main()
 		
 
 	return(0);
-};
+}

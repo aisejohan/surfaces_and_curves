@@ -130,7 +130,7 @@ if(aa[i]->leading) {
 
 	free_scalar(c);
 	return(fBC.bc4);
-};
+}
 
 #if 0
 /* This returns the complete reduction and destroys f.		*/
@@ -177,7 +177,7 @@ struct polynomial **all_the_way(struct polynomial *f)
 	};
 	
 	return(uit);
-};
+}
 #endif
 
 /* Deals with a split up polynomial and reduces all the		*
@@ -246,4 +246,4 @@ struct polynomial **all_the_way_split(struct polynomial **bb)
 	free(bb);
 	
 	return(aa);
-};
+}

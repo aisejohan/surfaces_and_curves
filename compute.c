@@ -57,7 +57,7 @@ static struct exponents take_exponents(struct polynomial f)
 	uit.e3 = f.leading->n3;
 	uit.e4 = (unsigned int) valuation(f.leading->c);
 	return(uit);
-};
+}
 
 /* Least common multiple.					*/
 static struct exponents lcm(struct exponents *mon1, struct exponents *mon2)
@@ -68,7 +68,7 @@ static struct exponents lcm(struct exponents *mon1, struct exponents *mon2)
 	uit.e3 = (mon1->e3 > mon2->e3) ? mon1->e3 : mon2->e3;
 	uit.e4 = (mon1->e4 > mon2->e4) ? mon1->e4 : mon2->e4;
 	return(uit);
-};
+}
 
 /* Rarely the case.							*/
 static unsigned int rel_prime(struct exponents *mon1, struct exponents *mon2)
@@ -78,13 +78,13 @@ static unsigned int rel_prime(struct exponents *mon1, struct exponents *mon2)
 	if((mon1->e3 > 0) && (mon2->e3 > 0)) return(0);
 	if((mon1->e4 > 0) && (mon2->e4 > 0)) return(0);
 	return(1);
-};
+}
 
 static unsigned int divides(struct exponents *mon1, struct exponents *mon2)
 {
 	return((mon1->e1 <= mon2->e1) && (mon1->e2 <= mon2->e2) && 
 	(mon1->e3 <= mon2->e3) && (mon1->e4 <= mon2->e4));
-};
+}
 
 /* Smaller degree means smaller. Otherwise:				*
  * Make sure the ordering on the first 4 is the same as in the 		*
@@ -109,7 +109,7 @@ static unsigned int smaller(struct exponents mon1, struct exponents mon2)
 	if(mon1.e4 != mon2.e4) return((mon1.e4 < mon2.e4));
 	/* Means equal so not smaller. 				*/
 	return(0);
-};
+}
 
 /* Computes the coefficient terms needed to make the s_pol.	*/
 static void s_pol_terms(struct term *a, struct term *b, struct term *fterm, struct term *gterm)
@@ -256,7 +256,7 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 	free_scalar(a.c);
 	free_scalar(b.c);
 	return(uit);
-};
+}
 
 #ifdef KIJKEN
 /* Test function. 						*/
@@ -304,7 +304,7 @@ static void print_M(unsigned int mm, struct pair *MM)
 		printf("\n");
 	};
 	return;
-};
+}
 
 /* Outputs V.							*/
 static void print_V(unsigned int mm)
@@ -318,7 +318,7 @@ static void print_V(unsigned int mm)
 		printf("\n");
 	};
 	return;
-};
+}
 #endif
 
 /* Outputs G.							*/
@@ -357,7 +357,7 @@ static unsigned int print_G(void)
 	};
 	success=s1+s2+s3;
 	return(success);
-};
+}
 
 static unsigned int test_G(void)
 {
@@ -381,7 +381,7 @@ static unsigned int test_G(void)
 	};
 	success=s1+s2+s3;
 	return(success);
-};
+}
 
 /* Silly sort should be OK since the length of G is at most maxlength. */
 static void sort_G(void)
@@ -432,7 +432,7 @@ static unsigned int test_skip(struct pair try, struct exponents least)
 		};
 	};
 	return(0);
-};
+}
 
 int setup(void)
 {
@@ -1093,4 +1093,4 @@ while((m>0) || (check == 1)) {
 
 	/* Success. */
 	return(0);
-};
+}

@@ -40,7 +40,7 @@ unsigned int ivaluation(int a)
 		uit++;
 	};
 	return(uit);
-};
+}
 
 void set_seed(unsigned int zaadje)
 {
@@ -63,7 +63,7 @@ void set_seed(unsigned int zaadje)
 	};
 	srand(willekeurig);
 	return;
-};
+}
 
 unsigned int count_sum(unsigned int degree)
 {
@@ -77,7 +77,7 @@ unsigned int count_sum(unsigned int degree)
 		};
 	};
 	return(count);
-};
+}
 
 void print_sum(unsigned int degree)
 {
@@ -91,7 +91,7 @@ void print_sum(unsigned int degree)
 	  };
 	};
 	return;
-};
+}
 
 /* Makes a random polynomial of degree degree.		*
  * The result may be the zero polynomial!		*/
@@ -172,7 +172,7 @@ printf("\n");
 printf("\n");
 #endif
 	return(uit);
-};
+}
 
 /* Counts the number of terms and verifies f is a polynomial.	*
  * Allows f to be the zero polynomial, warns if degree not 0.	*/
@@ -193,7 +193,7 @@ unsigned int number_terms(struct polynomial f)
 		fterm = fterm->next;
 	};
 	return(count);
-};
+}
 
 /* Frobenius operation by raising varaibles tot the	*
  * pth power.						*/
@@ -218,7 +218,7 @@ struct polynomial frobenius(struct polynomial f)
 		fterm = fterm->next;
 	};
 	return(uit);
-};
+}
 
 /* Ouputs the derivative. 					*
  * The result is nonsense if the degree of f is too low.	*/
@@ -293,7 +293,7 @@ struct polynomial deriv(struct polynomial f, unsigned int i)
 		exit(1);
 	};
 	exit(1);
-};
+}
 
 /* Same as above. Replaces f by the derivative. 		*
  * The result is nonsense if the degree of f is too low.	*/
@@ -361,4 +361,4 @@ void rep_deriv(struct polynomial *f, unsigned int i)
 		exit(1);
 	};
 	exit(1);
-};
+}
