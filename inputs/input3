@@ -1,0 +1,10 @@
+Coefficient of   z^3                     = b
+Coefficient of   y^1 * z^2               = 0
+Coefficient of   y^2 * z^1               = -1
+Coefficient of   y^3                     = 0
+Coefficient of   x^1 * z^2               = a
+Coefficient of   x^1 * y^1 * z^1         = 0
+Coefficient of   x^1 * y^2               = 0
+Coefficient of   x^2 * z^1               = 0
+Coefficient of   x^2 * y^1               = 0
+Coefficient of   x^3                     = 1
