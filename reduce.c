@@ -115,11 +115,14 @@ if(aa[i]->leading) {
 	/* Divide fBC.bci by j-1.		 	*/
 	k = 0;
 	i = j-1;
+	sc_one(c);
 	/* Note that j is not 1, so i is not 0.		*/
 	while(i % p == 0) {
 		i = i/p;
 		k++;
+		sc_imult_replace(p,c);
 	};
+	if (k > 0) times_scalar(c, &(fBC.bc5));
 	/* c becomes the inverse of i */
 	ito_sc(i,c);
 	sc_inv(c,c);
@@ -128,18 +131,14 @@ if(aa[i]->leading) {
 	times_scalar(c,&(fBC.bc2));
 	times_scalar(c,&(fBC.bc3));
 	times_scalar(c,&(fBC.bc4));
-	if (k > 0) {
-		div_p_pol(k,&(fBC.bc1));
-		div_p_pol(k,&(fBC.bc2));
-		div_p_pol(k,&(fBC.bc3));
-		div_p_pol(k,&(fBC.bc4));
-	}
 
 	/* Adding up to get the result. */	
 	merge_add(&(fBC.bc5), fBC.bc4);
 	merge_add(&(fBC.bc5), fBC.bc3);
 	merge_add(&(fBC.bc5), fBC.bc2);
 	merge_add(&(fBC.bc5), fBC.bc1);
+
+	if (k > 0) div_p_pol(k,&fBC.bc5);
 
 	free_scalar(c);
 	return(fBC.bc5);

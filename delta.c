@@ -400,7 +400,7 @@ struct polynomial **copy_pol_star(mscalar c, struct polynomial **bb)
 		uit[i] = NULL;
 		make_pol(&uit[i]);
 		*uit[i] = copy_pol(*bb[i]);
-		times_scalar(c,bb[i]);
+		times_scalar(c,uit[i]);
 	};
 	return(uit);
 }

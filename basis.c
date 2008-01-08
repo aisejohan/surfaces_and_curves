@@ -117,7 +117,7 @@ static void print_fmatrix(void)
 
 int main() 
 {
-	int i,j,k,retry;
+	int i,j,k,retry,extra;
 	int c;
 	mscalar cc;
 	struct term *aaterm;
@@ -129,6 +129,8 @@ int main()
 	T.leading = NULL;
 	Delta.leading = NULL;
 	aaterm = NULL;
+	make_scalar(cc);
+	extra=5;
 	
 #ifdef KIJKEN
 	printf("Debug is set! To unset do not define KIJKEN.\n");
@@ -314,10 +316,10 @@ int main()
 	 * This is the case i=0,j=3 of expansion in the file	*
 	 * short_explanation.					*/
 	sc_one(cc);
-	for(k=1;k<=5+3+0;k++) {
+	for(k=1;k<=extra+3+0;k++) {
 		sc_imult_replace(p,cc);
 	}
-	/* Note 5 extra powers of p for good luck. */
+	/* Note extra powers of p for good luck. */
 	/* Note (i+j-1 choose j-1) is 1 in this case. */
 	for(i=0;i+1<=blen3;i++) {
 		T.degree = 3*(p*d)-d1-d2-d3-d4;
@@ -337,10 +339,10 @@ int main()
 	/* This is the case i=0,j=2 of expansion in the file	*
 	 * short_explanation.					*/
 	sc_one(cc);
-	for(k=1;k<=5+3+0;k++) {
+	for(k=1;k<=extra+3+0;k++) {
 		sc_imult_replace(p,cc);
 	}
-	/* Note 5 extra powers of p for good luck. */
+	/* Note extra powers of p for good luck. */
 	/* Note (i+j-1 choose j-1) is 1 in this case. */
 	for(i=0;i+1<=blen2;i++) {
 		T.degree = 2*(p*d)-d1-d2-d3-d4;
@@ -360,10 +362,10 @@ int main()
 	/* This is the case i=0,j=1 of expansion in the file	*
 	 * short_explanation.					*/
 	sc_one(cc);
-	for(k=1;k<=5+3+0;k++) {
+	for(k=1;k<=extra+3+0;k++) {
 		sc_imult_replace(p,cc);
 	}
-	/* Note 5 extra powers of p for good luck. */
+	/* Note extra powers of p for good luck. */
 	/* Note (i+j-1 choose j-1) is 1 in this case. */
 	for(i=0;i+1<=blen1;i++) {
 		T.degree = p*d-d1-d2-d3-d4;
@@ -414,12 +416,12 @@ int main()
 		 * This is the case j=3,i=i of the file			*
 		 * short_explanation.					*/
 		sc_one(cc);
-		for(k=1;k<=5+3+i;k++) {
+		for(k=1;k<=extra+3+i;k++) {
 			sc_imult_replace(p,cc);
 		}
 		c=((i+1)*(i+2))/2;
 		sc_imult_replace(c,cc);
-		/* Note 5 extra powers of p for good luck. */
+		/* Note extra powers of p for good luck. */
 		/* Note (i+j-1 choose j-1) is (i+1)(i+2)/2 in this case. */
 		for(j=0;j+1<=blen3;j++) {
 			printf("Starting computing hh... "); fflush(stdout);
@@ -435,12 +437,12 @@ int main()
 		/* This is the case j=2,i=i of the file			*
 		 * short_explanation.					*/
 		sc_one(cc);
-		for(k=1;k<=5+3+i;k++) {
+		for(k=1;k<=extra+3+i;k++) {
 			sc_imult_replace(p,cc);
 		}
 		c=i+1;
 		sc_imult_replace(c,cc);
-		/* Note 5 extra powers of p for good luck. */
+		/* Note extra powers of p for good luck. */
 		/* Note (i+j-1 choose j-1) is (i+1) in this case. */
 		for(j=0;j+1<=blen2;j++) {
 			printf("Starting computing hh... "); fflush(stdout);
@@ -456,10 +458,10 @@ int main()
 		/* This is the case j=1,i=i of the file			*
 		 * short_explanation.					*/
 		sc_one(cc);
-		for(k=1;k<=5+3+i;k++) {
+		for(k=1;k<=extra+3+i;k++) {
 			sc_imult_replace(p,cc);
 		}
-		/* Note 5 extra powers of p for good luck. */
+		/* Note extra powers of p for good luck. */
 		/* Note (i+j-1 choose j-1) is 1 in this case. */
 		for(j=0;j+1<=blen1;j++) {
 			printf("Starting computing hh... "); fflush(stdout);
@@ -476,7 +478,7 @@ int main()
 	};
 	
 	print_fmatrix();
-	printf("This should be the matrix up to a factor %d^5.\n",p);
+	printf("This should be the matrix up to a factor %d^%d.\n",p,extra+1);
 
 	/************************************************
 	 * Neurotic freeing continues even now.		*

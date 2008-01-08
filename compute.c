@@ -426,7 +426,9 @@ static unsigned int test_G(void)
 	return(success);
 }
 
-/* Silly sort should be OK since the length of G is at most maxlength. */
+/* Silly sort should be OK since the length of G is at most maxlength.	*
+ * We sort the basis so that all the elements with high power of p	*
+ * in the leading coefficient come last.				*/
 static void sort_G(void)
 {
 	int i,j;
@@ -436,7 +438,7 @@ static void sort_G(void)
 
 	for(i = 0; i+1 <= G.len; i++) {
 		for(j = i+1; j+1 <= G.len; j++) {
-			if (smaller(*G.ee[j], *G.ee[i])) {
+			if ((G.ee[j]->e5 < G.ee[i]->e5) || ((G.ee[j]->e5 < G.ee[i]->e5) && (smaller(*G.ee[j], *G.ee[i])))) {
 				s_ee = G.ee[i];
 				s_bc = G.BC[i];
 				s_ff = G.ff[i];
