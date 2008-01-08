@@ -117,12 +117,14 @@ static void print_fmatrix(void)
 
 int main() 
 {
-	int i,j,k,retry,p_pow,precision=0;
+	int i,j,k,retry;
 	int c;
+	mscalar cc;
 	struct term *aaterm;
 	struct polynomial Delta;
 	struct polynomial T;
 	struct polynomial **aa, **bb, **dd, **hh;
+	struct polynomial ***hhh;
 	struct polynomial ***fbasis;
 	T.leading = NULL;
 	Delta.leading = NULL;
@@ -300,9 +302,23 @@ int main()
 		exit(1);
 	};
 
+	/* Initialize hhh. */
+	hhh = (struct polynomial ***)
+		malloc((blen1+blen2+blen3)*sizeof(struct polynomial **));
+	if(!hhh) {
+		perror("Malloc failed!");
+		exit(1);
+	};
+
 	/* Highest degree and term is first basis element. 	*
 	 * This is the case i=0,j=3 of expansion in the file	*
 	 * short_explanation.					*/
+	sc_one(cc);
+	for(k=1;k<=5+3+0;k++) {
+		sc_imult_replace(p,cc);
+	}
+	/* Note 5 extra powers of p for good luck. */
+	/* Note (i+j-1 choose j-1) is 1 in this case. */
 	for(i=0;i+1<=blen3;i++) {
 		T.degree = 3*(p*d)-d1-d2-d3-d4;
 		make_term(&T.leading);
@@ -313,28 +329,19 @@ int main()
 		T.leading->n4 = p*basis3[i]->n4 + p - 1;
 		T.leading->next = NULL;
 		fbasis[i] = split_up(&T);
-		bb = copy_pol_star(fbasis[i]);
+		bb = copy_pol_star(cc,fbasis[i]);
 		aa = all_the_way_split(bb);
-		/* Now aa[0] still has to be			*
-		 * 	multiplied by p^3, and			*
-		 * 	divided by p-parts of 3p-1,3p-2,...,3.	*
-		 * For all p just times p.			*/
-		times_int(p,aa[0]);
-		/* For aa[1] we 				*
-		 * 	mulitply by p^3				*
-		 * 	divide by p-parts of 3p-1,...,2		*
-		 * For p>=3 times p for p=2 times 1.		*/
-		if(p>2) times_int(p,aa[1]);
-		/* For aa[2] we					*
-		 * 	multiply by p^3				*
-		 * 	divide by p-parts of 3p-1,...,1.	*
-		 * For p>2 times p for p=2 times 1.		*/
-		if(p>2) times_int(p,aa[2]);
 		add_coefficients(aa,i);
 	};
 	
-	 /* This is the case i=0,j=2 of expansion in the file	*
-	  * short_explanation.					*/
+	/* This is the case i=0,j=2 of expansion in the file	*
+	 * short_explanation.					*/
+	sc_one(cc);
+	for(k=1;k<=5+3+0;k++) {
+		sc_imult_replace(p,cc);
+	}
+	/* Note 5 extra powers of p for good luck. */
+	/* Note (i+j-1 choose j-1) is 1 in this case. */
 	for(i=0;i+1<=blen2;i++) {
 		T.degree = 2*(p*d)-d1-d2-d3-d4;
 		make_term(&T.leading);
@@ -345,34 +352,19 @@ int main()
 		T.leading->n4 = p*basis2[i]->n4 + p - 1;
 		T.leading->next = NULL;
 		fbasis[blen3+i] = split_up(&T);
-		bb = copy_pol_star(fbasis[blen3+i]);
+		bb = copy_pol_star(cc,fbasis[blen3+i]);
 		aa = all_the_way_split(bb);
-		/* Now aa[0] still has to be			*
-		 * 	multiplied by p^3, and			*
-		 * 	divided by p-parts of 2p-1,2p-2,...,3.	*
-		 * For p>2 times p^2 for 2 times 8		*/
-		if(p>2) {
-			c = p*p;
-			times_int(c,aa[0]);
-		} else {
-			times_int(8,aa[0]);
-		};
-		/* For aa[1] we					*
-		 * 	multiply by p^3				*
-		 * 	divide by p-parts of 2p-1,...,2		*
-		 * For all we multiply by p^2.			*/
-		c = p*p;
-		times_int(c,aa[1]);
-		/* For aa[2] we					*
-		 * 	multiply by p^3				*
-		 * 	divide by p-parts of 2p-1,...,1.	*
-		 * For all p we multiply by p^2			*/
-		times_int(c,aa[2]);
 		add_coefficients(aa,blen3+i);
 	};
 
-	 /* This is the case i=0,j=1 of expansion in the file	*
+	/* This is the case i=0,j=1 of expansion in the file	*
 	 * short_explanation.					*/
+	sc_one(cc);
+	for(k=1;k<=5+3+0;k++) {
+		sc_imult_replace(p,cc);
+	}
+	/* Note 5 extra powers of p for good luck. */
+	/* Note (i+j-1 choose j-1) is 1 in this case. */
 	for(i=0;i+1<=blen1;i++) {
 		T.degree = p*d-d1-d2-d3-d4;
 		make_term(&T.leading);
@@ -383,24 +375,8 @@ int main()
 		T.leading->n4 = p*basis1[i]->n4 + p - 1;
 		T.leading->next = NULL;
 		fbasis[blen3+blen2+i] = split_up(&T);
-		bb = copy_pol_star(fbasis[blen3+blen2+i]);
+		bb = copy_pol_star(cc,fbasis[blen3+blen2+i]);
 		aa = all_the_way_split(bb);
-		/* Now aa[0] still has to be			*
-		 * 	multiplied by p^3, and			*
-		 * 	divided by p-parts of p-1,p-2,...,3.	*
-		 * For all p times p^3.				*/
-		c = p*(p*p);
-		times_int(c,aa[0]);
-		/* For aa[1] we					*
-		 * 	multiply by p^3				*
-		 * 	divide by p-parts of p-1,...,2		*
-		 * For all p we get p^3				*/
-		times_int(c,aa[1]);
-		/* For aa[2] we 				*
-		 * 	multiply by p^3				*
-		 * 	divide by p-parts of p-1,...,1		*
-		 * For all p we multiply by p^3			*/
-		times_int(c,aa[2]);
 		add_coefficients(aa,blen3+blen2+i);
 	};
 
@@ -437,253 +413,62 @@ int main()
 		/* Highest degree and term is first basis element. 	*
 		 * This is the case j=3,i=i of the file			*
 		 * short_explanation.					*/
+		sc_one(cc);
+		for(k=1;k<=5+3+i;k++) {
+			sc_imult_replace(p,cc);
+		}
+		c=((i+1)*(i+2))/2;
+		sc_imult_replace(c,cc);
+		/* Note 5 extra powers of p for good luck. */
+		/* Note (i+j-1 choose j-1) is (i+1)(i+2)/2 in this case. */
 		for(j=0;j+1<=blen3;j++) {
 			printf("Starting computing hh... "); fflush(stdout);
-			hh = mult_split(fbasis[j],bb);
+			aa = copy_pol_star(cc,fbasis[j]);
+			hh = mult_split(aa,bb);
 			printf("Done.\n");
 			printf("Starting computing aa... "); fflush(stdout);
 			aa = all_the_way_split(hh);
 			printf("Done.\n");
-			/* Now aa[0] still has to be			*
-			 * 	multiplied by p^3			*
-			 * 	multiplied by p^i			*
-			 * 	multiplied by (i+3-1 choose i)		*
-			 * 	divided by p-parts of (3+i)p-1,...,3.	*/
-			p_pow = 3+i;
-			c = ((i+1)*(i+2))/2;
-			while(c % p == 0) {
-				c = c/p;
-				p_pow++;
-			};
-			times_int(c,aa[0]);
-			for(k=(3+i)*p-1;k>=3;k--) {
-				p_pow -= ivaluation(k);
-			};
-			if(p_pow >= 0) {
-				for(k=1;k<=p_pow;k++) times_int(p,aa[0]);
-			} else {
-				printf("Here p_pow=%d.\n",p_pow);
-				if(p_pow < precision) precision = p_pow;
-				for(k=1;k<=-p_pow;k++) {
-					aaterm = aa[0]->leading;
-					while(aaterm) {
-						if(valuation(aaterm->c) > 0) {
-							div_p(aaterm->c);
-							aaterm = aaterm->next;
-						} else {
-							printf("FIXME!\n");
-							exit(1);
-						};
-					};
-				};
-			};
-			/* For aa[1] and aa[2] we
-			 * 	multiply by p^3
-			 * 	multiply by p^i
-			 * 	multiply by (i+3-1 choose 2)
-			 * 	divide by p-parts of (3+i)p-1,...,2	*/
-			times_int(c,aa[1]);
-			times_int(c,aa[2]);
-			p_pow -= ivaluation(2);
-			if(p_pow >= 0) {
-				for(k=1;k<=p_pow;k++) {
-					times_int(p,aa[1]);
-					times_int(p,aa[2]);
-				};
-			} else {
-				if(p_pow < precision) precision = p_pow;
-				printf("Here p_pow=%d.\n",p_pow);
-				for(k=1;k<=-p_pow;k++) {
-					aaterm = aa[1]->leading;
-					while(aaterm) {
-						if(valuation(aaterm->c) > 0) {
-							div_p(aaterm->c);
-							aaterm = aaterm->next;
-						} else {
-							printf("FIXME!\n");
-							exit(1);
-						};
-					};
-					aaterm = aa[2]->leading;
-					while(aaterm) {
-						if(valuation(aaterm->c) > 0) {
-							div_p(aaterm->c);
-							aaterm = aaterm->next;
-						} else {
-							printf("FIXME!\n");
-							exit(1);
-						};
-					};
-				};
-			};
 			add_coefficients(aa,j);
 		};	
 
 		/* This is the case j=2,i=i of the file			*
 		 * short_explanation.					*/
+		sc_one(cc);
+		for(k=1;k<=5+3+i;k++) {
+			sc_imult_replace(p,cc);
+		}
+		c=i+1;
+		sc_imult_replace(c,cc);
+		/* Note 5 extra powers of p for good luck. */
+		/* Note (i+j-1 choose j-1) is (i+1) in this case. */
 		for(j=0;j+1<=blen2;j++) {
 			printf("Starting computing hh... "); fflush(stdout);
-			hh = mult_split(fbasis[blen3+j],bb);
+			aa = copy_pol_star(cc,fbasis[blen3+j]);
+			hh = mult_split(aa,bb);
 			printf("Done.\n");
 			printf("Starting computing aa... "); fflush(stdout);
 			aa = all_the_way_split(hh);
 			printf("Done.\n");
-			/* Now aa[0] still has to be			*
-			 * 	multiplied by p^3			*
-			 * 	multiplied by p^i			*
-			 * 	multiplied by (2-1+i choose i) 		*
-			 * 	and divided by the p-parts of 		*
-			 * 		(2+i)p-1,...,3.			*/
-			p_pow = 3+i;
-			c = i+1;
-			while(c % p == 0) {
-				c = c/p;
-				p_pow++;
-			};
-			times_int(c,aa[0]);
-			for(k=(2+i)*p-1;k>=3;k--) {
-				p_pow -= ivaluation(k);
-			};
-			if(p_pow >= 0) {
-				for(k=1;k<=p_pow;k++) {
-					times_int(p,aa[0]);
-				};
-			} else {
-				if(p_pow < precision) precision = p_pow;
-				for(k=1;k<=-p_pow;k++) {
-					aaterm = aa[0]->leading;
-					while(aaterm) {
-						if(valuation(aaterm->c) > 0) {
-							div_p(aaterm->c);
-							aaterm = aaterm->next;
-						} else {
-							printf("FIXME!\n");
-							exit(1);
-						};
-					};
-				};
-			};
-			/* For aa[1] and aa[2] we			*
-			 * 	multiply by p^3				*
-			 * 	multiply by p^i				*
-			 * 	multiply by (2-1+i choose i)		*
-			 * 	and divde by p-parts of 		*
-			 * 		(2+i)p-1,...,2.			*/
-			times_int(c,aa[1]);
-			times_int(c,aa[2]);
-			p_pow -= ivaluation(2);
-			if(p_pow >= 0) {
-				for(k=1;k<=p_pow;k++) {
-					times_int(p,aa[1]);
-					times_int(p,aa[2]);
-				};
-			} else {
-				if(p_pow < precision) precision = p_pow;
-				for(k=1;k<=-p_pow;k++) {
-					aaterm =aa[1]->leading;
-					while(aaterm) {
-						if(valuation(aaterm->c) > 0) {
-							div_p(aaterm->c);
-							aaterm = aaterm->next;
-						} else {
-							printf("FIXME!\n");
-							exit(1);
-						};
-					};
-					aaterm =aa[2]->leading;
-					while(aaterm) {
-						if(valuation(aaterm->c) > 0) {
-							div_p(aaterm->c);
-							aaterm = aaterm->next;
-						} else {
-							printf("FIXME!\n");
-							exit(1);
-						};
-					};
-				};
-			};
 			add_coefficients(aa,blen3+j);
 		};
 
 		/* This is the case j=1,i=i of the file			*
 		 * short_explanation.					*/
+		sc_one(cc);
+		for(k=1;k<=5+3+i;k++) {
+			sc_imult_replace(p,cc);
+		}
+		/* Note 5 extra powers of p for good luck. */
+		/* Note (i+j-1 choose j-1) is 1 in this case. */
 		for(j=0;j+1<=blen1;j++) {
 			printf("Starting computing hh... "); fflush(stdout);
-			hh = mult_split(fbasis[blen3+blen2+j],bb);
+			aa = copy_pol_star(cc,fbasis[blen3+blen2+j]);
+			hh = mult_split(aa,bb);
 			printf("Done.\n");
 			printf("Starting computing aa... "); fflush(stdout);
 			aa = all_the_way_split(hh);
 			printf("Done.\n");
-			/* Now aa[0] still has to be			*
-			 * 	multiplied by p^3			*
-			 * 	multiplied by p^i			*
-			 * 	multiplied by (1-1+i choose i)=1	*
-			 * 	and divided by the p-parts of 		*
-			 * 	   (1+i)p-1,...,3.			*/
-			p_pow = 3+i;
-			c = 1;
-			times_int(c,aa[0]);
-			for(k=(1+i)*p-1;k>=3;k--) {
-				p_pow -= ivaluation(k);
-			};
-			if(p_pow >= 0) {
-				for(k=1;k<=p_pow;k++) {
-					times_int(p,aa[0]);
-				};
-			} else {
-				if(p_pow < precision) precision = p_pow;
-				for(k=1;k<=-p_pow;k++) {
-					aaterm = aa[0]->leading;
-					while(aaterm) {
-						if(valuation(aaterm->c) > 0) {
-							div_p(aaterm->c);
-							aaterm = aaterm->next;
-						} else {
-							printf("FIXME!\n");
-							exit(1);
-						};
-					};
-				};
-			};
-			/* For aa[1] and aa[2] we 			*
-			 * 	multiply by p^3				*
-			 * 	multiply by p^i				*
-			 * 	multiply by (1-1+i choose i)=1		*
-			 * 	divide by p-parts of 			*
-			 * 		(1+i)p-1,...,2.			*/
-			times_int(c,aa[1]);
-			times_int(c,aa[2]);
-			p_pow -= ivaluation(2);
-			if(p_pow >= 0) {
-				for(k=1;k<=p_pow;k++) {
-					times_int(p,aa[1]);
-					times_int(p,aa[2]);
-				};
-			} else {
-				if(p_pow < precision) precision = p_pow;
-				for(k=1;k<=-p_pow;k++) {
-					aaterm = aa[1]->leading;
-					while(aaterm) {
-						if(valuation(aaterm->c) > 0) {
-							div_p(aaterm->c);
-							aaterm = aaterm->next;
-						} else {
-							printf("FIXME!\n");
-							exit(1);
-						};
-					};
-					aaterm = aa[2]->leading;
-					while(aaterm) {
-						if(valuation(aaterm->c) > 0) {
-							div_p(aaterm->c);
-							aaterm = aaterm->next;
-						} else {
-							printf("FIXME!\n");
-							exit(1);
-						};
-					};
-				};
-			};
 			add_coefficients(aa,blen3+blen2+j);
 		};
 
@@ -691,12 +476,13 @@ int main()
 	};
 	
 	print_fmatrix();
-	printf("The variable precision is %d.\n",precision);
+	printf("This should be the matrix up to a factor %d^5.\n",p);
 
 	/************************************************
 	 * Neurotic freeing continues even now.		*
 	 * The reason for this is that it makes 	*
-	 * it easier to detect memory leaks.		*/
+	 * it easier to detect memory leaks.		*
+	 ************************************************/
 	for(j=0;j<=q*p;j++) {
 		free_tail(bb[j]->leading);
 		free(bb[j]);

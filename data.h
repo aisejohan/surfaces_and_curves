@@ -41,16 +41,16 @@
  * or
  * 	REVLEX_ORDER + OLD_GROBNER
  * can be much faster. */
-#define MIXED_GROBNER
+#define NEW_GROBNER
 
-#define d1	8
-#define d2	9
-#define d3	17
-#define d4	21
-#define d	72
-#define p	5
-#define r	20		/* Exponent. */
-#define q	5		/* Largest power of Delta. */
+#define d1	1
+#define d2	1
+#define d3	1
+#define d4	1
+#define d	5
+#define p	3
+#define r	40		/* Exponent. */
+#define q	7		/* Largest power of Delta. */
 
 #define maxlength	256
 

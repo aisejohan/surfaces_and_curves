@@ -384,7 +384,8 @@ struct term **find_basis(unsigned int degree, int blen)
 	return(tt);
 }
 
-struct polynomial **copy_pol_star(struct polynomial **bb)
+/* Scalar multiple of a split polynomial. */
+struct polynomial **copy_pol_star(mscalar c, struct polynomial **bb)
 {
 	struct polynomial **uit;
 	int i,len;
@@ -399,6 +400,7 @@ struct polynomial **copy_pol_star(struct polynomial **bb)
 		uit[i] = NULL;
 		make_pol(&uit[i]);
 		*uit[i] = copy_pol(*bb[i]);
+		times_scalar(c,bb[i]);
 	};
 	return(uit);
 }
@@ -441,6 +443,31 @@ struct polynomial **split_up(struct polynomial *f)
 	};
 	return(uit);
 }
+
+/* Replaces f by f+g. Destroys the contents of g.
+ * It could happen that the result has leading term 0. */
+void merge_add_split(struct polynomial **f, struct polynomial **g)
+{
+	int i,flen,glen;
+	struct polynomial **tussen;
+
+	flen = 1 + f[0]->degree/d;
+	glen = 1 + g[0]->degree/d;
+
+	if (flen < glen) {
+		tussen = g;
+		g = f;
+		f = tussen;
+	}
+
+	for(i=0;i+1<=glen;i++) {
+		merge_add(f[i+flen-glen],*(g[i]));
+		free(g[i]);
+	}
+
+	return;
+}
+
 
 /* Returns the product.						*
  * Does not modify f or g. 					*

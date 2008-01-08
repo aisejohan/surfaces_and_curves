@@ -21,6 +21,7 @@
  *
  *									*/
 void times_scalar(mscalar c, struct polynomial *f);
+void div_p_pol(int k, struct polynomial *f);
 void times_int(int c, struct polynomial *f);
 void clean_pol(struct polynomial *pol);
 void make_term(struct term **mon);

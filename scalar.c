@@ -53,7 +53,7 @@ void printmscalar(mscalar a)
 	};
 }
 
-#ifdef PROFILER
+#ifdef EPROFILER
 void make_scalar(mscalar a)
 {
 	mpz_init(a);

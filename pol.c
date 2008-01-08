@@ -460,6 +460,27 @@ void times_scalar(mscalar c, struct polynomial *f)
 	return;
 }
 
+/* Divides by p^k if possible. */
+void div_p_pol(int k, struct polynomial *f)
+{
+	int i;
+	struct term *aaterm;
+
+	aaterm = f->leading;
+	while(aaterm) {
+		if(valuation(aaterm->c) >= k) {
+			for(i=1;i<=k;i++) {
+				div_p(aaterm->c);
+			}
+			aaterm = aaterm->next;
+		} else {
+			printf("FIXME!\n");
+			exit(1);
+		};
+	};
+	return;
+}
+
 /* This function assumes the data structures f and g	*
  * have the same length, and f is initialized, but	*
  * g need not be. The result t*f is put into g, but	*

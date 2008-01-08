@@ -29,7 +29,7 @@ void setup_scalars(void);
 
 void printmscalar(mscalar a);
 
-#ifndef PROFILER
+#ifndef EPROFILER
 #define make_scalar(a)		mpz_init(a)
 #define free_scalar(a)		mpz_clear(a)
 #else

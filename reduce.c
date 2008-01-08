@@ -112,14 +112,13 @@ if(aa[i]->leading) {
 	rep_deriv(&(fBC.bc3),3);
 	rep_deriv(&(fBC.bc4),4);
 	
-	/* Divide fBC.bci by p-primary part of j-1. 	*
-	 * and multiply fBC.bc5 by p-part of j-1.	*/
-	k = 1;
+	/* Divide fBC.bci by j-1.		 	*/
+	k = 0;
 	i = j-1;
 	/* Note that j is not 1, so i is not 0.		*/
 	while(i % p == 0) {
 		i = i/p;
-		k = p*k;
+		k++;
 	};
 	/* c becomes the inverse of i */
 	ito_sc(i,c);
@@ -129,9 +128,12 @@ if(aa[i]->leading) {
 	times_scalar(c,&(fBC.bc2));
 	times_scalar(c,&(fBC.bc3));
 	times_scalar(c,&(fBC.bc4));
-
-	ito_sc(k,c);
-	times_scalar(c,&(fBC.bc5));
+	if (k > 0) {
+		div_p_pol(k,&(fBC.bc1));
+		div_p_pol(k,&(fBC.bc2));
+		div_p_pol(k,&(fBC.bc3));
+		div_p_pol(k,&(fBC.bc4));
+	}
 
 	/* Adding up to get the result. */	
 	merge_add(&(fBC.bc5), fBC.bc4);
@@ -207,7 +209,7 @@ struct polynomial **all_the_way(struct polynomial *f)
  * ALTERNATIVE VERSION.						*/
 struct polynomial **all_the_way_split(struct polynomial **bb)
 {
-	int i,j,ii,jj,k,c,tel;
+	int j,ii,jj,tel;
 	struct polynomial T;
 	struct polynomial **aa,**cc;
 	
@@ -238,25 +240,11 @@ struct polynomial **all_the_way_split(struct polynomial **bb)
 		 * so j=jj-ii 		*/
 		j = (bb[ii]->degree+d1+d2+d3+d4)/d;
 
-		/* In the one_step_down function (inside all_the_way)	*
-		 * we multiply by the correct factor up to factors of	*
-		 * p, so we have to correct for that here. We do this	*
-		 * stupidly, mimicking what happens in one_down so we 	*
-		 * don't make an error.					*
-		 * Note that k is not cumulative (reset back to 1)	*/
 		if(j>1) {
 			/* This will have degree (j-1)d - s	*/
 			T = one_step_down(bb[ii]);
 			cc = split_up(&T);
-			i = j-1;
-			k = 1;
-			while(i % p == 0) {
-				i = i/p;
-				k = p*k;
-			};
-			c = k;
 			for(tel=1;tel+ii+1<=jj;tel++){
-				times_int(c,bb[ii+tel]);
 				merge_add(bb[ii+tel],*cc[tel-1]);
 				free(cc[tel-1]);
 			};
