@@ -427,6 +427,7 @@ int main()
 			printf("Starting computing hh... "); fflush(stdout);
 			aa = copy_pol_star(cc,fbasis[j]);
 			hh = mult_split(aa,bb);
+			free_star(aa);
 			printf("Done.\n");
 			printf("Starting computing aa... "); fflush(stdout);
 			aa = all_the_way_split(hh);
@@ -448,6 +449,7 @@ int main()
 			printf("Starting computing hh... "); fflush(stdout);
 			aa = copy_pol_star(cc,fbasis[blen3+j]);
 			hh = mult_split(aa,bb);
+			free_star(aa);
 			printf("Done.\n");
 			printf("Starting computing aa... "); fflush(stdout);
 			aa = all_the_way_split(hh);
@@ -467,6 +469,7 @@ int main()
 			printf("Starting computing hh... "); fflush(stdout);
 			aa = copy_pol_star(cc,fbasis[blen3+blen2+j]);
 			hh = mult_split(aa,bb);
+			free_star(aa);
 			printf("Done.\n");
 			printf("Starting computing aa... "); fflush(stdout);
 			aa = all_the_way_split(hh);
@@ -548,10 +551,11 @@ int main()
 		free(fmatrix[i]);
 	};
 	free(fmatrix);
+	free_scalar(cc);
 	/********************************************************
 	 * End Neurotic freeing. 				*
 	 ********************************************************/
-		
+
 
 	return(0);
 }

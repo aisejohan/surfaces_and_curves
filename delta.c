@@ -405,6 +405,19 @@ struct polynomial **copy_pol_star(mscalar c, struct polynomial **bb)
 	return(uit);
 }
 
+/* Scalar multiple of a split polynomial. */
+void free_star(struct polynomial **bb)
+{
+	int i,len;
+
+	len = 1 + bb[0]->degree/d;
+	for(i=0;i+1<=len;i++) {
+		free_tail(bb[i]->leading);
+		free(bb[i]);
+	}
+	return;
+}
+
 /* Splits up a polynomial into pieces.				*
  * Removes the tail of f, and sets f.leading=NULL		*/
 struct polynomial **split_up(struct polynomial *f)
