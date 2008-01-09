@@ -387,8 +387,8 @@ int main()
 		/* Compute next version of bb which is
 		 * 	p^i Delta^i p^3 (x1...x4)^(p-1) 
 		 * in split form. */
-		printf("Start computing %d^(3+%d) Delta^%d"
-			"(x1x2x3x4)^(%d-1)... ",p,i,i,p);
+		printf("Start computing %d^%d Delta^%d"
+			" (x1x2x3x4)^%d... ",p,3+i,i,p-1);
 		fflush(stdout);
 		hh = mult_split(dd,bb);
 		free_star(bb);
@@ -429,8 +429,9 @@ int main()
 		if (j+1 <= blen3) c=0;
 		else if (j+1 <= blen3+blen2) c=1;
 		else c=2;
-		printf("%d ",j+1); fflush(stdout);
+		printf("%d",j+1); fflush(stdout);
 		hh = mult_split(fbasis[j],hhh[c]);
+		printf(" "); fflush(stdout);
 		aa = all_the_way_split(hh);
 		add_coefficients(aa,j);
 	}
