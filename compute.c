@@ -438,7 +438,15 @@ static void sort_G(void)
 
 	for(i = 0; i+1 <= G.len; i++) {
 		for(j = i+1; j+1 <= G.len; j++) {
-			if ((G.ee[j]->e5 < G.ee[i]->e5) || ((G.ee[j]->e5 < G.ee[i]->e5) && (smaller(*G.ee[j], *G.ee[i])))) {
+			if (
+/* Test for p-adic valuation of leading coefficient. */
+(G.ee[j]->e5 < G.ee[i]->e5) ||
+/* Test for degree of leading term. */
+((G.ee[j]->e5 == G.ee[i]->e5) && (G.ff[j]->degree < G.ff[i]->degree)) ||
+/* Test for ordering. */
+((G.ee[j]->e5 == G.ee[i]->e5) && (G.ff[j]->degree == G.ff[i]->degree) &&
+((smaller(*G.ee[i],*G.ee[j]))))
+			) {
 				s_ee = G.ee[i];
 				s_bc = G.BC[i];
 				s_ff = G.ff[i];
