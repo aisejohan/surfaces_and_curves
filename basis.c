@@ -306,166 +306,132 @@ int main()
 
 	/* Initialize hhh. */
 	hhh = (struct polynomial ***)
-		malloc((blen1+blen2+blen3)*sizeof(struct polynomial **));
+		malloc(3*sizeof(struct polynomial **));
 	if(!hhh) {
 		perror("Malloc failed!");
 		exit(1);
 	};
 
+	/* Initialize bb which is going to be equal to
+	 * 	p^i Delta^i p^3 (x1...x4)^(p-1)
+	 * at various stages. */
+	T.degree = (p-1)*(d1+d2+d3+d4);
+	make_term(&T.leading);
+	sc_one(T.leading->c);
+	for(k=1;k<=extra+3+0;k++) { /* Note extra powers of p. */
+		sc_imult_replace(p,T.leading->c);
+	}
+	T.leading->n1 = p-1;
+	T.leading->n2 = p-1;
+	T.leading->n3 = p-1;
+	T.leading->n4 = p-1;
+	T.leading->next = NULL;
+	bb = split_up(&T);
+
 	/* Highest degree and term is first basis element. 	*
 	 * This is the case i=0,j=3 of expansion in the file	*
-	 * short_explanation.					*/
+	 * short_explanation.					*
+	 * Note (i+j-1 choose j-1) is 1 in this case. 		*/
 	sc_one(cc);
-	for(k=1;k<=extra+3+0;k++) {
-		sc_imult_replace(p,cc);
-	}
-	/* Note extra powers of p for good luck. */
-	/* Note (i+j-1 choose j-1) is 1 in this case. */
+	hhh[0] = copy_pol_star(cc,bb);
 	for(i=0;i+1<=blen3;i++) {
-		T.degree = 3*(p*d)-d1-d2-d3-d4;
+		T.degree = p*(3*d-d1-d2-d3-d4);
 		make_term(&T.leading);
 		sc_one(T.leading->c);
-		T.leading->n1 = p*basis3[i]->n1 + p - 1;
-		T.leading->n2 = p*basis3[i]->n2 + p - 1;
-		T.leading->n3 = p*basis3[i]->n3 + p - 1;
-		T.leading->n4 = p*basis3[i]->n4 + p - 1;
+		T.leading->n1 = p*basis3[i]->n1;
+		T.leading->n2 = p*basis3[i]->n2;
+		T.leading->n3 = p*basis3[i]->n3;
+		T.leading->n4 = p*basis3[i]->n4;
 		T.leading->next = NULL;
 		fbasis[i] = split_up(&T);
-		hhh[i] = copy_pol_star(cc,fbasis[i]);
 	};
 	
 	/* This is the case i=0,j=2 of expansion in the file	*
-	 * short_explanation.					*/
+	 * short_explanation.					*
+	 * Note (i+j-1 choose j-1) is 1 in this case. 		*/
 	sc_one(cc);
-	for(k=1;k<=extra+3+0;k++) {
-		sc_imult_replace(p,cc);
-	}
-	/* Note extra powers of p for good luck. */
-	/* Note (i+j-1 choose j-1) is 1 in this case. */
+	hhh[1] = copy_pol_star(cc,bb);
 	for(i=0;i+1<=blen2;i++) {
-		T.degree = 2*(p*d)-d1-d2-d3-d4;
+		T.degree = p*(2*d-d1-d2-d3-d4);
 		make_term(&T.leading);
 		sc_one(T.leading->c);
-		T.leading->n1 = p*basis2[i]->n1 + p - 1;
-		T.leading->n2 = p*basis2[i]->n2 + p - 1;
-		T.leading->n3 = p*basis2[i]->n3 + p - 1;
-		T.leading->n4 = p*basis2[i]->n4 + p - 1;
+		T.leading->n1 = p*basis2[i]->n1;
+		T.leading->n2 = p*basis2[i]->n2;
+		T.leading->n3 = p*basis2[i]->n3;
+		T.leading->n4 = p*basis2[i]->n4;
 		T.leading->next = NULL;
 		fbasis[blen3+i] = split_up(&T);
-		hhh[blen3+i] = copy_pol_star(cc,fbasis[blen3+i]);
 	};
 
 	/* This is the case i=0,j=1 of expansion in the file	*
-	 * short_explanation.					*/
+	 * short_explanation.					*
+	 * Note (i+j-1 choose j-1) is 1 in this case. 		*/
 	sc_one(cc);
-	for(k=1;k<=extra+3+0;k++) {
-		sc_imult_replace(p,cc);
-	}
-	/* Note extra powers of p for good luck. */
-	/* Note (i+j-1 choose j-1) is 1 in this case. */
+	hhh[2] = copy_pol_star(cc,bb);
 	for(i=0;i+1<=blen1;i++) {
-		T.degree = p*d-d1-d2-d3-d4;
+		T.degree = p*(d-d1-d2-d3-d4);
 		make_term(&T.leading);
 		sc_one(T.leading->c);
-		T.leading->n1 = p*basis1[i]->n1 + p - 1;
-		T.leading->n2 = p*basis1[i]->n2 + p - 1;
-		T.leading->n3 = p*basis1[i]->n3 + p - 1;
-		T.leading->n4 = p*basis1[i]->n4 + p - 1;
+		T.leading->n1 = p*basis1[i]->n1;
+		T.leading->n2 = p*basis1[i]->n2;
+		T.leading->n3 = p*basis1[i]->n3;
+		T.leading->n4 = p*basis1[i]->n4;
 		T.leading->next = NULL;
 		fbasis[blen3+blen2+i] = split_up(&T);
-		hhh[blen3+blen2+i] = copy_pol_star(cc,fbasis[blen3+blen2+i]);
 	};
 
+	/* This actually computes p*Delta */
 	Delta = compute_delta();
 	dd = split_up(&Delta);
-	bb = (struct polynomial **)malloc(sizeof(struct polynomial *));
-	if(!bb) {
-		perror("Malloc failed!");
-		exit(1);
-	};
-	bb[0] = NULL;
-	make_pol(&bb[0]);
-	bb[0]->degree = 0;
-	make_term(&bb[0]->leading);
-	sc_one(bb[0]->leading->c);
-	bb[0]->leading->n1 = 0;
-	bb[0]->leading->n2 = 0;
-	bb[0]->leading->n3 = 0;
-	bb[0]->leading->n4 = 0;
-	bb[0]->leading->next = NULL;
 	for(i=1;i<=q;i++) {
-		/* Compute Delta^i in split form. */
-		printf("Start computing Delta^%d... ",i); fflush(stdout);
+		/* Compute next version of bb which is
+		 * 	p^i Delta^i p^3 (x1...x4)^(p-1) 
+		 * in split form. */
+		printf("Start computing %d^(3+%d) Delta^%d"
+			"(x1x2x3x4)^(%d-1)... ",p,i,i,p);
+		fflush(stdout);
 		hh = mult_split(dd,bb);
-		for(j=0;j<=(i-1)*p;j++) {
-			free_tail(bb[j]->leading);
-			free(bb[j]);
-		};
+		free_star(bb);
 		free(bb);
 		bb = hh;
 		hh = NULL;
 		printf("Done.\n");
-		printf("Start computing hh.\n"); fflush(stdout);
 
 		/* Highest degree and term is first basis element. 	*
 		 * This is the case j=3,i=i of the file			*
 		 * short_explanation.					*/
 		sc_one(cc);
-		for(k=1;k<=extra+3+i;k++) {
-			sc_imult_replace(p,cc);
-		}
 		c=((i+1)*(i+2))/2;
 		sc_imult_replace(c,cc);
-		/* Note extra powers of p for good luck. */
 		/* Note (i+j-1 choose j-1) is (i+1)(i+2)/2 in this case. */
-		for(j=0;j+1<=blen3;j++) {
-			printf("%d ", j+1); fflush(stdout);
-			aa = copy_pol_star(cc,fbasis[j]);
-			hh = mult_split(aa,bb);
-			free_star(aa);
-			merge_add_split(&(hhh[j]),hh);
-		};	
+		aa = copy_pol_star(cc,bb);
+		merge_add_split(&(hhh[0]),aa);	
 
 		/* This is the case j=2,i=i of the file			*
 		 * short_explanation.					*/
 		sc_one(cc);
-		for(k=1;k<=extra+3+i;k++) {
-			sc_imult_replace(p,cc);
-		}
 		c=i+1;
 		sc_imult_replace(c,cc);
-		/* Note extra powers of p for good luck. */
 		/* Note (i+j-1 choose j-1) is (i+1) in this case. */
-		for(j=0;j+1<=blen2;j++) {
-			printf("%d ",blen3+j+1); fflush(stdout);
-			aa = copy_pol_star(cc,fbasis[blen3+j]);
-			hh = mult_split(aa,bb);
-			free_star(aa);
-			merge_add_split(&(hhh[blen3+j]),hh);
-		};
+		aa = copy_pol_star(cc,bb);
+		merge_add_split(&(hhh[1]),aa);
 
 		/* This is the case j=1,i=i of the file			*
 		 * short_explanation.					*/
 		sc_one(cc);
-		for(k=1;k<=extra+3+i;k++) {
-			sc_imult_replace(p,cc);
-		}
-		/* Note extra powers of p for good luck. */
 		/* Note (i+j-1 choose j-1) is 1 in this case. */
-		for(j=0;j+1<=blen1;j++) {
-			printf("%d ",blen3+blen2+j+1); fflush(stdout);
-			aa = copy_pol_star(cc,fbasis[blen3+blen2+j]);
-			hh = mult_split(aa,bb);
-			free_star(aa);
-			merge_add_split(&(hhh[blen3+blen2+j]),hh);
-		}
-		printf("\n");
+		aa = copy_pol_star(cc,bb);
+		merge_add_split(&(hhh[2]),aa);
 	}
 
 	printf("Start computing aa.\n");
 	for(j=0;j+1<=blen3+blen2+blen1;j++) {
+		if (j+1 <= blen3) c=0;
+		else if (j+1 <= blen3+blen2) c=1;
+		else c=2;
 		printf("%d ",j+1); fflush(stdout);
-		aa = all_the_way_split(hhh[j]);
+		hh = mult_split(fbasis[j],hhh[c]);
+		aa = all_the_way_split(hh);
 		add_coefficients(aa,j);
 	}
 	printf("\n");

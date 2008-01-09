@@ -31,14 +31,11 @@
 #include "grobner.h"
 #include "compute.h"
 
-/* Computes Delta. The division by p will not be correct unless	*
- * p^r is large enough.	If p^r is not large enough the result	*
- * will be correct modulo p^(r-1).		 		*/
-/* This will only be run once!					*/
+/* Computes p*Delta.							*
+ * This will only be run once!						*/
 struct polynomial compute_delta(void)
 {
 	int i;
-	struct term *tmpterm;
 	struct polynomial A,B,C;
 	A.leading = NULL;
 	B.leading = NULL;
@@ -68,11 +65,6 @@ struct polynomial compute_delta(void)
 	free_tail(A.leading);
 	free_tail(B.leading);
 	
-	tmpterm = C.leading;
-	while(tmpterm) {
-		div_p(tmpterm->c); /* Stupid lift. */
-		tmpterm = tmpterm->next;
-	};
 	return(C);
 }
 
@@ -499,7 +491,7 @@ struct polynomial **mult_split(struct polynomial **f, struct polynomial **g)
 
 	flen = 1 + f[0]->degree/d;
 	glen = 1 + g[0]->degree/d;
-	uitlen = flen + glen - 1;
+	uitlen = 1 + (f[0]->degree + g[0]->degree)/d;
 	uit=(struct polynomial **)malloc(uitlen*sizeof(struct polynomial *));
 	if(!uit) {
 		perror("Malloc failed!");
