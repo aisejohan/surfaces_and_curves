@@ -506,7 +506,6 @@ int setup(void)
 	NIKS.leading=NULL;
 	SS.leading=NULL;
 	T.leading=NULL;
-	make_scalar(c);
 
 	/* Unit polynomial */
 	EEN.degree = 0;
@@ -648,6 +647,7 @@ int setup(void)
 	G.len = 5;
 
 	/* Deal with leading coefficients being divisible by p! */
+	make_scalar(c);
 	i=0;
 	while(i+1<=G.len) {
 		if(G.ee[i]->e5 > 0) {

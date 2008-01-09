@@ -441,7 +441,7 @@ int main()
 	for(i=0;i+1<=blen1+blen2+blen3;i++) {
 		for(j=0;j+1<=blen1+blen2+blen3;j++) {
 			c=valuation(fmatrix[i][j]);
-			if (c < k) k = c;
+			if (!sc_is_zero(fmatrix[i][j]) && (c < k)) k = c;
 		}
 	}
 	for(i=0;i+1<=blen1+blen2+blen3;i++) {
@@ -463,16 +463,12 @@ int main()
 	 * The reason for this is that it makes 	*
 	 * it easier to detect memory leaks.		*
 	 ************************************************/
-	for(j=0;j<=q*p;j++) {
-		free_tail(bb[j]->leading);
-		free(bb[j]);
-	};
-	free(bb);
-	for(j=0;j<=p;j++) {
-		free_tail(dd[j]->leading);
-		free(dd[j]);
-	}
-	free(dd);
+	free_star(bb); free(bb);
+	free_star(dd); free(dd);
+	free_star(hhh[0]); free(hhh[0]);
+	free_star(hhh[1]); free(hhh[1]);
+	free_star(hhh[2]); free(hhh[2]);
+	free(hhh);
 	/* Free G and myf. */
 	free_tail(myf.leading);
 	for(i=0;i+1<=G.len;i++) {
