@@ -395,7 +395,7 @@ int main()
 	bb[0]->leading->next = NULL;
 	for(i=1;i<=q;i++) {
 		/* Compute Delta^i in split form. */
-		printf("Starting computing Delta^%d... ",i); fflush(stdout);
+		printf("Start computing Delta^%d... ",i); fflush(stdout);
 		hh = mult_split(dd,bb);
 		for(j=0;j<=(i-1)*p;j++) {
 			free_tail(bb[j]->leading);
@@ -405,6 +405,7 @@ int main()
 		bb = hh;
 		hh = NULL;
 		printf("Done.\n");
+		printf("Start computing hh.\n"); fflush(stdout);
 
 		/* Highest degree and term is first basis element. 	*
 		 * This is the case j=3,i=i of the file			*
@@ -418,11 +419,10 @@ int main()
 		/* Note extra powers of p for good luck. */
 		/* Note (i+j-1 choose j-1) is (i+1)(i+2)/2 in this case. */
 		for(j=0;j+1<=blen3;j++) {
-			printf("Starting computing hh... "); fflush(stdout);
+			printf("%d ", j+1); fflush(stdout);
 			aa = copy_pol_star(cc,fbasis[j]);
 			hh = mult_split(aa,bb);
 			free_star(aa);
-			printf("Done.\n");
 			merge_add_split(&(hhh[j]),hh);
 		};	
 
@@ -437,11 +437,10 @@ int main()
 		/* Note extra powers of p for good luck. */
 		/* Note (i+j-1 choose j-1) is (i+1) in this case. */
 		for(j=0;j+1<=blen2;j++) {
-			printf("Starting computing hh... "); fflush(stdout);
+			printf("%d ",blen3+j+1); fflush(stdout);
 			aa = copy_pol_star(cc,fbasis[blen3+j]);
 			hh = mult_split(aa,bb);
 			free_star(aa);
-			printf("Done.\n");
 			merge_add_split(&(hhh[blen3+j]),hh);
 		};
 
@@ -454,34 +453,35 @@ int main()
 		/* Note extra powers of p for good luck. */
 		/* Note (i+j-1 choose j-1) is 1 in this case. */
 		for(j=0;j+1<=blen1;j++) {
-			printf("Starting computing hh... "); fflush(stdout);
+			printf("%d ",blen3+blen2+j+1); fflush(stdout);
 			aa = copy_pol_star(cc,fbasis[blen3+blen2+j]);
 			hh = mult_split(aa,bb);
 			free_star(aa);
-			printf("Done.\n");
 			merge_add_split(&(hhh[blen3+blen2+j]),hh);
-		};
-	};
+		}
+		printf("\n");
+	}
 
+	printf("Start computing aa.\n");
 	for(j=0;j+1<=blen3+blen2+blen1;j++) {
-		printf("Starting computing aa for j=%d... ",j); fflush(stdout);
+		printf("%d ",j+1); fflush(stdout);
 		aa = all_the_way_split(hhh[j]);
-		printf("Done.\n");
 		add_coefficients(aa,j);
 	}
+	printf("\n");
 
 	k=extra+1;
 	for(i=0;i+1<=blen1+blen2+blen3;i++) {
 		for(j=0;j+1<=blen1+blen2+blen3;j++) {
 			c=valuation(fmatrix[i][j]);
 			if (c < k) k = c;
-		};
-	};
+		}
+	}
 	for(i=0;i+1<=blen1+blen2+blen3;i++) {
 		for(j=0;j+1<=blen1+blen2+blen3;j++) {
 			for(c=1;c<=k;c++) div_p(fmatrix[i][j]);
-		};
-	};
+		}
+	}
 
 	print_fmatrix();
 	if (k == extra+1 ) {
