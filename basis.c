@@ -331,9 +331,7 @@ int main()
 		T.leading->n4 = p*basis3[i]->n4 + p - 1;
 		T.leading->next = NULL;
 		fbasis[i] = split_up(&T);
-		bb = copy_pol_star(cc,fbasis[i]);
-		aa = all_the_way_split(bb);
-		add_coefficients(aa,i);
+		hhh[i] = copy_pol_star(cc,fbasis[i]);
 	};
 	
 	/* This is the case i=0,j=2 of expansion in the file	*
@@ -354,9 +352,7 @@ int main()
 		T.leading->n4 = p*basis2[i]->n4 + p - 1;
 		T.leading->next = NULL;
 		fbasis[blen3+i] = split_up(&T);
-		bb = copy_pol_star(cc,fbasis[blen3+i]);
-		aa = all_the_way_split(bb);
-		add_coefficients(aa,blen3+i);
+		hhh[blen3+i] = copy_pol_star(cc,fbasis[blen3+i]);
 	};
 
 	/* This is the case i=0,j=1 of expansion in the file	*
@@ -377,9 +373,7 @@ int main()
 		T.leading->n4 = p*basis1[i]->n4 + p - 1;
 		T.leading->next = NULL;
 		fbasis[blen3+blen2+i] = split_up(&T);
-		bb = copy_pol_star(cc,fbasis[blen3+blen2+i]);
-		aa = all_the_way_split(bb);
-		add_coefficients(aa,blen3+blen2+i);
+		hhh[blen3+blen2+i] = copy_pol_star(cc,fbasis[blen3+blen2+i]);
 	};
 
 	Delta = compute_delta();
@@ -429,10 +423,7 @@ int main()
 			hh = mult_split(aa,bb);
 			free_star(aa);
 			printf("Done.\n");
-			printf("Starting computing aa... "); fflush(stdout);
-			aa = all_the_way_split(hh);
-			printf("Done.\n");
-			add_coefficients(aa,j);
+			merge_add_split(&(hhh[j]),hh);
 		};	
 
 		/* This is the case j=2,i=i of the file			*
@@ -451,10 +442,7 @@ int main()
 			hh = mult_split(aa,bb);
 			free_star(aa);
 			printf("Done.\n");
-			printf("Starting computing aa... "); fflush(stdout);
-			aa = all_the_way_split(hh);
-			printf("Done.\n");
-			add_coefficients(aa,blen3+j);
+			merge_add_split(&(hhh[blen3+j]),hh);
 		};
 
 		/* This is the case j=1,i=i of the file			*
@@ -471,17 +459,37 @@ int main()
 			hh = mult_split(aa,bb);
 			free_star(aa);
 			printf("Done.\n");
-			printf("Starting computing aa... "); fflush(stdout);
-			aa = all_the_way_split(hh);
-			printf("Done.\n");
-			add_coefficients(aa,blen3+blen2+j);
+			merge_add_split(&(hhh[blen3+blen2+j]),hh);
 		};
-
-	
 	};
-	
+
+	for(j=0;j+1<=blen3+blen2+blen1;j++) {
+		printf("Starting computing aa for j=%d... ",j); fflush(stdout);
+		aa = all_the_way_split(hhh[j]);
+		printf("Done.\n");
+		add_coefficients(aa,j);
+	}
+
+	k=extra+1;
+	for(i=0;i+1<=blen1+blen2+blen3;i++) {
+		for(j=0;j+1<=blen1+blen2+blen3;j++) {
+			c=valuation(fmatrix[i][j]);
+			if (c < k) k = c;
+		};
+	};
+	for(i=0;i+1<=blen1+blen2+blen3;i++) {
+		for(j=0;j+1<=blen1+blen2+blen3;j++) {
+			for(c=1;c<=k;c++) div_p(fmatrix[i][j]);
+		};
+	};
+
 	print_fmatrix();
-	printf("This should be the matrix up to a factor %d^%d.\n",p,extra+1);
+	if (k == extra+1 ) {
+		printf("This should be the matrix of frobenius!\n");
+	} else {
+		printf("This matrix times %d^(-%d)"
+		"should be the matrix of frobenius.\n",p,extra+1-k);
+	}
 
 	/************************************************
 	 * Neurotic freeing continues even now.		*

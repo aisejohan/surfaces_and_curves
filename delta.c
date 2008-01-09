@@ -459,22 +459,25 @@ struct polynomial **split_up(struct polynomial *f)
 
 /* Replaces f by f+g. Destroys the contents of g.
  * It could happen that the result has leading term 0. */
-void merge_add_split(struct polynomial **f, struct polynomial **g)
+void merge_add_split(struct polynomial ***f, struct polynomial **g)
 {
 	int i,flen,glen;
 	struct polynomial **tussen;
 
-	flen = 1 + f[0]->degree/d;
+	flen = 1 + (*f)[0]->degree/d;
 	glen = 1 + g[0]->degree/d;
 
 	if (flen < glen) {
-		tussen = g;
-		g = f;
-		f = tussen;
+		tussen = *f;
+		*f = g;
+		g = tussen;
+		i = glen;
+		glen = flen;
+		flen = i;
 	}
 
 	for(i=0;i+1<=glen;i++) {
-		merge_add(f[i+flen-glen],*(g[i]));
+		merge_add((*f)[i+flen-glen],*g[i]);
 		free(g[i]);
 	}
 
