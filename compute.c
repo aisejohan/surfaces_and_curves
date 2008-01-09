@@ -521,7 +521,11 @@ int setup(void)
 	NIKS.degree = 0;
 
 	/* Initialize myf,myf1,myf2,myf3,myf4 */
-	myf = make_random(d);
+	printf("\n\n");
+	myf = make_random(d,1);
+	printf("\n");
+	printf("Here is the polynomial we're using this time:\n");
+	printf("\n");
 	print_pol(myf);
 	if(!myf.leading) {
 		printf("Polynomial is zero!\n");
@@ -531,16 +535,13 @@ int setup(void)
 	printf("\n");
 	
 	myf1 = deriv(myf,1);
-	print_pol(myf1);
 	if(!myf1.leading) {
 		printf("Polynomial does not depend on x!\n");
 		free_tail(EEN.leading);
 		free_tail(myf.leading);
 		return(1);
 	};
-	printf("\n");
 	myf2 = deriv(myf,2);
-	print_pol(myf2);
 	if(!myf2.leading) {
 		printf("Polynomial does not depend on y!\n");
 		free_tail(EEN.leading);
@@ -548,9 +549,7 @@ int setup(void)
 		free_tail(myf1.leading);
 		return(1);
 	};
-	printf("\n");
 	myf3 = deriv(myf,3);
-	print_pol(myf3);
 	if(!myf3.leading) {
 		printf("Polynomial does not depend on z!\n");
 		free_tail(EEN.leading);
@@ -559,9 +558,7 @@ int setup(void)
 		free_tail(myf2.leading);
 		return(1);
 	};
-	printf("\n");
 	myf4 = deriv(myf,4);
-	print_pol(myf4);
 	if(!myf4.leading) {
 		printf("Polynomial does not depend on w!\n");
 		free_tail(EEN.leading);

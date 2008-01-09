@@ -162,11 +162,11 @@ void print_pol(struct polynomial f)
 	while(fterm) {
 		if(!sc_is_zero(fterm->c)) {
 			printmscalar(fterm->c);
-			if(fterm->n1) printf("* x^%d ",fterm->n1);
-			if(fterm->n2) printf("* y^%d ",fterm->n2);
-			if(fterm->n3) printf("* z^%d ",fterm->n3);
-			if(fterm->n4) printf("* w^%d ",fterm->n4);
-			if(fterm->next) printf("+\n");
+			if(fterm->n1) printf("*x^%d",fterm->n1);
+			if(fterm->n2) printf("*y^%d",fterm->n2);
+			if(fterm->n3) printf("*z^%d",fterm->n3);
+			if(fterm->n4) printf("*w^%d",fterm->n4);
+			if(fterm->next) printf(" + ");
 			else printf("\n");
 		} else {
 			printf("ZERO COEFFICIENT! FIXME!\n");

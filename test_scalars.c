@@ -74,11 +74,11 @@ int main()
 	printmscalar(me);
 	printf(".\n");
 
-	A = make_random(10);
+	A = make_random(10,0);
 	F = copy_pol(A);
 /*	print_pol(A);
 	printf("\n"); */
-	B = make_random(11);
+	B = make_random(11,0);
 	H = copy_pol(B);
 /*	print_pol(B);
 	printf("\n"); */

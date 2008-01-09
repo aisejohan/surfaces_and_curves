@@ -99,7 +99,7 @@ void print_sum(unsigned int degree)
 
 /* Makes a random polynomial of degree degree.		*
  * The result may be the zero polynomial!		*/
-struct polynomial make_random(unsigned int degree)
+struct polynomial make_random(unsigned int degree, int print)
 {
 	unsigned int a1,a2,a3,a4;
 	int c;
@@ -118,7 +118,6 @@ struct polynomial make_random(unsigned int degree)
  #ifndef OUTPUT_LIST
 	printf("\n");
 	printf("Please input coefficients below.\n");
-	printf("Beware that the monomials are listed backwards!\n");
  #endif
 #endif
 	for(a1=0;(d1*a1 <= degree);a1++) {
@@ -127,6 +126,40 @@ struct polynomial make_random(unsigned int degree)
 	      if((degree - (a1*d1+a2*d2+a3*d3)) % d4 == 0) {
 		a4 = (degree - (a1*d1+a2*d2+a3*d3))/d4;
 #ifdef INPUT_F
+		/* Dummy input at first. */
+		c = 1;
+#else
+		/* Stupid lift. */
+		c = rand() % p;
+		/* Change for compatibility with previous version.	*
+		 * This does not make any difference to the pol mod p.	*/
+		if (c < -(p-1)/2) c+=p; /* OK, this never happens. */
+		if (c > (p-1)/2) c-=p; /* This does happen. */
+#endif
+		/* Create the new term to be put in. */
+		make_term(&uitterm);
+		uitterm->n1 = a1;
+		uitterm->n2 = a2;
+		uitterm->n3 = a3;
+		uitterm->n4 = a4;
+		ito_sc(c,uitterm->c);
+		ptrterm = &(uit.leading);
+		while((*ptrterm) && (kleiner(uitterm, *ptrterm) == KLEINER)) {
+			ptrterm = &((*ptrterm)->next);
+		};
+		uitterm->next = *ptrterm;
+		*ptrterm = uitterm;
+		uitterm=NULL;
+	      };
+	    };
+	  };
+	};
+	uitterm = uit.leading;
+	while (uitterm) {
+		a1 = uitterm->n1;
+		a2 = uitterm->n2;
+		a3 = uitterm->n3;
+		a4 = uitterm->n4;
 		c=0;
 		printf("Coefficient of   ");
 		if(a1) {printf("x^%d",a1); c++;};
@@ -138,47 +171,22 @@ struct polynomial make_random(unsigned int degree)
 		if(a4) {printf("w^%d",a4); c++;};
 		while(8-c) {printf("   ");c++;};
 		printf("= ");
+#ifndef INPUT_F
+		if (print) printmscalar(uitterm->c);
+ 		printf("\n");
+#else
  #ifdef OUTPUT_LIST
  		printf("\n");
  #else
 		scanf("%d",&c);
  #endif
-#else
-		/* Stupid lift. */
-		c = rand() % p;
-		/* Change for compatibility with previous version.	*
-		 * This does not make any difference to the pol mod p.	*/
-		if (c < -(p-1)/2) c+=p; /* OK, this never happens. */
-		if (c > (p-1)/2) c-=p; /* This does happen. */
+		ito_sc(c,uitterm->c);
 #endif
-		if(c != 0) {
-			/* Create the new term to be put in. */
-			make_term(&uitterm);
-			uitterm->n1 = a1;
-			uitterm->n2 = a2;
-			uitterm->n3 = a3;
-			uitterm->n4 = a4;
-			ito_sc(c,uitterm->c);
-			ptrterm = &(uit.leading);
-			while((*ptrterm) && (kleiner(uitterm, *ptrterm) == KLEINER)) {
-				ptrterm = &((*ptrterm)->next);
-			};
-			uitterm->next = *ptrterm;
-			*ptrterm = uitterm;
-			uitterm=NULL;
-		};
-	      };
-	    };
-	  };
-	};
+		uitterm = uitterm->next;
+	}
+	clean_pol(&uit);
 #ifdef OUTPUT_LIST
 	exit(0);
-#endif
-#ifdef INPUT_F
-printf("\n");
-printf("\n");
-printf("\n");
-printf("\n");
 #endif
 	return(uit);
 }
