@@ -25,15 +25,24 @@ check_symmetry(f,p,w) =
 	if(isprime(p),,error("Second argument should be a prime."));
 	d = poldegree(f);
 	c = polcoeff(f,0)/p^(w*d/2);
-	if((c^2 - 1),error("Not a Weil polynomial."));
+	if((c^2 - 1),
+		print("Not a Weil polynomial.");
+		return(0)
+	);
 	if((c == 1),
 		if(x^d*p^(-w*d/2)*subst(f,x,p^w/x)-f,
-			print("Not symmetric.")
+			print("Not symmetric.");
+			return(0)
+		,
+			return(1)
 		)
 	);
 	if((c == -1),
 		if(x^d*p^(-w*d/2)*subst(f,x,p^w/x)+f,
-			print("Not symmetric.")
+			print("Not symmetric.");
+			return(0)
+		,
+			return(1)
 		)
 	);
 }
@@ -47,22 +56,26 @@ findweil(f,p,initial) =
 	d = poldegree(f);
 	polygon = newtonpoly(f,p);
 	w = 2*sum(i=1,d,polygon[i])/d;
-	print("The weight is ",w,".");
-	n=myN+1;
+	print1("The weight is ",w,".");
+	n=myN+initial+1;
 	while(n>=initial,
 		n = n - 1;
 		g = findsmall(f,p,n);
 		lijst = abs(polroots(g));
 		success = 1;
-		for(i=1,matsize(lijst)[2],
+		for(i=1,matsize(lijst)[1],
 			if(((p^(w/2)-myepsilon > lijst[i]) ||
 				(lijst[i] > p^(w/2)+myepsilon)),
 				success = 0
 			)
 		);
 		if(success,
-			check_symmetry(g,p,w);
-			return(g))
+			print1(" Something found... ");
+			if(check_symmetry(g,p,w),
+				print(" Success!");
+				return(g)
+			)
+		)
 	);
 	print("No luck this time!");
 }
