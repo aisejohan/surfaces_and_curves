@@ -248,8 +248,8 @@ int main()
 	/* Initialize extra. */
 	extra=0;
 	for(i=0;i<=q;i++) {
-		j=(3+i)*p-1;
-		c=-i-3;
+		j=(2+i)*p-1;
+		c=-i-2;
 		while (j > 0) {
 			c += ivaluation(j);
 			j--;
