@@ -164,13 +164,12 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	struct polynomial vh_rest[ss];
 	struct polynomial **aa;
 	struct polynomial *ppp;
-	struct term *aaterm[ss];
+	struct term **ptraa[ss];
 	struct term **ptrterm;
-	struct term *pppterm;
-	struct term mon;
 	unsigned int i, dividing;
+	mscalar c;
 
-	make_scalar(mon.c);
+	make_scalar(c);
 	ppp = NULL;
 	make_pol(&ppp);
 	aa = (struct polynomial **)malloc(ss*sizeof(struct polynomial *));
@@ -179,11 +178,12 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 		exit(1);
 	};
 	for(i=0;i+1<=ss;i++) {
-		aaterm[i] = NULL;
 		aa[i] = NULL;
 		make_pol(&aa[i]);
-		aa[i]->degree = (pp->degree > vh[i]->degree) ?
-			(pp->degree - vh[i]->degree) : 0;
+		aa[i]->degree = (pp->degree > vh[i]->degree) ? (pp->degree - vh[i]->degree) : 0;
+		vh_rest[i].degree = vh[i]->degree;
+		vh_rest[i].leading = vh[i]->leading->next;
+		ptraa[i] = &(aa[i]->leading);
 	};
 
 	/* Copy pp into ppp. */
@@ -199,48 +199,35 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 		while (i+1 <= ss && dividing) {
 			if (deelbaar(vh[i]->leading, ppp->leading)) {
 				/* No sign in front of pppterm->c */
-				sc_div(ppp->leading->c, vh[i]->leading->c,
-					mon.c);
+				sc_div(ppp->leading->c, vh[i]->leading->c, c);
 				/* Change sign mon.c */
-				sc_negate(mon.c);
-				mon.n1 = ppp->leading->n1 - vh[i]->leading->n1;
-				mon.n2 = ppp->leading->n2 - vh[i]->leading->n2;
-				mon.n3 = ppp->leading->n3 - vh[i]->leading->n3;
-				mon.n4 = ppp->leading->n4 - vh[i]->leading->n4;
+				sc_negate(c);
 
-				pppterm = ppp->leading;
-				ppp->leading = ppp->leading->next;
-				free_term(pppterm);
-
-				if (aaterm[i]) {
-					make_term(&aaterm[i]->next);
-					copy_term(&mon, aaterm[i]->next);
-					aaterm[i] = aaterm[i]->next;
-				} else {
-					vh_rest[i].degree = vh[i]->degree;
-					vh_rest[i].leading = 
-						vh[i]->leading->next;
-					make_term(&aa[i]->leading);
-					copy_term(&mon, aa[i]->leading);
-					aaterm[i] = aa[i]->leading;
-				};
-
-				/* New part. This part seems to
-				 * work better with LEX_ORDER
-				 * than with REVLEX_ORDER. */
+				*ptraa[i] = ppp->leading;
 				save_the_spot.degree = aa[i]->degree;
-				save_the_spot.leading = aaterm[i];
+				save_the_spot.leading = *ptraa[i];
+
+				ppp->leading->n1 -= vh[i]->leading->n1;
+				ppp->leading->n2 -= vh[i]->leading->n2;
+				ppp->leading->n3 -= vh[i]->leading->n3;
+				ppp->leading->n4 -= vh[i]->leading->n4;
+				sc_copy(c, ppp->leading->c);
+
+				ppp->leading = ppp->leading->next;
+				(*ptraa[i])->next = NULL;
 
 				if (vh_rest[i].leading) {
-					test.n1 = mon.n1 + 
+					test.n1 = (*ptraa[i])->n1 + 
 						vh_rest[i].leading->n1;
-					test.n2 = mon.n2 +
+					test.n2 = (*ptraa[i])->n2 +
 						vh_rest[i].leading->n2;
-					test.n3 = mon.n3 +
+					test.n3 = (*ptraa[i])->n3 +
 						vh_rest[i].leading->n3;
-					test.n4 = mon.n4 +
+					test.n4 = (*ptraa[i])->n4 +
 						vh_rest[i].leading->n4;
 				}
+
+				ptraa[i]= &((*ptraa[i])->next);
 
 				while ((ppp->leading) &&
 				deelbaar(vh[i]->leading, ppp->leading)
@@ -249,23 +236,22 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 					/* No sign in front of
 					 * pppterm->c */
 					sc_div(ppp->leading->c,
-						vh[i]->leading->c, mon.c);
+						vh[i]->leading->c, c);
 					/* Change sign mon.c */
-					sc_negate(mon.c);
-					mon.n1 = ppp->leading->n1 -
+					sc_negate(c);
+					*ptraa[i] = ppp->leading;
+					ppp->leading->n1 -=
 						vh[i]->leading->n1;
-					mon.n2 = ppp->leading->n2 -
+					ppp->leading->n2 -=
 						vh[i]->leading->n2;
-					mon.n3 = ppp->leading->n3 -
+					ppp->leading->n3 -=
 						vh[i]->leading->n3;
-					mon.n4 = ppp->leading->n4 -
+					ppp->leading->n4 -=
 						vh[i]->leading->n4;
-					pppterm = ppp->leading;
+					sc_copy(c, ppp->leading->c);
 					ppp->leading = ppp->leading->next;
-					free_term(pppterm);
-					make_term(&aaterm[i]->next);
-					copy_term(&mon, aaterm[i]->next);
-					aaterm[i] = aaterm[i]->next;
+					(*ptraa[i])->next = NULL;
+					ptraa[i]= &((*ptraa[i])->next);
 				}
 				uit = pol_mult(save_the_spot, vh_rest[i]);
 				merge_add(ppp, uit);
@@ -287,7 +273,7 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 		};
 	};
 	free(ppp);
-	free_scalar(mon.c);
+	free_scalar(c);
 	return(aa);
 }
 #endif
