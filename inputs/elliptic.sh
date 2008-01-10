@@ -14,11 +14,6 @@ if [ -f inputs/tijdelijk ]; then
 	echo "Please remove the file inputs/tijdelijk. Stop."
 	exit 1
 fi
-grep -q "^#define LEX_ORDER" data.h
-if [ ! $? = 0 ]; then
-	echo "Make sure you use LEX_ORDER. Stop."
-	exit 1
-fi
 DISC=$((27*$B*$B + 4*$A*$A*$A))
 DISC=$((DISC % $P))
 if [ $DISC = 0 ]; then
@@ -26,7 +21,10 @@ if [ $DISC = 0 ]; then
 	exit 1
 fi
 
-cat >> inputs/tijdelijk << AISEJOHAN
+
+grep -q -E "^#define LEX_ORDER" data.h > /dev/null
+if [ $? = 0 ]; then
+cat >> inputs/tijdelijk << LEXICO
 1
 0
 0
@@ -37,7 +35,21 @@ a
 -1
 0
 b
-AISEJOHAN
+LEXICO
+else
+cat >> inputs/tijdelijk << LEXREV
+1
+0
+0
+0
+0
+0
+-1
+a
+0
+b
+LEXREV
+fi
 
 sed -i -e "s@a@$A@" \
 	-e "s@b@$B@" inputs/tijdelijk
@@ -53,7 +65,7 @@ sed -i \
 
 cat data.h
 echo
-echo "Does this look ok? (Hit return to continue,Ctrl-C to abort.)"
+echo "Does this look ok? (Hit return to continue, Ctrl-C to abort.)"
 read ANTWOORD
 
 make input_pol
