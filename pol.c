@@ -113,6 +113,7 @@ void clean_pol(struct polynomial *pol)
 
 	ptrterm = &(pol->leading);
 	while(*ptrterm) {
+		mpz_mod((*ptrterm)->c,(*ptrterm)->c,modulus);
 		if(sc_is_zero((*ptrterm)->c)) {
 			tmp = *ptrterm;
 			*ptrterm = (*ptrterm)->next;
@@ -683,12 +684,6 @@ struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 	while(tt) {
 		times_term_variant(*tt, *b, &tmppol);
 		rep_pol_add_variant(&uit,tmppol);
-		tt = tt->next;
-	};
-
-	tt = uit.leading;
-	while(tt) {
-		mpz_mod(tt->c,tt->c,modulus);
 		tt = tt->next;
 	};
 
