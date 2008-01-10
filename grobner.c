@@ -27,6 +27,7 @@
 #include "data.h"
 #include "scalar.h"
 #include "pol.h"
+#include "compute.h"
 
 /* Generic routines... */
 
@@ -52,7 +53,7 @@ static int deelbaar(struct term *mon1, struct term *mon2)
  *	(output pp)						*
  *								*
  * **************************************************************/
-#ifdef OLD_GROBNER
+#if defined OLD_GROBNER || defined MIXED_GROBNER
 struct polynomial ** 
 gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 {
@@ -145,158 +146,6 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	for(i=0;i+1<=ss;i++) {
 		free_tail(tmp[i].leading);
 	};
-	free(ppp);
-	free_scalar(mon.c);
-	return(aa);
-}
-#endif
-
-#ifdef MIXED_GROBNER
-struct polynomial ** 
-gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
-{
-	struct polynomial tmp[ss];
-	struct polynomial save_the_spot, uit;
-	struct term test;
-	struct polynomial vh_rest[ss];
-	struct polynomial **aa;
-	struct polynomial *ppp;
-	struct term *aaterm[ss];
-	struct term **ptrterm;
-	struct term *pppterm;
-	struct term mon;
-	unsigned int i, dividing;
-
-	make_scalar(mon.c);
-	ppp = NULL;
-	make_pol(&ppp);
-	aa = (struct polynomial **)malloc(ss*sizeof(struct polynomial *));
-	if(!aa) {
-		perror("Malloc failed!");
-		exit(1);
-	};
-	for(i=0;i+1<=ss;i++) {
-		tmp[i].leading = NULL;
-		aaterm[i] = NULL;
-		aa[i] = NULL;
-		make_pol(&aa[i]);
-		aa[i]->degree = (pp->degree > vh[i]->degree) ?
-			(pp->degree - vh[i]->degree) : 0;
-	};
-
-	/* Copy pp into ppp. */
-	ppp->degree = pp->degree;
-	ppp->leading = pp->leading;
-	/* Set pp equal to ``zero'' */
-	pp->leading = NULL;
-	ptrterm = &pp->leading;
-
-	while (ppp->leading) {
-		i = 0;
-		dividing = 1;
-		while (i+1 <= ss && dividing) {
-			if (deelbaar(vh[i]->leading, ppp->leading)) {
-				/* No sign in front of pppterm->c */
-				sc_div(ppp->leading->c, vh[i]->leading->c,
-					mon.c);
-				/* Change sign mon.c */
-				sc_negate(mon.c);
-				mon.n1 = ppp->leading->n1 - vh[i]->leading->n1;
-				mon.n2 = ppp->leading->n2 - vh[i]->leading->n2;
-				mon.n3 = ppp->leading->n3 - vh[i]->leading->n3;
-
-				pppterm = ppp->leading;
-				ppp->leading = ppp->leading->next;
-				free_term(pppterm);
-
-				if (aaterm[i]) {
-					if (ss > 1) /* Old part. */
-						times_term(mon, vh_rest[i],
-							&(tmp[i]));
-					make_term(&aaterm[i]->next);
-					copy_term(&mon, aaterm[i]->next);
-					aaterm[i] = aaterm[i]->next;
-				} else {
-					vh_rest[i].degree = vh[i]->degree;
-					vh_rest[i].leading = 
-						vh[i]->leading->next;
-					if (ss > 1) /* Old part. */
-						tmp[i] = make_times_term(mon,
-							vh_rest[i]);
-					make_term(&aa[i]->leading);
-					copy_term(&mon, aa[i]->leading);
-					aaterm[i] = aa[i]->leading;
-				};
-
-				if (ss == 1) {
-					/* New part. This part seems to
-					 * work better with LEX_ORDER
-					 * than with REVLEX_ORDER. */
-					save_the_spot.degree = aa[i]->degree;
-					save_the_spot.leading = aaterm[i];
-					test.n1 = mon.n1 +
-						vh_rest[i].leading->n1;
-					test.n2 = mon.n2 +
-						vh_rest[i].leading->n2;
-					test.n3 = mon.n3 +
-						vh_rest[i].leading->n3;
-
-					while ((ppp->leading) &&
-					deelbaar(vh[i]->leading, ppp->leading)
-					&& (GROTER == kleiner(ppp->leading,
-					&test))) {
-						/* No sign in front of
-						 * pppterm->c */
-						sc_div(ppp->leading->c,
-						vh[i]->leading->c, mon.c);
-						/* Change sign mon.c */
-						sc_negate(mon.c);
-						mon.n1 = ppp->leading->n1 -
-							vh[i]->leading->n1;
-						mon.n2 = ppp->leading->n2 -
-							vh[i]->leading->n2;
-						mon.n3 = ppp->leading->n3 -
-							vh[i]->leading->n3;
-						pppterm = ppp->leading;
-						ppp->leading = 
-							ppp->leading->next;
-						free_term(pppterm);
-						make_term(&aaterm[i]->next);
-						copy_term(&mon,
-							aaterm[i]->next);
-						aaterm[i] = aaterm[i]->next;
-					}
-					uit = pol_mult(save_the_spot,
-						vh_rest[i]);
-					merge_add(ppp, uit);
-					/* End new part. */
-				} else {
-					/* Old part. */
-					rep_pol_add(ppp, tmp[i]);
-					/* End old part. */
-				}
-
-				dividing = 0;
-			} else {
-				i=i+1;
-			};
-		};
-		/* dividing == 1 means that we cannot get rid of the leading
-		 * term. So we put it back in pp. */
-		if(dividing) {
-			*ptrterm = ppp->leading;
-			ptrterm = &((*ptrterm)->next);
-			/* Move on to the next one. */
-			ppp->leading = ppp->leading->next;
-			/* Terminate pp. */
-			*ptrterm = NULL;
-		};
-	};
-	if (ss > 1) {
-		for(i=0;i+1<=ss;i++) {
-			free_tail(tmp[i].leading);
-		};
-	}
 	free(ppp);
 	free_scalar(mon.c);
 	return(aa);
@@ -431,6 +280,98 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	};
 	free(ppp);
 	free_scalar(mon.c);
+	return(aa);
+}
+#endif
+
+#if defined NEW_GROBNER || defined MIXED_GROBNER
+/* Optimized for dividing by myf. */
+struct polynomial *myf_division(struct polynomial *pp)
+{
+	struct polynomial save_the_spot, uit;
+	struct term test;
+	struct polynomial myf_rest;
+	struct polynomial *aa;
+	struct polynomial *ppp;
+	struct term **ptraa;
+	struct term **ptrterm;
+	mscalar c;
+
+	myf_rest.degree = myf.degree;
+	myf_rest.leading = myf.leading->next;
+
+	make_scalar(c);
+	sc_inv(myf.leading->c,c);
+
+	ppp = NULL;
+	make_pol(&ppp);
+	aa = NULL;
+	make_pol(&aa);
+	aa->degree = pp->degree - myf.degree;
+	ptraa = &(aa->leading);
+
+	save_the_spot.degree = aa->degree;
+
+	/* Copy pp into ppp. */
+	ppp->degree = pp->degree;
+	ppp->leading = pp->leading;
+	/* Set pp equal to ``zero'' */
+	pp->leading = NULL;
+	ptrterm = &pp->leading;
+
+	while (ppp->leading) {
+
+		if (deelbaar(myf.leading, ppp->leading)) {
+			/* No sign in front of pppterm->c */
+			sc_mult_replace(c, ppp->leading->c);
+			/* Change sign mon.c */
+			sc_negate(ppp->leading->c);
+
+			*ptraa = ppp->leading;
+			save_the_spot.leading = *ptraa;
+
+			ppp->leading->n1 -= myf.leading->n1;
+			ppp->leading->n2 -= myf.leading->n2;
+			ppp->leading->n3 -= myf.leading->n3;
+
+			ppp->leading = ppp->leading->next;
+			(*ptraa)->next = NULL;
+
+			test.n1 = (*ptraa)->n1 + myf_rest.leading->n1;
+			test.n2 = (*ptraa)->n2 + myf_rest.leading->n2;
+			test.n3 = (*ptraa)->n3 + myf_rest.leading->n3;
+
+			ptraa = &((*ptraa)->next);
+
+			while ((ppp->leading) &&
+			deelbaar(myf.leading, ppp->leading) &&
+			(GROTER == kleiner(ppp->leading, &test))) {
+				/* No sign in front of
+				 * pppterm->c */
+				sc_mult_replace(c, ppp->leading->c);
+				/* Change sign mon.c */
+				sc_negate(ppp->leading->c);
+				*ptraa = ppp->leading;
+				ppp->leading->n1 -= myf.leading->n1;
+				ppp->leading->n2 -= myf.leading->n2;
+				ppp->leading->n3 -= myf.leading->n3;
+				ppp->leading = ppp->leading->next;
+				(*ptraa)->next = NULL;
+				ptraa = &((*ptraa)->next);
+			}
+			uit = pol_mult(save_the_spot, myf_rest);
+			merge_add(ppp, uit);
+		} else {
+			*ptrterm = ppp->leading;
+			ptrterm = &((*ptrterm)->next);
+			/* Move on to the next one. */
+			ppp->leading = ppp->leading->next;
+			/* Terminate pp. */
+			*ptrterm = NULL;
+		}
+	};
+	free(ppp);
+	free_scalar(c);
 	return(aa);
 }
 #endif

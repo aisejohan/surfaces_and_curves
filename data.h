@@ -40,7 +40,7 @@
  * or
  * 	REVLEX_ORDER + OLD_GROBNER
  * can be much faster. */
-#define MIXED_GROBNER
+#define NEW_GROBNER
 
 #define d1	1
 #define d2	1
