@@ -130,7 +130,6 @@ int main()
 	Delta.leading = NULL;
 	aaterm = NULL;
 	make_scalar(cc);
-	extra=5;
 	
 #ifdef KIJKEN
 	printf("Debug is set! To unset do not define KIJKEN.\n");
@@ -312,6 +311,18 @@ int main()
 		exit(1);
 	};
 
+	/* Initialize extra. */
+	extra=0;
+	for(i=0;i<=q;i++) {
+		j=(3+i)*p-1;
+		c=-i-3;
+		while (j > 0) {
+			c += ivaluation(j);
+			j--;
+		}
+		if (c > extra) extra = c;
+	}
+
 	/* Initialize bb which is going to be equal to
 	 * 	p^i Delta^i p^3 (x1...x4)^(p-1)
 	 * at various stages. */
@@ -455,7 +466,7 @@ int main()
 		printf("This should be the matrix of frobenius!\n");
 	} else {
 		printf("This matrix times %d^(-%d)"
-		"should be the matrix of frobenius.\n",p,extra+1-k);
+		" should be the matrix of frobenius.\n",p,extra+1-k);
 	}
 
 	/************************************************
