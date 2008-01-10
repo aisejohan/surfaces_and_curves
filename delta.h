@@ -23,7 +23,9 @@
 struct polynomial compute_delta(void);
 struct polynomial **split_up(struct polynomial *f);
 void test_split(struct polynomial **aa, struct polynomial orig);
+void merge_add_split(struct polynomial ***f, struct polynomial **g);
 struct polynomial **mult_split(struct polynomial **f, struct polynomial **g);
 int check_flatness(unsigned int degree);
 struct term **find_basis(unsigned int degree, int blen);
-struct polynomial **copy_pol_star(struct polynomial **bb);
+void free_star(struct polynomial **bb);
+struct polynomial **copy_pol_star(mscalar c, struct polynomial **bb);

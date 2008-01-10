@@ -8,56 +8,74 @@ findsmall(f,p,n) =
 	d = poldegree(f);
 	g = x^d;
 	polygon = newtonpoly(f,p);
-	for(i=0,d-1,\
-		c = polcoeff(f,i);\
-		e = floor(sum(j=1,d-i,polygon[d+1-j]));\
-		c = c/p^e;\
-		c = lift(Mod(c,p^n));\
-		if((c>(p^n)/2),c=c-p^n);\
-		g = g + c*p^e*x^i;\
+	for(i=0,d-1,
+		c = polcoeff(f,i);
+		e = floor(sum(j=1,d-i,polygon[d+1-j]));
+		c = c/p^e;
+		c = lift(Mod(c,p^n));
+		if((c>(p^n)/2),c=c-p^n);
+		g = g + c*p^e*x^i;
 	);
 	return(g);
 }
 
-check_symmetry(f,p) =
+check_symmetry(f,p,w) =
 {
 	local(d,c);
 	if(isprime(p),,error("Second argument should be a prime."));
 	d = poldegree(f);
-	c = polcoeff(f,0)/p^d;
-	if((c^2 - 1),error("Not a Weil polynomial."));
-	if((c == 1),\
-		if(x^d*p^(-d)*subst(f,x,p^2/x)-f,\
-			print("Not symmetric.")\
-		)\
+	c = polcoeff(f,0)/p^(w*d/2);
+	if((c^2 - 1),
+		print("Not a Weil polynomial.");
+		return(0)
 	);
-	if((c == -1),\
-		if(x^d*p^(-d)*subst(f,x,p^2/x)+f,\
-			print("Not symmetric.")\
-		)\
+	if((c == 1),
+		if(x^d*p^(-w*d/2)*subst(f,x,p^w/x)-f,
+			print("Not symmetric.");
+			return(0)
+		,
+			return(1)
+		)
+	);
+	if((c == -1),
+		if(x^d*p^(-w*d/2)*subst(f,x,p^w/x)+f,
+			print("Not symmetric.");
+			return(0)
+		,
+			return(1)
+		)
 	);
 }
 
-/* Finds Weil polynomial of "weight" 2. */
+/* Finds Weil polynomial. */
 findweil(f,p,initial) =
 {
-	local(n,g,lijst,success);
+	local(d,polygon,w,n,g,lijst,success);
 	if(isprime(p),,error("Second argument should be a prime."));
 	if(initial,,initial=1+floor(log(poldegree(f)*p)/log(p)));
-	n=myN+1;
-	while(n>=initial,\
-		n = n - 1;\
-		g = findsmall(f,p,n);\
-		lijst = abs(polroots(g));\
-		success = 1;\
-		for(i=1,matsize(lijst)[2],\
-			if(((p-myepsilon > lijst[i]) || (lijst[i] > p+myepsilon)),\
-				success = 0\
-			)\
-		);\
-		if(success,\
-			check_symmetry(g,p);\
-			return(g))\
+	d = poldegree(f);
+	polygon = newtonpoly(f,p);
+	w = 2*sum(i=1,d,polygon[i])/d;
+	print1("The weight is ",w,".");
+	n=myN+initial+1;
+	while(n>=initial,
+		n = n - 1;
+		g = findsmall(f,p,n);
+		lijst = abs(polroots(g));
+		success = 1;
+		for(i=1,matsize(lijst)[1],
+			if(((p^(w/2)-myepsilon > lijst[i]) ||
+				(lijst[i] > p^(w/2)+myepsilon)),
+				success = 0
+			)
+		);
+		if(success,
+			print1(" Something found... ");
+			if(check_symmetry(g,p,w),
+				print(" Success!");
+				return(g)
+			)
+		)
 	);
 	print("No luck this time!");
 }

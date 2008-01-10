@@ -21,21 +21,34 @@
  *
  *									*/
 
-
 /* #define KIJKEN */
 
 #define KLEINER	1
 #define GELIJK	-1
 #define GROTER	0
 
-#define d1	8
-#define d2	9
-#define d3	17
-#define d4	21
-#define d	72
-#define p	11
-#define r	20		/* Exponent. */
-#define q	5		/* Largest power of Delta. */
+/* There are two orderings. LEX and REVLEX. Chose one by
+ * commenting out one of the following two lines. */
+#define LEX_ORDER
+/* #define REVLEX_ORDER */
+
+/* There are three strategies for reducing the polynomials
+ * encountered during the computation. OLD, NEW and MIXED.
+ * Setting MIXED_GROBNER is a good choice on average, but
+ * for certain choices of degrees etc the combinations
+ * 	LEX_ORDER + NEW_GROBNER
+ * or
+ * 	REVLEX_ORDER + OLD_GROBNER
+ * can be much faster. */
+#define MIXED_GROBNER
+
+#define d1	1
+#define d2	1
+#define d3	1
+#define d	4
+#define p	5
+#define r	40		/* Exponent. */
+#define q	6		/* Largest power of Delta. */
 
 #define maxlength	256
 
@@ -48,7 +61,6 @@ struct term {
 	unsigned int n1;
 	unsigned int n2;
 	unsigned int n3;
-	unsigned int n4;
 	struct term *next;
 };
 

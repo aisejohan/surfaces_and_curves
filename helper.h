@@ -24,7 +24,7 @@
 unsigned int ivaluation(int a);
 void set_seed(unsigned int zaadje);
 unsigned int count_sum(unsigned int degree);
-struct polynomial make_random(unsigned int degree);
+struct polynomial make_random(unsigned int degree, int print);
 void rep_deriv(struct polynomial *f, unsigned int i);
 struct polynomial deriv(struct polynomial f, unsigned int i);
 unsigned int number_terms(struct polynomial f);

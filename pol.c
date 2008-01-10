@@ -26,6 +26,7 @@
 
 #include "data.h"
 #include "scalar.h"
+#include "pol.h"
 
 /* Makes a term.				*/
 void make_term(struct term **mon)
@@ -43,7 +44,7 @@ void make_term(struct term **mon)
 	};
 	make_scalar((*mon)->c);
 	(*mon)->next=NULL;
-};
+}
 
 void make_pol(struct polynomial **f)
 {
@@ -59,7 +60,7 @@ void make_pol(struct polynomial **f)
 		exit(1);
 	};
 	(*f)->leading=NULL;
-};
+}
 
 /* Frees a term. */
 void free_term(struct term *mon)
@@ -73,7 +74,7 @@ void free_term(struct term *mon)
 	free_scalar(mon->c);
 	free(mon);
 	mon=NULL;
-};
+}
 
 /* Copies data not pointer.						*/
 /* sc_copy does allocation.						*/
@@ -83,8 +84,7 @@ void copy_term(struct term *mon1, struct term *mon2)
 	mon2->n1 = mon1->n1;
 	mon2->n2 = mon1->n2;
 	mon2->n3 = mon1->n3;
-	mon2->n4 = mon1->n4;
-};
+}
 
 /* This frees memory starting with mon.					*
  * It does not set mon=NULL. This means you will/might			*
@@ -98,7 +98,7 @@ void free_tail(struct term *mon)
 		mon = tmp;
 	};
 	return;
-};
+}
 
 /* Remove terms with zero coefficient from putative pol.	*
  * The result is a polynomial of the same degree as the input	*
@@ -121,19 +121,7 @@ void clean_pol(struct polynomial *pol)
 		};
 	};
 	return;
-};
-
-/* Create data structure of the same length.		*/
-void make_tail(struct term *mon, struct term **ptrterm)
-{
-	while(mon) {
-		make_term(ptrterm);
-		ptrterm = &((*ptrterm)->next);
-		mon = mon->next;
-	};
-	*ptrterm = NULL;
-};
-
+}
 
 /* Copies tail of pol.					*/
 void copy_tail(struct term *mon, struct term **ptrterm)
@@ -144,7 +132,7 @@ void copy_tail(struct term *mon, struct term **ptrterm)
 		ptrterm = &((*ptrterm)->next);
 		mon = mon->next;
 	};
-};
+}
 
 
 /* Copies a polynomial.					*/
@@ -156,23 +144,7 @@ struct polynomial copy_pol(struct polynomial f)
 	uit.degree = f.degree;
 	copy_tail(f.leading,&(uit.leading));
 	return(uit);
-};
-
-/* This function assumes terms of the same degree. 	*
- * It compares the monomials not the coefficients.	*
- * Returns						*
- * 		GELIJK if equal				*
- * 		KLEINER if mon1 < mon2			*
- * 		GROTER if mon1 > mon2			*
- * 							*/
-int kleiner(struct term *mon1, struct term *mon2)
-{
-	if(mon1->n1 != mon2->n1) return((mon1->n1 < mon2->n1));
-	if(mon1->n2 != mon2->n2) return((mon1->n2 < mon2->n2));
-	if(mon1->n3 != mon2->n3) return((mon1->n3 < mon2->n3));
-	return(-1);
-};
-
+}
 
 /* Prints a polynomial. 				*/
 void print_pol(struct polynomial f)
@@ -187,11 +159,10 @@ void print_pol(struct polynomial f)
 	while(fterm) {
 		if(!sc_is_zero(fterm->c)) {
 			printmscalar(fterm->c);
-			if(fterm->n1) printf("* x^%d ",fterm->n1);
-			if(fterm->n2) printf("* y^%d ",fterm->n2);
-			if(fterm->n3) printf("* z^%d ",fterm->n3);
-			if(fterm->n4) printf("* w^%d ",fterm->n4);
-			if(fterm->next) printf("+\n");
+			if(fterm->n1) printf("*x^%d",fterm->n1);
+			if(fterm->n2) printf("*y^%d",fterm->n2);
+			if(fterm->n3) printf("*z^%d",fterm->n3);
+			if(fterm->next) printf(" + ");
 			else printf("\n");
 		} else {
 			printf("ZERO COEFFICIENT! FIXME!\n");
@@ -200,7 +171,7 @@ void print_pol(struct polynomial f)
 		fterm = fterm->next;
 	};
 	return;
-};
+}
 
 /* This function adds polynomials of the same degree	*
  * into a new polynomial structure: 			*
@@ -264,7 +235,6 @@ struct polynomial pol_add(struct polynomial f, struct polynomial g)
 				(*ptrterm)->n1 = fterm->n1;
 				(*ptrterm)->n2 = fterm->n2;
 				(*ptrterm)->n3 = fterm->n3;
-				(*ptrterm)->n4 = fterm->n4;
 				ptrterm = &((*ptrterm)->next);
 				fterm = fterm->next;
 				gterm = gterm->next;
@@ -273,8 +243,92 @@ struct polynomial pol_add(struct polynomial f, struct polynomial g)
 	};
 	printf("Fall through! Cannot happen.");
 	exit(1);
-};
+}
 
+/* Almost the same as rep_pol_add:			*
+ * 	replace f by (f+g)				*
+ * 	empty out g					*
+ * Here g may have terms that are zero but not f.	*/
+void merge_add(struct polynomial *f, struct polynomial g)
+{
+	int vergelijk;
+	struct term *fterm, *gterm;
+	struct term **ptrterm;
+
+	ptrterm = &(f->leading);
+	fterm = f->leading;
+	*ptrterm = NULL;
+	gterm = g.leading;
+	g.leading = NULL;
+	while (1) {
+		if(!fterm) {
+			/* if(!gterm) return; */
+			*ptrterm = gterm;
+			while(*ptrterm)  {
+				if(sc_is_zero((*ptrterm)->c)) {
+					gterm = *ptrterm;
+					*ptrterm = (*ptrterm)->next;
+					free_term(gterm);
+				} else {
+					ptrterm = &((*ptrterm)->next);
+				}
+			}
+			return;
+		};
+
+		if(!gterm) {
+			*ptrterm = fterm;
+			return;
+		};
+
+		vergelijk=kleiner(fterm,gterm);
+		if (vergelijk == GROTER) {
+			*ptrterm = fterm;
+			ptrterm = &(fterm->next);
+			fterm = fterm->next;
+			*ptrterm = NULL;
+		} else if (vergelijk == KLEINER) {
+			/* Check for zero in g. */
+			if(!sc_is_zero(gterm->c)) {
+				*ptrterm = gterm;
+				ptrterm = &(gterm->next);
+				gterm = gterm->next;
+				*ptrterm = NULL;
+			} else {
+				*ptrterm = gterm->next;
+				free_term(gterm);
+				gterm = *ptrterm;
+				*ptrterm = NULL;
+			}
+		} else {
+			/* vergelijk == GELIJK */
+			sc_add_replace(gterm->c,fterm->c);
+			if(sc_is_zero(fterm->c)) {
+				/* Here we use *ptrterm as temp	*
+				 * storage. A little ugly.	*/
+				*ptrterm = fterm->next;
+				free_term(fterm);
+				fterm = *ptrterm;
+
+				*ptrterm = gterm->next;
+				free_term(gterm);
+				gterm = *ptrterm;
+				/* Now we put *ptrterm back to NULL. */
+				*ptrterm = NULL;
+			} else {
+				*ptrterm = fterm;
+				ptrterm = &(fterm->next);
+				fterm = fterm->next;
+				*ptrterm = gterm->next;
+				free_term(gterm);
+				gterm = *ptrterm;
+				*ptrterm = NULL;
+			};
+		};
+	};
+	printf("Fall through! Cannot happen.");
+	exit(1);
+}
 
 /* Same as above but replace f by (f+g).		*
  * Here g may have terms that are zero but not f.	*/
@@ -357,7 +411,7 @@ void rep_pol_add(struct polynomial *f, struct polynomial g)
 	};
 	printf("Fall through! Cannot happen.");
 	exit(1);
-};
+}
 
 /* Replaces f by the product (possibly null).		*/
 void times_int(int c, struct polynomial *f)
@@ -377,7 +431,7 @@ void times_int(int c, struct polynomial *f)
 		};
 	};
 	return;
-};
+}
 
 
 /* Replaces f by the product (possibly null).		*/
@@ -398,7 +452,28 @@ void times_scalar(mscalar c, struct polynomial *f)
 		};
 	};
 	return;
-};
+}
+
+/* Divides by p^k if possible. */
+void div_p_pol(int k, struct polynomial *f)
+{
+	int i;
+	struct term *aaterm;
+
+	aaterm = f->leading;
+	while(aaterm) {
+		if(valuation(aaterm->c) >= k) {
+			for(i=1;i<=k;i++) {
+				div_p(aaterm->c);
+			}
+			aaterm = aaterm->next;
+		} else {
+			printf("FIXME!\n");
+			exit(1);
+		};
+	};
+	return;
+}
 
 /* This function assumes the data structures f and g	*
  * have the same length, and f is initialized, but	*
@@ -409,7 +484,7 @@ void times_term(struct term t, struct polynomial f, struct polynomial *g)
 {
 	struct term *fterm, *gterm;
 
-	g->degree = f.degree + d1*t.n1 + d2*t.n2 + d3*t.n3 + d4*t.n4;
+	g->degree = f.degree + d1*t.n1 + d2*t.n2 + d3*t.n3;
 	gterm = g->leading;
 	fterm = f.leading;
 	while(fterm) {
@@ -417,12 +492,11 @@ void times_term(struct term t, struct polynomial f, struct polynomial *g)
 		gterm->n1 = t.n1 + fterm->n1;
 		gterm->n2 = t.n2 + fterm->n2;
 		gterm->n3 = t.n3 + fterm->n3;
-		gterm->n4 = t.n4 + fterm->n4;
 		fterm = fterm->next;
 		gterm = gterm->next;
 	};
 	return;
-};
+}
 
 
 /* Same as above but it creates and outputs the product. 	*
@@ -435,7 +509,7 @@ make_times_term(struct term t, struct polynomial f)
 	struct polynomial uit;
 	uit.leading = NULL;
 
-	uit.degree = f.degree + d1*t.n1 + d2*t.n2 + d3*t.n3 + d4*t.n4;
+	uit.degree = f.degree + d1*t.n1 + d2*t.n2 + d3*t.n3;
 	ptrterm = &(uit.leading);
 	fterm = f.leading;
 	while(fterm) {
@@ -444,48 +518,18 @@ make_times_term(struct term t, struct polynomial f)
 		(*ptrterm)->n1 = t.n1 + fterm->n1;
 		(*ptrterm)->n2 = t.n2 + fterm->n2;
 		(*ptrterm)->n3 = t.n3 + fterm->n3;
-		(*ptrterm)->n4 = t.n4 + fterm->n4;
 		fterm = fterm->next;
 		ptrterm = &((*ptrterm)->next);
 	};
 	return(uit);
-};
-
-/* This is the version which is better in that it knows
- * nothing about the internals of the scalars.			 */
-struct polynomial pol_mult_variant(struct polynomial f, struct polynomial g)
-{
-	struct polynomial uit, tmppol;
-	struct term *fterm;
-	tmppol.leading = NULL;
-	uit.leading = NULL;
-
-	if((!f.leading) || (!g.leading)) {
-		uit.degree = f.degree + g.degree;
-		return(uit);
-	};
-	make_tail(g.leading, &(tmppol.leading));
-	fterm = f.leading;
-	while((!uit.leading) && (fterm)) {
-		uit = make_times_term(*fterm, g);
-		clean_pol(&uit);
-		fterm = fterm->next;
-	};
-	while(fterm) {
-		times_term(*fterm, g, &tmppol);
-		rep_pol_add(&uit,tmppol);
-		fterm = fterm->next;
-	};
-	free_tail(tmppol.leading);
-	return(uit);
-};
+}
 
 /* Do not compute reductions. */
-void times_term_variant(struct term t, struct polynomial f, struct polynomial *g)
+static void times_term_variant(struct term t, struct polynomial f, struct polynomial *g)
 {
 	struct term *fterm, *gterm;
 
-	g->degree = f.degree + d1*t.n1 + d2*t.n2 + d3*t.n3 + d4*t.n4;
+	g->degree = f.degree + d1*t.n1 + d2*t.n2 + d3*t.n3;
 	gterm = g->leading;
 	fterm = f.leading;
 	while(fterm) {
@@ -493,15 +537,14 @@ void times_term_variant(struct term t, struct polynomial f, struct polynomial *g
 		gterm->n1 = t.n1 + fterm->n1;
 		gterm->n2 = t.n2 + fterm->n2;
 		gterm->n3 = t.n3 + fterm->n3;
-		gterm->n4 = t.n4 + fterm->n4;
 		fterm = fterm->next;
 		gterm = gterm->next;
 	};
 	return;
-};
+}
 
 /* We do not check for zero or reduce mod modulus. */
-void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
+static void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 {
 	int vergelijk;
 	struct term *fterm, *gterm;
@@ -560,9 +603,9 @@ void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 			gterm = gterm->next;
 		};
 	};
-};
+}
 
-struct polynomial
+static struct polynomial
 make_times_term_variant(struct term t, struct polynomial f)
 {
 	struct term *fterm;
@@ -570,7 +613,7 @@ make_times_term_variant(struct term t, struct polynomial f)
 	struct polynomial uit;
 	uit.leading = NULL;
 
-	uit.degree = f.degree + d1*t.n1 + d2*t.n2 + d3*t.n3 + d4*t.n4;
+	uit.degree = f.degree + d1*t.n1 + d2*t.n2 + d3*t.n3;
 	ptrterm = &(uit.leading);
 	fterm = f.leading;
 	while(fterm) {
@@ -579,12 +622,21 @@ make_times_term_variant(struct term t, struct polynomial f)
 		(*ptrterm)->n1 = t.n1 + fterm->n1;
 		(*ptrterm)->n2 = t.n2 + fterm->n2;
 		(*ptrterm)->n3 = t.n3 + fterm->n3;
-		(*ptrterm)->n4 = t.n4 + fterm->n4;
 		fterm = fterm->next;
 		ptrterm = &((*ptrterm)->next);
 	};
 	return(uit);
-};
+}
+
+static unsigned int nr_terms(struct term *aa)
+{
+	unsigned int na=0;
+	while(aa) {
+		na++;
+		aa = aa->next;
+	}
+	return(na);
+}
 
 /* Only clean up and do modulo modulus at the very end. */
 struct polynomial pol_mult(struct polynomial f, struct polynomial g)
@@ -599,7 +651,7 @@ struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 
 	if((!f.leading) || (!g.leading)) return(uit);
 
-	if (f.degree > g.degree) {
+	if (nr_terms(f.leading) > nr_terms(g.leading)) {
 		a = &g;
 		b = &f;
 	} else {
@@ -607,12 +659,16 @@ struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 		b = &g;
 	}
 
-	make_tail(b->leading, &(tmppol.leading));
-
 	tt = a->leading;
 
 	uit = make_times_term_variant(*tt, *b);
 	tt = tt->next;
+
+	if (tt) {
+		tmppol = make_times_term_variant(*tt, *b);
+		rep_pol_add_variant(&uit,tmppol);
+		tt = tt->next;
+	}
 
 	while(tt) {
 		times_term_variant(*tt, *b, &tmppol);
@@ -631,4 +687,4 @@ struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 	free_tail(tmppol.leading);
 
 	return(uit);
-};
+}

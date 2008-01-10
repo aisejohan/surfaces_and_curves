@@ -3,7 +3,8 @@ Description
 
 Partial implementation of the algorithm by Timothy G. Abbott, Kiran S. Kedlaya,
 and David Roe described in the preprint math.NT/0601508, with the additional
-twist that you can do surfaces in weigthed projected spaces.
+twist that you can do surfaces and curves (this version) in weigthed projected
+spaces.
 
 Requirements
 ------------
@@ -13,10 +14,15 @@ You will need a compiler and the gmp library installed.
 Usage
 -----
 
-Step 1: Edit 
---data.h to suit to your system and choose degrees d1,d2,d3,d4 and d,
-choose the prime p and the power r.
---Makefile, change --march=nocona to --march=<your-cpu-type> or just 
+Step 1: Edit the files data.h and the Makefile.
+
+data.h: Choose degrees d1,d2,d3 of the coordinates in weighted projective
+space and the degree of the curve d. Choose the prime p and the prime power r
+(the precision). As well choose q which determines the number of terms in the
+expansion to compute. It is best to choose
+	d1 <= d2 <= d3
+
+Makefile: change --march=nocona to --march=<your-cpu-type> or just 
 remove the --march= option entirely.
 
 Step 2: Compile with the command ``make''.
