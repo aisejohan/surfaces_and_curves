@@ -163,7 +163,7 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	struct polynomial *ppp;
 	struct term **ptraa[ss];
 	struct term **ptrterm;
-	unsigned int i, dividing;
+	unsigned int i, first;
 	mscalar c;
 
 	make_scalar(c);
@@ -190,19 +190,22 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	pp->leading = NULL;
 	ptrterm = &pp->leading;
 
-	while (ppp->leading) {
-		i = 0;
-		dividing = 1;
-		while (i+1 <= ss && dividing) {
-			if (deelbaar(vh[i]->leading, ppp->leading)) {
-				/* No sign in front of pppterm->c */
+	i = 0;
+	while ((ppp->leading) && (i+1 <= ss)) {
+
+		if (deelbaar(vh[i]->leading, ppp->leading)) {
+
+			save_the_spot.degree = aa[i]->degree;
+			save_the_spot.leading = ppp->leading;
+			first=1;
+
+			do {
+				/* No sign in front of c */
 				sc_div(ppp->leading->c, vh[i]->leading->c, c);
-				/* Change sign mon.c */
+				/* Change sign c */
 				sc_negate(c);
 
 				*ptraa[i] = ppp->leading;
-				save_the_spot.degree = aa[i]->degree;
-				save_the_spot.leading = *ptraa[i];
 
 				ppp->leading->n1 -= vh[i]->leading->n1;
 				ppp->leading->n2 -= vh[i]->leading->n2;
@@ -212,58 +215,38 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 				ppp->leading = ppp->leading->next;
 				(*ptraa[i])->next = NULL;
 
-				if (vh_rest[i].leading) {
+				if ((first) && (vh_rest[i].leading)) {
 					test.n1 = (*ptraa[i])->n1 + 
 						vh_rest[i].leading->n1;
 					test.n2 = (*ptraa[i])->n2 +
 						vh_rest[i].leading->n2;
 					test.n3 = (*ptraa[i])->n3 +
 						vh_rest[i].leading->n3;
+					first = 0;
 				}
 
 				ptraa[i]= &((*ptraa[i])->next);
 
-				while ((ppp->leading) &&
-				deelbaar(vh[i]->leading, ppp->leading)
-				&& ((!vh_rest[i].leading) ||
-				(GROTER == kleiner(ppp->leading, &test)))) {
-					/* No sign in front of
-					 * pppterm->c */
-					sc_div(ppp->leading->c,
-						vh[i]->leading->c, c);
-					/* Change sign mon.c */
-					sc_negate(c);
-					*ptraa[i] = ppp->leading;
-					ppp->leading->n1 -=
-						vh[i]->leading->n1;
-					ppp->leading->n2 -=
-						vh[i]->leading->n2;
-					ppp->leading->n3 -=
-						vh[i]->leading->n3;
-					sc_copy(c, ppp->leading->c);
-					ppp->leading = ppp->leading->next;
-					(*ptraa[i])->next = NULL;
-					ptraa[i]= &((*ptraa[i])->next);
-				}
-				uit = pol_mult(save_the_spot, vh_rest[i]);
-				merge_add(ppp, uit);
+			} while ((ppp->leading) && deelbaar(vh[i]->leading, ppp->leading) && ((!vh_rest[i].leading) || (GROTER == kleiner(ppp->leading, &test)))) ;
 
-				dividing = 0;
-			} else {
-				i=i+1;
-			};
-		};
-		/* dividing == 1 means that we cannot get rid of the leading
-		 * term. So we put it back in pp. */
-		if(dividing) {
+			uit = pol_mult(save_the_spot, vh_rest[i]);
+			merge_add(ppp, uit);
+
+			i = 0;
+
+		} else if (i+1 == ss) {
 			*ptrterm = ppp->leading;
 			ptrterm = &((*ptrterm)->next);
 			/* Move on to the next one. */
 			ppp->leading = ppp->leading->next;
 			/* Terminate pp. */
 			*ptrterm = NULL;
-		};
+			i = 0;
+		} else {
+			i = i+1;
+		}
 	};
+
 	free(ppp);
 	free_scalar(c);
 	return(aa);
@@ -281,6 +264,7 @@ struct polynomial *myf_division(struct polynomial *pp)
 	struct polynomial *ppp;
 	struct term **ptraa;
 	struct term **ptrterm;
+	int first;
 	mscalar c;
 
 	myf_rest.degree = myf.degree;
@@ -308,45 +292,41 @@ struct polynomial *myf_division(struct polynomial *pp)
 	while (ppp->leading) {
 
 		if (deelbaar(myf.leading, ppp->leading)) {
-			/* No sign in front of pppterm->c */
-			sc_mult_replace(c, ppp->leading->c);
-			/* Change sign mon.c */
-			sc_negate(ppp->leading->c);
 
-			*ptraa = ppp->leading;
-			save_the_spot.leading = *ptraa;
-
-			ppp->leading->n1 -= myf.leading->n1;
-			ppp->leading->n2 -= myf.leading->n2;
-			ppp->leading->n3 -= myf.leading->n3;
-
-			ppp->leading = ppp->leading->next;
-			(*ptraa)->next = NULL;
-
-			test.n1 = (*ptraa)->n1 + myf_rest.leading->n1;
-			test.n2 = (*ptraa)->n2 + myf_rest.leading->n2;
-			test.n3 = (*ptraa)->n3 + myf_rest.leading->n3;
-
-			ptraa = &((*ptraa)->next);
-
-			while ((ppp->leading) &&
-			deelbaar(myf.leading, ppp->leading) &&
-			(GROTER == kleiner(ppp->leading, &test))) {
-				/* No sign in front of
-				 * pppterm->c */
+			save_the_spot.leading = ppp->leading;
+			first = 1;
+			
+			do {
+		
+				/* No sign in front of pppterm->c */
 				sc_mult_replace(c, ppp->leading->c);
 				/* Change sign mon.c */
 				sc_negate(ppp->leading->c);
+
 				*ptraa = ppp->leading;
+
 				ppp->leading->n1 -= myf.leading->n1;
 				ppp->leading->n2 -= myf.leading->n2;
 				ppp->leading->n3 -= myf.leading->n3;
 				ppp->leading = ppp->leading->next;
 				(*ptraa)->next = NULL;
+				if (first) {
+					test.n1 = (*ptraa)->n1 +
+						myf_rest.leading->n1;
+					test.n2 = (*ptraa)->n2 +
+						myf_rest.leading->n2;
+					test.n3 = (*ptraa)->n3 +
+						myf_rest.leading->n3;
+					first = 0;
+				}
+
 				ptraa = &((*ptraa)->next);
-			}
+
+			} while ((ppp->leading) && deelbaar(myf.leading, ppp->leading) && (GROTER == kleiner(ppp->leading, &test))) ;
+
 			uit = pol_mult(save_the_spot, myf_rest);
 			merge_add(ppp, uit);
+
 		} else {
 			*ptrterm = ppp->leading;
 			ptrterm = &((*ptrterm)->next);
