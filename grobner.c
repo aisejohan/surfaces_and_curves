@@ -156,20 +156,34 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 
 
 #ifdef NEW_GROBNER
+static mscalar c[maxlength];
+static unsigned int e[maxlength];
+static struct polynomial vh_rest[maxlength];
+
+void setup_grobner(void )
+{
+	int i;
+
+	for(i=0;i+1<=G.len;i++) {
+		vh_rest[i].degree = G.ff[i]->degree;
+		vh_rest[i].leading = G.ff[i]->leading->next;
+		make_scalar(c[i]);
+		e[i] = mpz_remove(c[i], G.ff[i]->leading->c, prime);
+		mpz_invert(c[i], c[i], modulus);
+	}
+}
+
 struct polynomial ** 
 gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 {
 	struct polynomial save_the_spot, uit;
 	struct term test;
-	struct polynomial vh_rest[ss];
 	struct polynomial **aa;
 	struct polynomial *ppp;
 	struct term **ptraa[ss];
 	struct term **ptrterm;
-	unsigned int i, dividing;
-	mscalar c;
+	unsigned int i, j, dividing;
 
-	make_scalar(c);
 	ppp = NULL;
 	make_pol(&ppp);
 	aa = (struct polynomial **)malloc(ss*sizeof(struct polynomial *));
@@ -181,9 +195,12 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 		aa[i] = NULL;
 		make_pol(&aa[i]);
 		aa[i]->degree = (pp->degree > vh[i]->degree) ? (pp->degree - vh[i]->degree) : 0;
+		ptraa[i] = &(aa[i]->leading);
 		vh_rest[i].degree = vh[i]->degree;
 		vh_rest[i].leading = vh[i]->leading->next;
-		ptraa[i] = &(aa[i]->leading);
+		make_scalar(c[i]);
+		e[i] = mpz_remove(c[i],vh[i]->leading->c,prime);
+		mpz_invert(c[i],c[i],modulus);
 	};
 
 	/* Copy pp into ppp. */
@@ -199,9 +216,14 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 		while (i+1 <= ss && dividing) {
 			if (deelbaar(vh[i]->leading, ppp->leading)) {
 				/* No sign in front of pppterm->c */
-				sc_div(ppp->leading->c, vh[i]->leading->c, c);
+				j=e[i];
+				while (j) {
+					div_p(ppp->leading->c);
+					j--;
+				}
+				sc_mult_replace(c[i], ppp->leading->c);
 				/* Change sign mon.c */
-				sc_negate(c);
+				sc_negate(ppp->leading->c);
 
 				*ptraa[i] = ppp->leading;
 				save_the_spot.degree = aa[i]->degree;
@@ -211,7 +233,6 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 				ppp->leading->n2 -= vh[i]->leading->n2;
 				ppp->leading->n3 -= vh[i]->leading->n3;
 				ppp->leading->n4 -= vh[i]->leading->n4;
-				sc_copy(c, ppp->leading->c);
 
 				ppp->leading = ppp->leading->next;
 				(*ptraa[i])->next = NULL;
@@ -235,10 +256,14 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 				(GROTER == kleiner(ppp->leading, &test)))) {
 					/* No sign in front of
 					 * pppterm->c */
-					sc_div(ppp->leading->c,
-						vh[i]->leading->c, c);
+					j=e[i];
+					while (j) {
+						div_p(ppp->leading->c);
+						j--;
+					}
+					sc_mult_replace(c[i], ppp->leading->c);
 					/* Change sign mon.c */
-					sc_negate(c);
+					sc_negate(ppp->leading->c);
 					*ptraa[i] = ppp->leading;
 					ppp->leading->n1 -=
 						vh[i]->leading->n1;
@@ -248,7 +273,6 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 						vh[i]->leading->n3;
 					ppp->leading->n4 -=
 						vh[i]->leading->n4;
-					sc_copy(c, ppp->leading->c);
 					ppp->leading = ppp->leading->next;
 					(*ptraa[i])->next = NULL;
 					ptraa[i]= &((*ptraa[i])->next);
@@ -273,7 +297,7 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 		};
 	};
 	free(ppp);
-	free_scalar(c);
+	for(i=0;i+1<=ss;i++) free_scalar(c[i]);
 	return(aa);
 }
 #endif
