@@ -629,6 +629,7 @@ make_times_term_variant(struct term t, struct polynomial f)
 	return(uit);
 }
 
+/*
 static unsigned int nr_terms(struct term *aa)
 {
 	unsigned int na=0;
@@ -638,41 +639,22 @@ static unsigned int nr_terms(struct term *aa)
 	}
 	return(na);
 }
+*/
 
 /* Only clean up and do modulo modulus at the very end. */
-struct polynomial pol_mult(struct polynomial f, struct polynomial g)
+static struct polynomial __pol_mult(struct term *tt, struct polynomial g)
 {
 	struct polynomial uit, tmppol;
-	struct polynomial *a, *b;
-	struct term *tt;
-	tmppol.leading = NULL;
-	uit.leading = NULL;
 
-	uit.degree = f.degree + g.degree;
-
-	if((!f.leading) || (!g.leading)) return(uit);
-
-	if (nr_terms(f.leading) > nr_terms(g.leading)) {
-		a = &g;
-		b = &f;
-	} else {
-		a = &f;
-		b = &g;
-	}
-
-	tt = a->leading;
-
-	uit = make_times_term_variant(*tt, *b);
+	uit = make_times_term_variant(*tt, g);
 	tt = tt->next;
 
-	if (tt) {
-		tmppol = make_times_term_variant(*tt, *b);
-		rep_pol_add_variant(&uit,tmppol);
-		tt = tt->next;
-	}
+	tmppol = make_times_term_variant(*tt, g);
+	rep_pol_add_variant(&uit,tmppol);
+	tt = tt->next;
 
 	while(tt) {
-		times_term_variant(*tt, *b, &tmppol);
+		times_term_variant(*tt, g, &tmppol);
 		rep_pol_add_variant(&uit,tmppol);
 		tt = tt->next;
 	};
@@ -682,4 +664,38 @@ struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 	free_tail(tmppol.leading);
 
 	return(uit);
+}
+
+struct polynomial pol_mult(struct polynomial f, struct polynomial g)
+{
+	struct term *tf, *tg;
+
+	if ((!f.leading) || (!g.leading)) {
+		struct polynomial uit;
+		uit.leading = NULL;
+		uit.degree = f.degree + g.degree;
+		return uit;
+	}
+
+	if (!f.leading->next) {
+		return make_times_term(*f.leading, g);
+	}
+
+	if (!g.leading->next) {
+		return make_times_term(*g.leading, f);
+	}
+	
+	tf = f.leading->next;
+	tg = g.leading->next;
+
+	while ((tf) && (tg)) {
+		tf = tf->next;
+		tg = tg->next;
+	}
+
+	if (tf) {
+		return __pol_mult(g.leading, f);
+	} else {
+		return __pol_mult(f.leading, g);
+	}
 }
