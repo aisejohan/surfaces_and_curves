@@ -166,10 +166,10 @@ int check_flatness(unsigned int degree)
 	  };
 	};
 	if((count1 != goodcount) || (count2 != goodcount)) {
-		printf("Here we have degree %d, count1 %d"
+/*		printf("Here we have degree %d, count1 %d"
 		", count2 %d, and goodcount %d\n",
 		degree,count1,count2,goodcount);
-		
+*/		
 		aantal = count_sum(degree);
 		bb = (struct polynomial **)
 			malloc((G.len+aantal)*sizeof(struct polynomial *));
