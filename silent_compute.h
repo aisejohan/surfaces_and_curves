@@ -27,7 +27,6 @@ struct exponents {
 	unsigned int e2;
 	unsigned int e3;
 	unsigned int e4;
-	unsigned int e5;
 };
 
 struct base_change {
@@ -35,7 +34,6 @@ struct base_change {
 	struct polynomial bc2;
 	struct polynomial bc3;
 	struct polynomial bc4;
-	struct polynomial bc5;
 };
 
 struct lijst {

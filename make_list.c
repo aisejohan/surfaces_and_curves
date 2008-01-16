@@ -35,8 +35,8 @@
 #include "reduce.h"
 
 /* External variables. */
-int blen1,blen2,blen3;
-struct term **basis1,**basis2,**basis3;
+int blen1,blen2;
+struct term **basis1,**basis2;
 mscalar **fmatrix;
 
 
@@ -44,7 +44,7 @@ mscalar **fmatrix;
  * The result may be the zero polynomial!		*/
 struct polynomial make_initial_pol(unsigned int degree, int print)
 {
-	unsigned int a1,a2,a3,a4;
+	unsigned int a1,a2,a3;
 	int c;
 	struct polynomial uit;
 	struct term *uitterm;
@@ -60,9 +60,8 @@ struct polynomial make_initial_pol(unsigned int degree, int print)
 
 	for(a1=0;(d1*a1 <= degree);a1++) {
 	  for(a2=0;(d1*a1+d2*a2 <= degree);a2++) {
-	    for(a3=0;(d1*a1+d2*a2+d3*a3 <= degree);a3++) {
-	      if((degree - (a1*d1+a2*d2+a3*d3)) % d4 == 0) {
-		a4 = (degree - (a1*d1+a2*d2+a3*d3))/d4;
+	      if((degree - (a1*d1+a2*d2)) % d3 == 0) {
+		a3 = (degree - (a1*d1+a2*d2))/d3;
 		/* Dummy input at first. */
 		c = 1;
 		/* Create the new term to be put in. */
@@ -70,7 +69,6 @@ struct polynomial make_initial_pol(unsigned int degree, int print)
 		uitterm->n1 = a1;
 		uitterm->n2 = a2;
 		uitterm->n3 = a3;
-		uitterm->n4 = a4;
 		ito_sc(c,uitterm->c);
 		ptrterm = &(uit.leading);
 		while((*ptrterm) && (kleiner(uitterm, *ptrterm) == KLEINER)) {
@@ -79,26 +77,22 @@ struct polynomial make_initial_pol(unsigned int degree, int print)
 		uitterm->next = *ptrterm;
 		*ptrterm = uitterm;
 		uitterm=NULL;
-	      };
-	    };
-	  };
-	};
+	    }
+	  }
+	}
 	if (print) {
 		uitterm = uit.leading;
 		while (uitterm) {
 			a1 = uitterm->n1;
 			a2 = uitterm->n2;
 			a3 = uitterm->n3;
-			a4 = uitterm->n4;
 			c=0;
 			printf("Coefficient of   ");
 			if(a1) {printf("x^%d",a1); c++;};
-			if((a1) && (a2+a3+a4)) {printf(" * "); c++;};
+			if((a1) && (a2+a3)) {printf(" * "); c++;};
 			if(a2) {printf("y^%d",a2); c++;};
-			if((a2) && (a3+a4)) {printf(" * "); c++;};
+			if((a2) && (a3)) {printf(" * "); c++;};
 			if(a3) {printf("z^%d",a3); c++;};
-			if((a3) && (a4)) {printf(" * "); c++;};
-			if(a4) {printf("w^%d",a4); c++;};
 			while(8-c) {printf("   ");c++;};
 			printf("= ");
 			printmscalar(uitterm->c);
@@ -158,8 +152,8 @@ int main()
 			retry = setup();
 		};
 
-		if(d>=d1+d2+d3+d4) {
-			blen1=check_flatness(d-d1-d2-d3-d4);
+		if(d>=d1+d2+d3) {
+			blen1=check_flatness(d-d1-d2-d3);
 			if(blen1<=0) {
 				retry = 1;
 				/* Free up G and myf. */
@@ -169,7 +163,6 @@ int main()
 					free_tail(G.BC[i]->bc2.leading);
 					free_tail(G.BC[i]->bc3.leading);
 					free_tail(G.BC[i]->bc4.leading);
-					free_tail(G.BC[i]->bc5.leading);
 					free_tail(G.ff[i]->leading);
 				};
 				for(i=0;i+1<=maxlength;i++) {
@@ -182,33 +175,9 @@ int main()
 				free(G.ee);
 			}
 		};
-		if((retry == 0) && (2*d>=d1+d2+d3+d4)) {
-			blen2=check_flatness(2*d-d1-d2-d3-d4);
-			if(blen2<=0) {
-				retry = 1;
-				/* Free up G and myf. */
-				free_tail(myf.leading);
-				for(i=0;i+1<=G.len;i++) {
-					free_tail(G.BC[i]->bc1.leading);
-					free_tail(G.BC[i]->bc2.leading);
-					free_tail(G.BC[i]->bc3.leading);
-					free_tail(G.BC[i]->bc4.leading);
-					free_tail(G.BC[i]->bc5.leading);
-					free_tail(G.ff[i]->leading);
-				};
-				for(i=0;i+1<=maxlength;i++) {
-					free(G.BC[i]);
-					free(G.ff[i]);
-					free(G.ee[i]);
-				};
-				free(G.BC);
-				free(G.ff);
-				free(G.ee);
-			}
-		};
-		if((retry == 0) && (3*d>=d1+d2+d3+d4)) { 
-			blen3=check_flatness(3*d-d1-d2-d3-d4);
-			if(blen3 > 0) {
+		if((retry == 0) && (2*d>=d1+d2+d3)) {
+			blen2=check_flatness(2*d-d1-d2-d3);
+			if(blen2 > 0) {
 				for(i=0;i+1<=nr;i++) {
 					printf("%d ",coeff[i]);
 				}
@@ -224,7 +193,6 @@ int main()
 				free_tail(G.BC[i]->bc2.leading);
 				free_tail(G.BC[i]->bc3.leading);
 				free_tail(G.BC[i]->bc4.leading);
-				free_tail(G.BC[i]->bc5.leading);
 				free_tail(G.ff[i]->leading);
 			};
 			for(i=0;i+1<=maxlength;i++) {
@@ -235,7 +203,7 @@ int main()
 			free(G.BC);
 			free(G.ff);
 			free(G.ee);
-		};
+		}
 	};
 	
 	exit(13);
