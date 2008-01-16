@@ -13,6 +13,7 @@
 *.so
 *.mod.c
 *.patch
+a.out
 gmon.out
 tester
 tijdelijk
