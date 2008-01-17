@@ -6,13 +6,11 @@
 #include <stdio.h>
 
 /* really dumb. */
-#define MAX	200
+#define MAX	500
 #define CUTOFF	100
 
 int storage=0;
 int **lijst;
-int len;
-int pairs[6][4] = {{0,1,2,3},{0,2,1,3},{0,3,1,2},{1,2,0,3},{1,3,0,2},{2,3,0,1}};
 
 void my_alloc(void )
 {
@@ -139,6 +137,24 @@ int d_suitable(int len)
 	return 0;
 }
 
+int hilbert_function(int d1, int d2, int d3, int d, int i)
+{
+	int phi;
+
+	if (i < 0) return(0);
+
+	phi = count_sum(d1,d2,d3,i,0);
+	if (i >= d-d1) phi -= count_sum(d1,d2,d3,i-d+d1,0);
+	if (i >= d-d2) phi -= count_sum(d1,d2,d3,i-d+d2,0);
+	if (i >= d-d3) phi -= count_sum(d1,d2,d3,i-d+d3,0); 
+	if (i >= 2*d-d1-d2) phi += count_sum(d1,d2,d3,i-2*d+d1+d2,0);
+	if (i >= 2*d-d1-d3) phi += count_sum(d1,d2,d3,i-2*d+d1+d3,0);
+	if (i >= 2*d-d2-d3) phi += count_sum(d1,d2,d3,i-2*d+d2+d3,0);
+	if (i >= 3*d-d1-d2-d3) phi -= count_sum(d1,d2,d3,i-3*d+d1+d2+d3,0);
+	return(phi);
+}
+
+
 /* This computes the dimension of the automorphism group. *
  * Note that we are computing the dimension of the cone.  */
 int dim_aut(int d1, int d2, int d3)
@@ -153,7 +169,7 @@ int dim_aut(int d1, int d2, int d3)
 
 int main()
 {
-	int count,totaal,d1,d2,d3,degree,g;
+	int count,totaal,d1,d2,d3,degree,pg,i,h11;
 	totaal=0;
 /*
 	count = count_sum(5,6,11,60,1);
@@ -166,7 +182,7 @@ int main()
 	printf("%d \n ", gcd(1,2));
 	exit(0);
 */
-	printf("d1 d2 d3 d #f dim_aut g.\n");
+	printf("d1 d2 d3 d #f dim_aut i pg h11.\n");
 	d1 = 1;
 	while (d1 <= MAX) {
 	  d2 = d1;
@@ -175,25 +191,28 @@ int main()
 	    while (d3 <= MAX) {
 		degree = d1+d2+d3;
 		while (degree <= MAX) {
-			g = count_sum(d1,d2,d3,degree-d1-d2-d3,0);
-if (g < 11) {
-			count = count_sum(d1, d2, d3, degree,1);
-			if (d_suitable(count)) {
-				printf("%d %d %d %d %d ",
-					d1,d2,d3,degree,count);
-				count = dim_aut(d1,d2,d3);
-				printf("%d ",count);
-				printf("%d\n",g);
-			}
-}
-			degree++;
+		    if ((degree % 2 == 0) && (degree >= 2*d1+2*d2+2*d3) && well_formed(d1,d2,d3)) {
+		      count = count_sum(d1, d2, d3, degree,1);
+		      if (d_suitable(count)) {
+		        printf("%d %d %d %d %d ",d1,d2,d3,degree,count);
+		        count = dim_aut(d1,d2,d3);
+		        printf("%d ",count);
+			i = (degree/2)-d1-d2-d3;
+		        printf("%d ",i);
+			pg = hilbert_function(d1,d2,d3,degree,i),
+		        printf("%d ",pg);
+			h11 = hilbert_function(d1,d2,d3,degree,i+degree);
+		        printf("%d\n",h11);
+		      }
+		    }
+		    degree++;
+	        };
+	        d3++;
 	      };
-	      d3++;
+	      d2++;
 	    };
-	    d2++;
+	    d1++;
 	  };
-	  d1++;
-	};
 
 	return(0);
 }
