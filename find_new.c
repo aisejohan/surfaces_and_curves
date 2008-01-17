@@ -7,7 +7,8 @@
 
 /* really dumb. */
 #define MAX	500
-#define CUTOFF	100
+#define MAX_g	11
+#define MAX_pg	11
 
 int storage=0;
 int **lijst;
@@ -31,7 +32,7 @@ void my_alloc(void )
 	storage = 2*storage;
 	return;
 }
-		
+
 
 /* Returns the number of monomials in degree degree, and sets lijst
  * equal to the list of them.*/
@@ -47,12 +48,12 @@ int count_sum(int d1, int d2, int d3, int degree, int save)
 			if((degree - (a1*d1+a2*d2)) % d3 == 0) {
 				if (save) {
 					if (len == storage) my_alloc();
-					lijst[len][0] = a1;
-					lijst[len][1] = a2;
-					lijst[len][2] = (degree - 
-						(a1*d1+a2*d2)) / d3;
-					}
-					len++;
+						lijst[len][0] = a1;
+						lijst[len][1] = a2;
+						lijst[len][2] = (degree - 
+							(a1*d1+a2*d2)) / d3;
+				}
+				len++;
 			}
 			a2++;
 		}
@@ -98,7 +99,7 @@ int well_formed(int d1,  int d2,  int d3)
 	return(1);
 }
 
-/* This tests whether there can be a quasi-smooth surface in the linear
+/* This tests whether there can be a quasi-smooth curve in the linear
  * system. The rule is that for each i either x_i^power can occur or that
  * x_i^power x_j should occur.... etc. See paper by Iano-Fletcher. 
  * ASSUMES: degree is bigger than d_i for all i. */
@@ -120,7 +121,7 @@ int d_suitable(int len)
 				test_two[j] = 1;
 				k=0;
 				while (k <= 2) {
-					if ((k != j) && lijst[i][j] == 1)
+					if ((k != j) && lijst[i][k] == 1)
 						test_one[3-j-k] = 1;
 					k++;
 				}
@@ -167,21 +168,47 @@ int dim_aut(int d1, int d2, int d3)
 	return(totaal);
 }
 
-int main()
+void list_curves()
 {
-	int count,totaal,d1,d2,d3,degree,pg,i,h11;
-	totaal=0;
-/*
-	count = count_sum(5,6,11,60,1);
-	printf("Here is %d.\n",count);
-	print_sum(count);
-	d1 = well_formed(5,6,11);
-	printf("Here is %d.\n",d1);
-	d2 = d_suitable(count);
-	printf("Here is %d.\n",d2);
-	printf("%d \n ", gcd(1,2));
+	int count,d1,d2,d3,degree,g;
+
+	printf("d1 d2 d3 d #f dim_aut g.\n");
+	d1 = 1;
+	while (d1 <= MAX) {
+	  d2 = d1;
+	  while (d2 <= MAX) {
+	    d3 = d2;
+	    while (d3 <= MAX) {
+	      if (well_formed(d1,d2,d3)) {
+		degree = d1+d2+d3;
+		while (degree <= MAX) {
+		  g = count_sum(d1, d2, d3, degree-d1-d2-d3, 0);
+		  if (g < MAX_g) {
+		    count = count_sum(d1,d2,d3,degree,1);
+		    if (d_suitable(count)) {
+		        printf("%d %d %d %d %d ",d1,d2,d3,degree,count);
+		        count = dim_aut(d1,d2,d3);
+		        printf("%d ",count);
+		        printf("%d\n",g);
+		    }
+		  }
+		  degree++;
+	        }
+	      }
+	      d3++;
+	    }
+	    d2++;
+	  }
+	  d1++;
+	}
+
 	exit(0);
-*/
+}
+
+void list_double_covers()
+{
+	int count,d1,d2,d3,degree,pg,i,h11;
+
 	printf("d1 d2 d3 d #f dim_aut i pg h11.\n");
 	d1 = 1;
 	while (d1 <= MAX) {
@@ -189,30 +216,39 @@ int main()
 	  while (d2 <= MAX) {
 	    d3 = d2;
 	    while (d3 <= MAX) {
-		degree = d1+d2+d3;
+	      if (well_formed(d1,d2,d3)) {
+		degree = 2*d1+2*d2+2*d3;
 		while (degree <= MAX) {
-		    if ((degree % 2 == 0) && (degree >= 2*d1+2*d2+2*d3) && well_formed(d1,d2,d3)) {
-		      count = count_sum(d1, d2, d3, degree,1);
-		      if (d_suitable(count)) {
-		        printf("%d %d %d %d %d ",d1,d2,d3,degree,count);
-		        count = dim_aut(d1,d2,d3);
-		        printf("%d ",count);
-			i = (degree/2)-d1-d2-d3;
-		        printf("%d ",i);
-			pg = hilbert_function(d1,d2,d3,degree,i),
-		        printf("%d ",pg);
-			h11 = hilbert_function(d1,d2,d3,degree,i+degree);
-		        printf("%d\n",h11);
-		      }
+		  i = (degree/2)-d1-d2-d3;
+		  pg = hilbert_function(d1,d2,d3,degree,i);
+		  if (pg < MAX_pg) {
+		    count = count_sum(d1, d2, d3, degree,1);
+		    if (d_suitable(count)) {
+		      printf("%d %d %d %d %d ",d1,d2,d3,degree,count);
+		      count = dim_aut(d1,d2,d3);
+		      printf("%d ",count);
+		      printf("%d ",i);
+		      printf("%d ",pg);
+		      h11 = hilbert_function(d1,d2,d3,degree,i+degree);
+		      printf("%d\n",h11);
 		    }
-		    degree++;
-	        };
-	        d3++;
-	      };
-	      d2++;
-	    };
-	    d1++;
-	  };
+		  }
+		  degree = degree + 2;
+		}
+	      }
+	      d3++;
+	    }
+	    d2++;
+	  }
+	  d1++;
+	}
+
+	exit(0);
+}
+
+int main(void )
+{
+	list_double_covers();
 
 	return(0);
 }
