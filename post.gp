@@ -70,12 +70,34 @@ findweil(f,p,initial) =
 			)
 		);
 		if(success,
-			print1(" Something found... ");
+			print1(" Something found for n=",n,".");
 			if(check_symmetry(g,p,w),
 				print(" Success!");
 				return(g)
 			)
 		)
 	);
-	print("No luck this time!");
+	print(" No luck this time!");
+	return(0);
+}
+
+/* Assumes that A times its denominator has positive weight. */
+do_it(A)=
+{
+	local(p,lijst,m,c,l,d,f,g);
+	f = charpoly(A);
+	d = matdet(denominator(A)*A);
+	lijst = factor(d,1);
+	l = matsize(lijst)[1];
+	m = lijst[1,2];
+	c = 1;
+	for(i=2,l,if((lijst[i,2] > m),c=i;m=lijst[i,2]));
+	p = lijst[c,1];
+	print("The prime is ",p,".");
+	g = findweil(f,p);
+	if(g,,error("Did not work."));
+	print("The valuation of f-g is ",valuation(f-g,p));
+	print("The valuation of subst(g,x,A) is ",valuation(subst(g,x,A),p));
+	print("The factorization of g is",factor(g));
+	return(g);
 }
