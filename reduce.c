@@ -65,7 +65,6 @@ struct polynomial one_step_down(struct polynomial *f)
 	j = f->degree + d1 + d2 + d3 - d;
 	g = gcd(d,j);
 	j = j/g;
-	times_int(d/g, f);
 	
 	fBC.bc1.leading = NULL;
 	fBC.bc1.degree = f->degree - (d - d1);
@@ -134,6 +133,7 @@ if(aa[i]->leading) {
 	/* c becomes the inverse of i */
 	ito_sc(i,c);
 	sc_inv(c,c);
+	sc_imult_replace(d/g,c);
 
 	times_scalar(c,&(fBC.bc1));
 	times_scalar(c,&(fBC.bc2));
