@@ -32,23 +32,40 @@
 #include "delta.h"
 #include "compute.h"
 
+int gcd(int a, int b)
+{
+        int t;
+
+        while (b > 0) {
+                t = a % b;
+                a = b;
+                b = t;
+        }
+        return a;
+}
+
 /* Here f is replaced by its grobner reduction.			*
- * The degree of f should be jd-s for some j.			*
- * The resulting polynomial of degree (j-1)d-s is returned.	*/
+ * Works for any degree of f.					*
+ * The resulting polynomial of degree deg(f)-d is returned.	*/
 struct polynomial one_step_down(struct polynomial *f)
 {
-	int i,j,k;
+	int i,j,k,g;
 	mscalar c;
 	struct polynomial T;
 	struct polynomial **aa;
 	struct base_change fBC;
 	make_scalar(c);
 	
-	if ((f->degree + d1 + d2 + d3) % d != 0) {
-		printf("Incorrect degree. Stop.");
+	if (f->degree < d) {
+		printf("one_step_down: Incorrect degree. Stop.");
 		exit(1);
 	};
-	j = (f->degree + d1 + d2 + d3) / d;
+	/* We have to multiply the result by d/j where j is as
+	 * below. So we might as well multiply f by d/gcd(j,d) here. */
+	j = f->degree + d1 + d2 + d3 - d;
+	g = gcd(d,j);
+	j = j/g;
+	times_int(d/g, f);
 	
 	fBC.bc1.leading = NULL;
 	fBC.bc1.degree = f->degree - (d - d1);
@@ -103,11 +120,11 @@ if(aa[i]->leading) {
 	rep_deriv(&(fBC.bc2),2);
 	rep_deriv(&(fBC.bc3),3);
 	
-	/* Divide fBC.bci by j-1.		 	*/
+	/* Divide fBC.bci by j.			 	*/
 	k = 0;
-	i = j-1;
+	i = j;
 	sc_one(c);
-	/* Note that j is not 1, so i is not 0.		*/
+	/* Note that j is not 0, so i is not 0.		*/
 	while(i % p == 0) {
 		i = i/p;
 		k++;
