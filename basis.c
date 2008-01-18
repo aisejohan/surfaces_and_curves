@@ -35,8 +35,8 @@
 #include "reduce.h"
 
 /* External variables. */
-int blen1,blen2;
-struct term **basis1,**basis2;
+int blen1,blen2,blen3;
+struct term **basis1,**basis2,**basis3;
 mscalar **fmatrix;
 
 
@@ -49,9 +49,9 @@ static void add_coefficients(struct polynomial **aa, int column)
 	aaterm = aa[0]->leading;
 	while(aaterm) {
 		if(
-		(aaterm->n1 == basis2[row]->n1) &&
-		(aaterm->n2 == basis2[row]->n2) &&
-		(aaterm->n3 == basis2[row]->n3)) {
+		(aaterm->n1 == basis3[row]->n1) &&
+		(aaterm->n2 == basis3[row]->n2) &&
+		(aaterm->n3 == basis3[row]->n3)) {
 			sc_add_replace(aaterm->c,fmatrix[row][column]);
 			row++;
 			aaterm = aaterm->next;
@@ -61,13 +61,13 @@ static void add_coefficients(struct polynomial **aa, int column)
 	};
 	free_tail(aa[0]->leading);
 	free(aa[0]);
-	row = blen2;
+	row = blen3;
 	aaterm = aa[1]->leading;
 	while(aaterm) {
 		if(
-		(aaterm->n1 == basis1[row-blen2]->n1) &&
-		(aaterm->n2 == basis1[row-blen2]->n2) &&
-		(aaterm->n3 == basis1[row-blen2]->n3)) {
+		(aaterm->n1 == basis2[row-blen3]->n1) &&
+		(aaterm->n2 == basis2[row-blen3]->n2) &&
+		(aaterm->n3 == basis2[row-blen3]->n3)) {
 			sc_add_replace(aaterm->c,fmatrix[row][column]);
 			row++;
 			aaterm = aaterm->next;
@@ -77,6 +77,22 @@ static void add_coefficients(struct polynomial **aa, int column)
 	};
 	free_tail(aa[1]->leading);
 	free(aa[1]);
+	row = blen3+blen2;
+	aaterm = aa[2]->leading;
+	while(aaterm) {
+		if(
+		(aaterm->n1 == basis1[row-blen3-blen2]->n1) &&
+		(aaterm->n2 == basis1[row-blen3-blen2]->n2) &&
+		(aaterm->n3 == basis1[row-blen3-blen2]->n3)) {
+			sc_add_replace(aaterm->c,fmatrix[row][column]);
+			row++;
+			aaterm = aaterm->next;
+		} else {
+			row++;
+		};
+	};
+	free_tail(aa[2]->leading);
+	free(aa[2]);
 	free(aa);
 	return;
 }
@@ -85,12 +101,12 @@ static void print_fmatrix(void)
 {
 	int i,j;
 	printf("[");
-	for(i=0;i+1<=blen1+blen2;i++) {
-		for(j=0;j+1<=blen1+blen2;j++) {
+	for(i=0;i+1<=blen1+blen2+blen3;i++) {
+		for(j=0;j+1<=blen1+blen2+blen3;j++) {
 			printmscalar(fmatrix[i][j]);
-			if(j+1 < blen1+blen2) printf(",");
+			if(j+1 < blen1+blen2+blen3) printf(",");
 		};
-		if(i+1 < blen1+blen2) printf(";\\\n");
+		if(i+1 < blen1+blen2+blen3) printf(";\\\n");
 	};
 	printf("]\n");
 	return;
@@ -100,7 +116,7 @@ int main()
 {
 	int i,j,k,retry,extra;
 	int c;
-	mscalar cc;
+	mscalar cc, cc1, cc2;
 	struct term *aaterm;
 	struct polynomial Delta;
 	struct polynomial T;
@@ -111,6 +127,8 @@ int main()
 	Delta.leading = NULL;
 	aaterm = NULL;
 	make_scalar(cc);
+	make_scalar(cc1);
+	make_scalar(cc2);
 	
 #ifdef KIJKEN
 	printf("Debug is set! To unset do not define KIJKEN.\n");
@@ -127,13 +145,17 @@ int main()
 			retry = setup();
 		};
 
-		if(d>=d1+d2+d3) {
-			blen1=check_flatness(d-d1-d2-d3);
-			printf("For %d = d-d1-d2-d3 you get %d\n",
-					d-d1-d2-d3,blen1);
+		if (d % 2 != 0) {
+			printf("Error: degree should be even.\n");
+			exit(1);
+		}
+
+		if (d >= 2*d1+2*d2+2*d3) {
+			blen1=check_flatness(d/2-d1-d2-d3);
+			printf("For %d = d/2-d1-d2-d3 you get %d\n",
+					d/2-d1-d2-d3,blen1);
 			if(blen1<=0) {
 				retry = 1;
-				sleep(10);
 				/* Free up G and myf. */
 				free_tail(myf.leading);
 				for(i=0;i+1<=G.len;i++) {
@@ -152,9 +174,9 @@ int main()
 				free(G.ff);
 				free(G.ee);
 			} else {
-				basis1 = find_basis(d-d1-d2-d3,blen1);
+				basis1 = find_basis(d/2-d1-d2-d3,blen1);
 				for(i=0;i+1<=blen1;i++) {
-					T.degree = d-d1-d2-d3;
+					T.degree = d/2-d1-d2-d3;
 					T.leading = basis1[i];
 					print_pol(T);
 					T.leading = NULL;
@@ -162,10 +184,10 @@ int main()
 				printf("\n");
 			};
 		};
-		if((retry == 0) && (2*d>=d1+d2+d3)) {
-			blen2=check_flatness(2*d-d1-d2-d3);
-			printf("For %d = 2*d-d1-d2-d3 you get %d\n",
-					2*d-d1-d2-d3,blen2);
+		if((retry == 0) && (3*d >= 2*d1+2*d2+2*d3)) {
+			blen2=check_flatness(3*d/2-d1-d2-d3);
+			printf("For %d = 3*d/2-d1-d2-d3 you get %d\n",
+					3*d/2-d1-d2-d3,blen2);
 			if(blen2<=0) {
 				retry = 1;
 				/* Free up G and myf. */
@@ -191,10 +213,54 @@ int main()
 				};
 				free(basis1);
 			} else {
-				basis2 = find_basis(2*d-d1-d2-d3,blen2);
+				basis2 = find_basis(3*d/2-d1-d2-d3,blen2);
 				for(i=0;i+1<=blen2;i++) {
-					T.degree = 2*d-d1-d2-d3;
+					T.degree = 3*d/2-d1-d2-d3;
 					T.leading = basis2[i];
+					print_pol(T);
+					T.leading = NULL;
+				};
+				printf("\n");
+			};
+		};
+		if((retry == 0) && (5*d >= 2*d1+2*d2+2*d3)) { 
+			blen3=check_flatness(5*d/2-d1-d2-d3);
+			printf("For %d = 5*d/2-d1-d2-d3 you get %d\n",
+					5*d/2-d1-d2-d3,blen3);
+			if(blen3<=0) {
+				retry = 1;
+				/* Free up G and myf. */
+				free_tail(myf.leading);
+				for(i=0;i+1<=G.len;i++) {
+					free_tail(G.BC[i]->bc1.leading);
+					free_tail(G.BC[i]->bc2.leading);
+					free_tail(G.BC[i]->bc3.leading);
+					free_tail(G.BC[i]->bc4.leading);
+					free_tail(G.ff[i]->leading);
+				};
+				for(i=0;i+1<=maxlength;i++) {
+					free(G.BC[i]);
+					free(G.ff[i]);
+					free(G.ee[i]);
+				};
+				free(G.BC);
+				free(G.ff);
+				free(G.ee);
+				/* Free up basis1. */
+				for(i=0;i+1<=blen1;i++) {
+					free_term(basis1[i]);
+				};
+				free(basis1);
+				/* Free up basis2. */
+				for(i=0;i+1<=blen2;i++) {
+					free_term(basis2[i]);
+				};
+				free(basis2);
+			} else {
+				basis3 = find_basis(5*d/2-d1-d2-d3,blen3);
+				for(i=0;i+1<=blen3;i++) {
+					T.degree = 5*d/2-d1-d2-d3;
+					T.leading = basis3[i];
 					print_pol(T);
 					T.leading = NULL;
 				};
@@ -203,27 +269,27 @@ int main()
 		};
 	};
 	
-	if(d < d1+d2+d3) {
+	if(2*d < d1+d2+d3) {
 		printf("Degree too small and p_g=0!\n");
 		exit(0);
 	};
 
 	/* Initialize fmatrix */
-	fmatrix = (mscalar **)malloc((blen1+blen2)*sizeof(mscalar *));
+	fmatrix = (mscalar **)malloc((blen1+blen2+blen3)*sizeof(mscalar *));
 	if(!fmatrix) {
 		perror("Malloc failed!");
 		exit(1);
 	};
-	for(i=0;i+1<=blen1+blen2;i++) {
+	for(i=0;i+1<=blen1+blen2+blen3;i++) {
 		fmatrix[i] = (mscalar *)
-			malloc((blen1+blen2)*sizeof(mscalar));
+			malloc((blen1+blen2+blen3)*sizeof(mscalar));
 		if(!fmatrix[i]) {
 			perror("Malloc failed!");
 			exit(1);
 		};
 	};
-	for(i=0;i+1<=blen1+blen2;i++) {
-		for(j=0;j+1<=blen1+blen2;j++) {
+	for(i=0;i+1<=blen1+blen2+blen3;i++) {
+		for(j=0;j+1<=blen1+blen2+blen3;j++) {
 			make_scalar(fmatrix[i][j]);
 			sc_zero(fmatrix[i][j]);
 		};
@@ -231,7 +297,7 @@ int main()
 
 	/* Initialize fbasis. */
 	fbasis = (struct polynomial ***)
-		malloc((blen1+blen2)*sizeof(struct polynomial **));
+		malloc((blen1+blen2+blen3)*sizeof(struct polynomial **));
 	if(!fbasis) {
 		perror("Malloc failed!");
 		exit(1);
@@ -239,7 +305,7 @@ int main()
 
 	/* Initialize hhh. */
 	hhh = (struct polynomial ***)
-		malloc(2*sizeof(struct polynomial **));
+		malloc(3*sizeof(struct polynomial **));
 	if(!hhh) {
 		perror("Malloc failed!");
 		exit(1);
@@ -248,17 +314,19 @@ int main()
 	/* Initialize extra. */
 	extra=0;
 	for(i=0;i<=q;i++) {
-		j=(2+i)*p-1;
+		j=(5+2*i)*p-2;
 		c=-i-2;
+		if (p == 2) c -= i;
 		while (j > 0) {
 			c += ivaluation(j);
-			j--;
+			j -= 2;
 		}
 		if (c > extra) extra = c;
 	}
+	printf("The invariant extra is equal to %d.\n",extra);
 
 	/* Initialize bb which is going to be equal to
-	 * 	p^i Delta^i p^3 (x1...x3)^(p-1)
+	 * 	p^i Delta^i p^2 (x1...x3)^(p-1)
 	 * at various stages. */
 	T.degree = (p-1)*(d1+d2+d3);
 	make_term(&T.leading);
@@ -273,36 +341,52 @@ int main()
 	bb = split_up(&T);
 
 	/* Highest degree and term is first basis element. 	*
-	 * This is the case i=0,j=2 of expansion in the file	*
+	 * This is the case i=0,j=5/2 of expansion in the file	*
 	 * short_explanation.					*
 	 * Note (i+j-1 choose j-1) is 1 in this case. 		*/
 	sc_one(cc);
 	hhh[0] = copy_pol_star(cc,bb);
+	for(i=0;i+1<=blen3;i++) {
+		T.degree = p*(5*d/2-d1-d2-d3);
+		make_term(&T.leading);
+		sc_one(T.leading->c);
+		T.leading->n1 = p*basis3[i]->n1;
+		T.leading->n2 = p*basis3[i]->n2;
+		T.leading->n3 = p*basis3[i]->n3;
+		T.leading->next = NULL;
+		fbasis[i] = split_up(&T);
+	};
+	
+	/* This is the case i=0,j=2 of expansion in the file	*
+	 * short_explanation.					*
+	 * Note (i+j-1 choose j-1) is 1 in this case. 		*/
+	sc_one(cc);
+	hhh[1] = copy_pol_star(cc,bb);
 	for(i=0;i+1<=blen2;i++) {
-		T.degree = p*(2*d-d1-d2-d3);
+		T.degree = p*(3*d/2-d1-d2-d3);
 		make_term(&T.leading);
 		sc_one(T.leading->c);
 		T.leading->n1 = p*basis2[i]->n1;
 		T.leading->n2 = p*basis2[i]->n2;
 		T.leading->n3 = p*basis2[i]->n3;
 		T.leading->next = NULL;
-		fbasis[i] = split_up(&T);
+		fbasis[blen3+i] = split_up(&T);
 	};
-	
+
 	/* This is the case i=0,j=1 of expansion in the file	*
 	 * short_explanation.					*
 	 * Note (i+j-1 choose j-1) is 1 in this case. 		*/
 	sc_one(cc);
-	hhh[1] = copy_pol_star(cc,bb);
+	hhh[2] = copy_pol_star(cc,bb);
 	for(i=0;i+1<=blen1;i++) {
-		T.degree = p*(1*d-d1-d2-d3);
+		T.degree = p*(1*d/2-d1-d2-d3);
 		make_term(&T.leading);
 		sc_one(T.leading->c);
 		T.leading->n1 = p*basis1[i]->n1;
 		T.leading->n2 = p*basis1[i]->n2;
 		T.leading->n3 = p*basis1[i]->n3;
 		T.leading->next = NULL;
-		fbasis[blen2+i] = split_up(&T);
+		fbasis[blen3+blen2+i] = split_up(&T);
 	};
 
 	/* This actually computes p*Delta */
@@ -310,10 +394,10 @@ int main()
 	dd = split_up(&Delta);
 	for(i=1;i<=q;i++) {
 		/* Compute next version of bb which is
-		 * 	p^i Delta^i p^3 (x1...x4)^(p-1) 
+		 * 	p^i Delta^i p^2 (x1...x4)^(p-1) 
 		 * in split form. */
 		printf("Start computing %d^%d Delta^%d"
-			" (x1x2x3x4)^%d... ",p,3+i,i,p-1);
+			" (x1x2x3)^%d... ",p,2+i,i,p-1);
 		fflush(stdout);
 		hh = mult_split(dd,bb);
 		free_star(bb);
@@ -323,28 +407,60 @@ int main()
 		printf("Done.\n");
 
 		/* Highest degree and term is first basis element. 	*
-		 * This is the case j=2,i=i of the file			*
+		 * This is the case j=5/2,i=i of the file		*
 		 * short_explanation.					*/
+		sc_one(cc1);
+		sc_one(cc2);
 		sc_one(cc);
-		c=i+1;
-		sc_imult_replace(c,cc);
-		/* Note (i+j-1 choose j-1) is (i+1) in this case. */
+		c = i;
+		while (c > 0) {
+			k = 2*c;
+			sc_imult_replace(k,cc1);
+			k = 5+2*i-2*c;
+			sc_imult_replace(k,cc2);
+			c--;
+		}
+		sc_div(cc2,cc1,cc);
+		/* Note the above equals (i+j-1 choose j-1) in this case. */
 		aa = copy_pol_star(cc,bb);
-		merge_add_split(&(hhh[0]),aa);	
+		merge_add_split(&(hhh[0]),aa);
 
+		/* This is the case j=3/2,i=i of the file		*
+		 * short_explanation.					*/
+		sc_one(cc1);
+		sc_one(cc2);
+		c = i;
+		while (c > 0) {
+			sc_imult_replace(2*c,cc1);
+			sc_imult_replace(3+2*i-2*c,cc2);
+			c--;
+		}
+		sc_div(cc2,cc1,cc);
+		/* Note the above equals (i+j-1 choose j-1) in this case. */
+		aa = copy_pol_star(cc,bb);
+		merge_add_split(&(hhh[1]),aa);
 
 		/* This is the case j=1,i=i of the file			*
 		 * short_explanation.					*/
-		sc_one(cc);
-		/* Note (i+j-1 choose j-1) is 1 in this case. */
+		sc_one(cc1);
+		sc_one(cc2);
+		c = i;
+		while (c > 0) {
+			sc_imult_replace(2*c,cc1);
+			sc_imult_replace(1+2*i-2*c,cc2);
+			c--;
+		}
+		sc_div(cc2,cc1,cc);
+		/* Note the abve equals (i+j-1 choose j-1) in this case. */
 		aa = copy_pol_star(cc,bb);
-		merge_add_split(&(hhh[1]),aa);
+		merge_add_split(&(hhh[2]),aa);
 	}
 
 	printf("Start computing aa.\n");
-	for(j=0;j+1<=blen2+blen1;j++) {
-		if (j+1 <= blen2) c=0;
-		else c=1;
+	for(j=0;j+1<=blen3+blen2+blen1;j++) {
+		if (j+1 <= blen3) c=0;
+		else if (j+1 <= blen3+blen2) c=1;
+		else c=2;
 		printf("%d",j+1); fflush(stdout);
 		hh = mult_split(fbasis[j],hhh[c]);
 		printf(" "); fflush(stdout);
@@ -354,24 +470,24 @@ int main()
 	printf("\n");
 
 	k=extra+1;
-	for(i=0;i+1<=blen1+blen2;i++) {
-		for(j=0;j+1<=blen1+blen2;j++) {
+	for(i=0;i+1<=blen1+blen2+blen3;i++) {
+		for(j=0;j+1<=blen1+blen2+blen3;j++) {
 			c=valuation(fmatrix[i][j]);
 			if (!sc_is_zero(fmatrix[i][j]) && (c < k)) k = c;
 		}
 	}
-	for(i=0;i+1<=blen1+blen2;i++) {
-		for(j=0;j+1<=blen1+blen2;j++) {
+	for(i=0;i+1<=blen1+blen2+blen3;i++) {
+		for(j=0;j+1<=blen1+blen2+blen3;j++) {
 			for(c=1;c<=k;c++) div_p(fmatrix[i][j]);
 		}
 	}
 
 	print_fmatrix();
-	if (k == extra+1 ) {
+	if (k == extra ) {
 		printf("This should be the matrix of frobenius!\n");
 	} else {
 		printf("This matrix times %d^(-%d)"
-		" should be the matrix of frobenius.\n",p,extra+1-k);
+		" should be the matrix of frobenius.\n",p,extra-k);
 	}
 
 	/************************************************
@@ -383,6 +499,7 @@ int main()
 	free_star(dd); free(dd);
 	free_star(hhh[0]); free(hhh[0]);
 	free_star(hhh[1]); free(hhh[1]);
+	free_star(hhh[2]); free(hhh[2]);
 	free(hhh);
 	/* Free G and myf. */
 	free_tail(myf.leading);
@@ -412,7 +529,7 @@ int main()
 	};
 	free(basis2);
 	/* Free fbasis. */
-	for(i=0;i+1<=blen1+blen2;i++) {
+	for(i=0;i+1<=blen1+blen2+blen3;i++) {
 		k = 1 + fbasis[i][0]->degree/d;
 		for(j=0;j+1<=k;j++) {
 			free_tail(fbasis[i][j]->leading);
@@ -422,16 +539,18 @@ int main()
 	};
 	free(fbasis);
 	/* Free fmatrix */
-	for(i=0;i+1<=blen1+blen2;i++) {
-		for(j=0;j+1<=blen1+blen2;j++) {
+	for(i=0;i+1<=blen1+blen2+blen3;i++) {
+		for(j=0;j+1<=blen1+blen2+blen3;j++) {
 			free_scalar(fmatrix[i][j]);
 		};
 	};
-	for(i=0;i+1<=blen1+blen2;i++) {
+	for(i=0;i+1<=blen1+blen2+blen3;i++) {
 		free(fmatrix[i]);
 	};
 	free(fmatrix);
 	free_scalar(cc);
+	free_scalar(cc1);
+	free_scalar(cc2);
 	/********************************************************
 	 * End Neurotic freeing. 				*
 	 ********************************************************/

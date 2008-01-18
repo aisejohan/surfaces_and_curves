@@ -65,7 +65,6 @@ struct polynomial one_step_down(struct polynomial *f)
 	j = f->degree + d1 + d2 + d3 - d;
 	g = gcd(d,j);
 	j = j/g;
-	times_int(d/g, f);
 	
 	fBC.bc1.leading = NULL;
 	fBC.bc1.degree = f->degree - (d - d1);
@@ -134,6 +133,7 @@ if(aa[i]->leading) {
 	/* c becomes the inverse of i */
 	ito_sc(i,c);
 	sc_inv(c,c);
+	sc_imult_replace(d/g,c);
 
 	times_scalar(c,&(fBC.bc1));
 	times_scalar(c,&(fBC.bc2));
@@ -145,7 +145,7 @@ if(aa[i]->leading) {
 	merge_add(&(fBC.bc4), fBC.bc1);
 
 	if (k > 0) div_p_pol(k,&fBC.bc4);
-
+	
 	free_scalar(c);
 	return(fBC.bc4);
 }
@@ -207,7 +207,7 @@ struct polynomial **all_the_way_split(struct polynomial **bb)
 	struct polynomial T;
 	struct polynomial **aa,**cc;
 	
-	/* bb[0] has degree (jj)d-s */
+	/* bb[0] has degree (jj - 1)d + (d/2-s)  */
 	jj = 1 + bb[0]->degree/d;
 	/* This means we have bb[0],...,bb[jj-1] */
 	
@@ -218,20 +218,22 @@ struct polynomial **all_the_way_split(struct polynomial **bb)
 	};
 	aa[0] = NULL;
 	aa[1] = NULL;
+	aa[2] = NULL;
 	make_pol(&aa[0]);
 	make_pol(&aa[1]);
+	make_pol(&aa[2]);
 
-	aa[0]->degree = 2*d - (d1+d2+d3);
-	aa[1]->degree = d - (d1+d2+d3);
+	aa[0]->degree = 5*d/2-d1-d2-d3;
+	aa[1]->degree = 3*d/2-d1-d2-d3;
+	aa[2]->degree = d/2-d1-d2-d3;
 	
 	for(ii=0;ii+1<=jj;ii++) {
 		
 		/* bb[ii] has degree 	*
 		 * (jj-ii)d-s = jd-s,	*
 		 * so j=jj-ii 		*/
-		j = (bb[ii]->degree+d1+d2+d3)/d;
 
-		if(j>1) {
+		if (bb[ii]->degree >= d) {
 			/* This will have degree (j-1)d - s	*/
 			T = one_step_down(bb[ii]);
 			cc = split_up(&T);
@@ -243,9 +245,11 @@ struct polynomial **all_the_way_split(struct polynomial **bb)
 		};
 	};
 
-	merge_add(aa[0],*bb[jj-2]);
+	merge_add(aa[0],*bb[jj-3]);
+	free(bb[jj-3]);
+	merge_add(aa[1],*bb[jj-2]);
 	free(bb[jj-2]);
-	merge_add(aa[1],*bb[jj-1]);
+	merge_add(aa[2],*bb[jj-1]);
 	free(bb[jj-1]);
 	free(bb);
 	

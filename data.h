@@ -42,13 +42,13 @@
  * can be much faster. */
 #define NEW_GROBNER
 
-#define d1	1
-#define d2	1
-#define d3	1
-#define d	4
-#define p	5
-#define r	40		/* Exponent. */
-#define q	6		/* Largest power of Delta. */
+#define d1	9
+#define d2	13
+#define d3	14
+#define d	126
+#define p	7
+#define r	50		/* Exponent. */
+#define q	20		/* Largest power of Delta. */
 
 #define maxlength	256
 
