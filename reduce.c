@@ -203,7 +203,7 @@ struct polynomial **all_the_way(struct polynomial *f)
  * ALTERNATIVE VERSION.						*/
 struct polynomial **all_the_way_split(struct polynomial **bb)
 {
-	int j,ii,jj,tel;
+	int ii,jj,tel;
 	struct polynomial T;
 	struct polynomial **aa,**cc;
 	

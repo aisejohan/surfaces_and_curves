@@ -133,6 +133,21 @@ int main()
 #ifdef KIJKEN
 	printf("Debug is set! To unset do not define KIJKEN.\n");
 #endif
+	if (d % 2 != 0) {
+		printf("Error: degree should be even.\n");
+		exit(1);
+	}
+
+	if (d < 2*d1+2*d2+2*d3) {
+		printf("Error: degree should be >= 2(d1+d2+d3).\n");
+		exit(1);
+	}
+
+	if (p == 2) {
+		printf("Error: p cannot be 2.\n");
+		exit(1);
+	}
+
 	/* Setup the scalars. */
 	setup_scalars();
 
@@ -145,46 +160,40 @@ int main()
 			retry = setup();
 		};
 
-		if (d % 2 != 0) {
-			printf("Error: degree should be even.\n");
-			exit(1);
-		}
 
-		if (d >= 2*d1+2*d2+2*d3) {
-			blen1=check_flatness(d/2-d1-d2-d3);
-			printf("For %d = d/2-d1-d2-d3 you get %d\n",
-					d/2-d1-d2-d3,blen1);
-			if(blen1<=0) {
-				retry = 1;
-				/* Free up G and myf. */
-				free_tail(myf.leading);
-				for(i=0;i+1<=G.len;i++) {
-					free_tail(G.BC[i]->bc1.leading);
-					free_tail(G.BC[i]->bc2.leading);
-					free_tail(G.BC[i]->bc3.leading);
-					free_tail(G.BC[i]->bc4.leading);
-					free_tail(G.ff[i]->leading);
-				};
-				for(i=0;i+1<=maxlength;i++) {
-					free(G.BC[i]);
-					free(G.ff[i]);
-					free(G.ee[i]);
-				};
-				free(G.BC);
-				free(G.ff);
-				free(G.ee);
-			} else {
-				basis1 = find_basis(d/2-d1-d2-d3,blen1);
-				for(i=0;i+1<=blen1;i++) {
-					T.degree = d/2-d1-d2-d3;
-					T.leading = basis1[i];
-					print_pol(T);
-					T.leading = NULL;
-				};
-				printf("\n");
+		blen1=check_flatness(d/2-d1-d2-d3);
+		printf("For %d = d/2-d1-d2-d3 you get %d\n",
+				d/2-d1-d2-d3,blen1);
+		if(blen1<=0) {
+			retry = 1;
+			/* Free up G and myf. */
+			free_tail(myf.leading);
+			for(i=0;i+1<=G.len;i++) {
+				free_tail(G.BC[i]->bc1.leading);
+				free_tail(G.BC[i]->bc2.leading);
+				free_tail(G.BC[i]->bc3.leading);
+				free_tail(G.BC[i]->bc4.leading);
+				free_tail(G.ff[i]->leading);
 			};
+			for(i=0;i+1<=maxlength;i++) {
+				free(G.BC[i]);
+				free(G.ff[i]);
+				free(G.ee[i]);
+			};
+			free(G.BC);
+			free(G.ff);
+			free(G.ee);
+		} else {
+			basis1 = find_basis(d/2-d1-d2-d3,blen1);
+			for(i=0;i+1<=blen1;i++) {
+				T.degree = d/2-d1-d2-d3;
+				T.leading = basis1[i];
+				print_pol(T);
+				T.leading = NULL;
+			};
+			printf("\n");
 		};
-		if((retry == 0) && (3*d >= 2*d1+2*d2+2*d3)) {
+		if (retry == 0) {
 			blen2=check_flatness(3*d/2-d1-d2-d3);
 			printf("For %d = 3*d/2-d1-d2-d3 you get %d\n",
 					3*d/2-d1-d2-d3,blen2);
@@ -223,7 +232,7 @@ int main()
 				printf("\n");
 			};
 		};
-		if((retry == 0) && (5*d >= 2*d1+2*d2+2*d3)) { 
+		if (retry == 0) { 
 			blen3=check_flatness(5*d/2-d1-d2-d3);
 			printf("For %d = 5*d/2-d1-d2-d3 you get %d\n",
 					5*d/2-d1-d2-d3,blen3);
@@ -268,11 +277,6 @@ int main()
 			};
 		};
 	};
-	
-	if(2*d < d1+d2+d3) {
-		printf("Degree too small and p_g=0!\n");
-		exit(0);
-	};
 
 	/* Initialize fmatrix */
 	fmatrix = (mscalar **)malloc((blen1+blen2+blen3)*sizeof(mscalar *));
@@ -312,11 +316,10 @@ int main()
 	};
 
 	/* Initialize extra. */
-	extra=0;
+	extra = 0;
 	for(i=0;i<=q;i++) {
-		j=(5+2*i)*p-2;
-		c=-i-2;
-		if (p == 2) c -= i;
+		j = (5+2*i)*p-2;
+		c = -i-2;
 		while (j > 0) {
 			c += ivaluation(j);
 			j -= 2;
