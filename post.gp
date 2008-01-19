@@ -34,6 +34,7 @@ check_symmetry(f,p,w) =
 			print("Not symmetric.");
 			return(0)
 		,
+			print("The sign is ",(-1)^d,".");
 			return(1)
 		)
 	);
@@ -42,6 +43,7 @@ check_symmetry(f,p,w) =
 			print("Not symmetric.");
 			return(0)
 		,
+			print("The sign is ",-(-1)^d,".");
 			return(1)
 		)
 	);
@@ -70,9 +72,9 @@ findweil(f,p,initial) =
 			)
 		);
 		if(success,
-			print1(" Something found for n=",n,".");
+			print1(" Something found for n=",n,". ");
 			if(check_symmetry(g,p,w),
-				print(" Success!");
+				print("Success!");
 				return(g)
 			)
 		)
@@ -98,6 +100,6 @@ do_it(A)=
 	if(g,,error("Did not work."));
 	print("The valuation of f-g is ",valuation(f-g,p));
 	print("The valuation of subst(g,x,A) is ",valuation(subst(g,x,A),p));
-	print("The factorization of g is",factor(g));
+	print("The factorization of g is ",factor(g));
 	return(g);
 }
