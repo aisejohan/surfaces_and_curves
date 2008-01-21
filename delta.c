@@ -165,7 +165,7 @@ int check_flatness(unsigned int degree)
 	    };
 	  };
 	};
-	if((count1 != goodcount) || (count2 != goodcount)) {
+	if (count2 != goodcount) {
 /*		printf("Here we have degree %d, count1 %d"
 		", count2 %d, and goodcount %d\n",
 		degree,count1,count2,goodcount);
