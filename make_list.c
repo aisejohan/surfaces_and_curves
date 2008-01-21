@@ -35,9 +35,7 @@
 #include "reduce.h"
 
 /* External variables. */
-int blen1,blen2;
-struct term **basis1,**basis2;
-mscalar **fmatrix;
+int blen1,blen2,blen3;
 
 
 /* Makes a random polynomial of degree degree.		*
@@ -150,11 +148,33 @@ int main()
 			}
 			clean_pol(&myf);
 			retry = setup();
-		};
+		}
 
-		if(d>=d1+d2+d3) {
-			blen1=check_flatness(d-d1-d2-d3);
-			if(blen1<=0) {
+		blen1=check_flatness(d/2-d1-d2-d3);
+		if(blen1<=0) {
+			retry = 1;
+			/* Free up G and myf. */
+			free_tail(myf.leading);
+			for(i=0;i+1<=G.len;i++) {
+				free_tail(G.BC[i]->bc1.leading);
+				free_tail(G.BC[i]->bc2.leading);
+				free_tail(G.BC[i]->bc3.leading);
+				free_tail(G.BC[i]->bc4.leading);
+				free_tail(G.ff[i]->leading);
+			}
+			for(i=0;i+1<=maxlength;i++) {
+				free(G.BC[i]);
+				free(G.ff[i]);
+				free(G.ee[i]);
+			}
+			free(G.BC);
+			free(G.ff);
+			free(G.ee);
+		}
+
+		if (retry == 0) {
+			blen2=check_flatness(3*d/2-d1-d2-d3);
+			if(blen2<=0) {
 				retry = 1;
 				/* Free up G and myf. */
 				free_tail(myf.leading);
@@ -164,7 +184,7 @@ int main()
 					free_tail(G.BC[i]->bc3.leading);
 					free_tail(G.BC[i]->bc4.leading);
 					free_tail(G.ff[i]->leading);
-				};
+				}
 				for(i=0;i+1<=maxlength;i++) {
 					free(G.BC[i]);
 					free(G.ff[i]);
@@ -174,10 +194,11 @@ int main()
 				free(G.ff);
 				free(G.ee);
 			}
-		};
-		if((retry == 0) && (2*d>=d1+d2+d3)) {
-			blen2=check_flatness(2*d-d1-d2-d3);
-			if(blen2 > 0) {
+		}
+
+		if (retry == 0) {
+			blen3=check_flatness(5*d/2-d1-d2-d3);
+			if(blen3 > 0) {
 				for(i=0;i+1<=nr;i++) {
 					printf("%d ",coeff[i]);
 				}
@@ -194,17 +215,17 @@ int main()
 				free_tail(G.BC[i]->bc3.leading);
 				free_tail(G.BC[i]->bc4.leading);
 				free_tail(G.ff[i]->leading);
-			};
+			}
 			for(i=0;i+1<=maxlength;i++) {
 				free(G.BC[i]);
 				free(G.ff[i]);
 				free(G.ee[i]);
-			};
+			}
 			free(G.BC);
 			free(G.ff);
 			free(G.ee);
 		}
-	};
+	}
 	
 	exit(13);
 }
