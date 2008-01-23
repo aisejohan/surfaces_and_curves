@@ -36,8 +36,6 @@
 
 /* External variables. */
 int blen1,blen2,blen3;
-struct term **basis1,**basis2,**basis3;
-mscalar **fmatrix;
 
 
 /* Makes a random polynomial of degree degree.		*
@@ -79,10 +77,10 @@ struct polynomial make_initial_pol(unsigned int degree, int print)
 		uitterm->next = *ptrterm;
 		*ptrterm = uitterm;
 		uitterm=NULL;
-	      };
-	    };
-	  };
-	};
+	      }
+	    }
+	  }
+	}
 	if (print) {
 		uitterm = uit.leading;
 		while (uitterm) {
@@ -120,7 +118,79 @@ void next_one(unsigned int nr, int *coeff)
 }
 	
 
-int main() 
+int __mm(int e, int i, int c)
+{
+	int j;
+
+	j = e;
+	while (j > 0) {
+		c = (c*i) % p;
+		j--;
+	}
+	return(c);
+}
+
+int mm(int e1, int e2, int e3, int e4, int i1, int i2, int i3, int i4, int c)
+{
+	c = __mm(e1, i1, c);
+	c = __mm(e2, i2, c);
+	c = __mm(e3, i3, c);
+	c = __mm(e4, i4, c);
+
+	return(c);
+}
+
+int is_square(int c)
+{
+	int j = 1;
+
+	c = c % p;
+	while (j < p) {
+		if (c == ((j*j) % p)) return(1);
+		j++;
+	}
+	return(0);
+}
+
+int is_min(unsigned int nr, int *coeff, struct polynomial f)
+{
+	int i,i1,i2,i3,i4,t,different;
+	struct term *tt;
+
+	i1 = 1;
+	while (i1 < p) {
+	  i2 = 1;
+	  while (i2 < p) {
+	    i3 = 1;
+	    while (i3 < p) {
+	      i4 = 1;
+	      while (i4 < p) {
+		tt = f.leading;
+		different = 0;
+		i = 0;
+		do {
+			t = mm(tt->n1,tt->n2,tt->n3,tt->n4,
+				i1,i2,i3,i4,coeff[i]);
+			if (t != coeff[i]) {
+				 different = (t < coeff[i]) - (t > coeff[i]);
+			}
+			i++;
+			tt = tt->next;
+		} while (tt);
+		if (different > 0) return(0);
+		i4++;
+	      }
+	      i3++;
+	    }
+	    i2++;
+	  }
+	  i1++;
+	}
+
+	return(1);
+}
+
+int main()
 {
 	unsigned int nr;
 	int i,retry;
@@ -146,17 +216,19 @@ int main()
 	while(retry == 1) {
 		while(retry == 1) {
 			next_one(nr, coeff);
-			myf = copy_pol(uit);
-			tt = myf.leading;
-			i=0;
-			while (tt) {
-				ito_sc(coeff[i],tt->c);
-				i++;
-				tt = tt->next;
+			if (is_min(nr, coeff, uit)) {
+				myf = copy_pol(uit);
+				tt = myf.leading;
+				i=0;
+				while (tt) {
+					ito_sc(coeff[i],tt->c);
+					i++;
+					tt = tt->next;
+				}
+				clean_pol(&myf);
+				retry = setup();
 			}
-			clean_pol(&myf);
-			retry = setup();
-		};
+		}
 
 		if(d>=d1+d2+d3+d4) {
 			blen1=check_flatness(d-d1-d2-d3-d4);
