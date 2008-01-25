@@ -6,8 +6,7 @@
 #include <stdio.h>
 
 /* really dumb. */
-#define MAX	200
-#define CUTOFF	100
+#define MAX	1000
 
 int storage=0;
 int **lijst;
@@ -36,34 +35,35 @@ void my_alloc(void )
 		
 
 /* Returns the number of monomials in degree degree, and sets lijst
- * equal to the list of them.*/
-int count_sum(int d1, int d2, int d3, int d4, int degree, int save)
+ * equal to the list of them. Set cutoff equal to zero if you want
+ * all of them otherwise set it to the cutoff you want. */
+int count_sum(int d1, int d2, int d3, int d4, int degree, int save, int cutoff)
 {
-	int len,a1,a2,a3;
+	int len,a2,a3,a4;
 	
 	len=0;
-	a1 = 0;
-	while (d1*a1 <= degree) {
-		a2 = 0;
-		while (d1*a1+d2*a2 <= degree) {
-			a3 = 0;
-			while (d1*a1+d2*a2+d3*a3 <= degree) {
-				if((degree - (a1*d1+a2*d2+a3*d3)) % d4 == 0) {
+	a4 = 0;
+	while (d4*a4 <= degree) {
+		a3 = 0;
+		while (d4*a4+d3*a3 <= degree) {
+			a2 = 0;
+			while (d4*a4+d3*a3+d2*a2 <= degree) {
+				if((degree - (a4*d4+a3*d3+a2*d2)) % d1 == 0) {
 					if (save) {
 						if (len == storage) my_alloc();
-						lijst[len][0] = a1;
+						lijst[len][0] = (degree - (a4*d4+a3*d3+a2*d2)) / d1;
 						lijst[len][1] = a2;
 						lijst[len][2] = a3;
-						lijst[len][3] = (degree - 
-						(a1*d1+a2*d2+a3*d3)) / d4;
+						lijst[len][3] = a4;
 					}
 					len++;
+					if (len == cutoff) return(len);
 				};
-				a3++;
+				a2++;
 			};
-			a2++;
+			a3++;
 		};
-		a1++;
+		a4++;
 	};
 	return(len);
 }
@@ -183,23 +183,62 @@ int d_suitable(int len)
 	return 0;
 }
 
+int hilbert_function(int d1, int d2, int d3, int d4, int d, int i)
+{
+        int phi;
+
+        if (i < 0) return(0);
+
+        phi = count_sum(d1,d2,d3,d4,i,0,0);
+        if (i >= d-d1) phi -= count_sum(d1,d2,d3,d4,i-d+d1,0,0);
+        if (i >= d-d2) phi -= count_sum(d1,d2,d3,d4,i-d+d2,0,0);
+        if (i >= d-d3) phi -= count_sum(d1,d2,d3,d4,i-d+d3,0,0); 
+        if (i >= d-d4) phi -= count_sum(d1,d2,d3,d4,i-d+d4,0,0); 
+        if (i >= 2*d-d1-d2) phi += count_sum(d1,d2,d3,d4,i-2*d+d1+d2,0,0);
+        if (i >= 2*d-d1-d3) phi += count_sum(d1,d2,d3,d4,i-2*d+d1+d3,0,0);
+        if (i >= 2*d-d2-d3) phi += count_sum(d1,d2,d3,d4,i-2*d+d2+d3,0,0);
+        if (i >= 2*d-d1-d4) phi += count_sum(d1,d2,d3,d4,i-2*d+d1+d4,0,0);
+        if (i >= 2*d-d2-d4) phi += count_sum(d1,d2,d3,d4,i-2*d+d2+d4,0,0);
+        if (i >= 2*d-d3-d4) phi += count_sum(d1,d2,d3,d4,i-2*d+d3+d4,0,0);
+        if (i >= 3*d-d1-d2-d3) phi -= count_sum(d1,d2,d3,d4,i-3*d+d1+d2+d3,0,0);
+        if (i >= 3*d-d1-d2-d4) phi -= count_sum(d1,d2,d3,d4,i-3*d+d1+d2+d4,0,0);
+        if (i >= 3*d-d1-d3-d4) phi -= count_sum(d1,d2,d3,d4,i-3*d+d1+d3+d4,0,0);
+        if (i >= 3*d-d2-d3-d4) phi -= count_sum(d1,d2,d3,d4,i-3*d+d2+d3+d4,0,0);
+        if (i >= 4*d-d1-d2-d3-d4) phi += count_sum(d1,d2,d3,d4,i-4*d+d1+d2+d3+d4,0,0);
+        return(phi);
+}
+
+
+
 /* This computes the dimension of the automorphism group. *
  * Note that we are computing the dimension of the cone.  */
 int dim_aut(int d1, int d2, int d3, int d4)
 {
 	int totaal;
 	totaal = 0;
-	totaal = totaal + count_sum(d1,d2,d3,d4,d1,0);
-	totaal = totaal + count_sum(d1,d2,d3,d4,d2,0);
-	totaal = totaal + count_sum(d1,d2,d3,d4,d3,0);
-	totaal = totaal + count_sum(d1,d2,d3,d4,d4,0);
+	totaal = totaal + count_sum(d1,d2,d3,d4,d1,0,0);
+	totaal = totaal + count_sum(d1,d2,d3,d4,d2,0,0);
+	totaal = totaal + count_sum(d1,d2,d3,d4,d3,0,0);
+	totaal = totaal + count_sum(d1,d2,d3,d4,d4,0,0);
 	return(totaal);
 }
 
 int main()
 {
-	int count,totaal,d1,d2,d3,d4,degree,pg;
-	totaal=0;
+	int i,count,totaal,d1,d2,d3,d4,degree,pg,dim;
+
+	do {
+		i = scanf("%d %d %d %d %d %d %d %d\n",
+			&d1,&d2,&d3,&d4,&degree,&count,&dim,&pg);
+		printf("%d %d %d %d %d %d %d %d %d %d\n",
+			d1,d2,d3,d4,degree,count,dim,pg,
+			hilbert_function(d1,d2,d3,d4,degree,
+				2*degree-d1-d2-d3-d4),
+			hilbert_function(d1,d2,d3,d4,degree,
+				3*degree-d1-d2-d3-d4));
+	} while (i > 0);
+	exit(0);
+
 /*
 	count = count_sum(5,6,11,27,60,1);
 	printf("Here is %d.\n",count);
@@ -212,7 +251,7 @@ int main()
 	exit(0);
 */
 
-	printf("d1 d2 d3 d4 d #f dim_aut pg h11.\n");
+	printf("d1 d2 d3 d4 d #f dim_aut pg\n");
 	d1 = 1;
 	while (d1 <= MAX) {
 	  d2 = d1;
@@ -223,22 +262,15 @@ int main()
 	      while ((d4 <= MAX) && (well_formed(d1, d2, d3, d4))) {
 		degree = d1+d2+d3+d4;
 		while (degree <= MAX) {
-			pg = count_sum(d1,d2,d3,d4,degree-d1-d2-d3-d4,0);
+			pg = count_sum(d1,d2,d3,d4,degree-d1-d2-d3-d4,0,11);
 if (pg < 11) {
-			count = count_sum(d1, d2, d3, d4, degree,1);
+			count = count_sum(d1, d2, d3, d4, degree,1,0);
 			if (d_suitable(count)) {
 				printf("%d %d %d %d %d %d ",
 					d1,d2,d3,d4,degree,count);
 				count = dim_aut(d1,d2,d3,d4);
 				printf("%d ",count);
-				printf("%d ",pg);
-				count = count_sum(
-					d1,d2,d3,d4,2*degree-d1-d2-d3-d4,0);
-				count -= count_sum(d1,d2,d3,d4,degree-d2-d3-d4,0);
-				count -= count_sum(d1,d2,d3,d4,degree-d1-d3-d4,0);
-				count -= count_sum(d1,d2,d3,d4,degree-d1-d2-d4,0);
-				count -= count_sum(d1,d2,d3,d4,degree-d1-d2-d3,0);
-				printf("%d\n",count);
+				printf("%d\n",pg);
 			}
 }
 			degree++;
