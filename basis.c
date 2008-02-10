@@ -531,6 +531,11 @@ int main()
 		free_term(basis2[i]);
 	};
 	free(basis2);
+	/* Free basis3. */
+	for(i=0;i+1<=blen3;i++) {
+		free_term(basis3[i]);
+	};
+	free(basis3);
 	/* Free fbasis. */
 	for(i=0;i+1<=blen1+blen2+blen3;i++) {
 		k = 1 + fbasis[i][0]->degree/d;
