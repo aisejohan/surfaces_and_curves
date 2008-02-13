@@ -39,6 +39,7 @@ void setup_scalars(void)
 {
 	mpz_init_set_ui(prime,(unsigned long) p);
 	mpz_init(modulus);
+	mpz_init(temp);
 	mpz_ui_pow_ui(modulus,(unsigned long) p,(unsigned long) r);
 }
 

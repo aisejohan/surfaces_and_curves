@@ -39,11 +39,11 @@ void free_scalar(mscalar a);
 
 #define valuation(x)		mpz_remove(temp,x,prime)
 
-#define sc_add(a,b,c)		{mpz_add(c,a,b);mpz_mod(c,c,modulus);}
+#define sc_add(a,b,c)		{mpz_add(temp,a,b);mpz_mod(c,temp,modulus);}
 
-#define sc_mult(a,b,c)		{mpz_mul(c,a,b);mpz_mod(c,c,modulus);}
+#define sc_mult(a,b,c)		{mpz_mul(temp,a,b);mpz_mod(c,temp,modulus);}
 
-#define sc_imult(a,b,c)		{mpz_mul_si(c,b,(long)a);mpz_mod(c,c,modulus);}
+#define sc_imult(a,b,c)		{mpz_mul_si(temp,b,(long)a);mpz_mod(c,temp,modulus);}
 
 #define sc_inv(a,b)		mpz_invert(b,a,modulus)
 
@@ -51,11 +51,11 @@ void sc_div(mscalar a, mscalar b, mscalar c);
 
 #define div_p(a)		mpz_divexact_ui(a,a,(unsigned long)p)
 
-#define sc_add_replace(a,b)	{mpz_add(b,a,b);mpz_mod(b,b,modulus);}
+#define sc_add_replace(a,b)	{mpz_add(temp,a,b);mpz_mod(b,temp,modulus);}
 
-#define sc_mult_replace(a,b)	{mpz_mul(b,a,b);mpz_mod(b,b,modulus);}
+#define sc_mult_replace(a,b)	{mpz_mul(temp,a,b);mpz_mod(b,temp,modulus);}
 
-#define sc_imult_replace(a,b)	{mpz_mul_si(b,b,(long)a);mpz_mod(b,b,modulus);}
+#define sc_imult_replace(a,b)	{mpz_mul_si(temp,b,(long)a);mpz_mod(b,temp,modulus);}
 
 #define sc_zero(a)		mpz_set_ui(a,0)
 
@@ -63,8 +63,8 @@ void sc_div(mscalar a, mscalar b, mscalar c);
 
 #define sc_copy(a,b)		mpz_set(b,a)
 
-#define sc_negate(a)		{mpz_neg(a,a);mpz_mod(a,a,modulus);}
+#define sc_negate(a)		{mpz_neg(temp,a);mpz_mod(a,temp,modulus);}
 
-#define ito_sc(a,b)		{mpz_set_si(b,(long)a);mpz_mod(b,b,modulus);}
+#define ito_sc(a,b)		{mpz_set_si(temp,(long)a);mpz_mod(b,temp,modulus);}
 
 #define sc_is_zero(a)		mpz_divisible_p(a,modulus)
