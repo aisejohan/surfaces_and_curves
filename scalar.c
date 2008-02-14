@@ -111,10 +111,10 @@ void sc_inv(mscalar a, mscalar b)
 void sc_div(mscalar a, mscalar b, mscalar c)
 {
 	unsigned long e;
-	e = mpz_remove(c,b,prime);
-	mpz_invert(c,c,modulus);
-	mpz_mul(c,c,a);
-	mpz_mod(c,c,modulus);
+	e = mpz_remove(temp,b,prime);
+	mpz_invert(temp,temp,modulus);
+	mpz_mul(temp,temp,a);
+	mpz_mod(c,temp,modulus);
 	while(e) {
 		mpz_divexact_ui(c,c,(unsigned long) p);
 		e--;
