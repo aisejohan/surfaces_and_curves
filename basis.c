@@ -322,6 +322,7 @@ int main()
 		}
 		if (c > extra) extra = c;
 	}
+	printf("The invariant extra is equal to %d.\n",extra);
 
 	/* Initialize bb which is going to be equal to
 	 * 	p^i Delta^i p^3 (x1...x4)^(p-1)
