@@ -161,19 +161,23 @@ struct polynomial make_random(unsigned int degree, int print)
 		a3 = uitterm->n3;
 		a4 = uitterm->n4;
 		c=0;
-		printf("Coefficient of   ");
-		if(a1) {printf("x^%d",a1); c++;};
-		if((a1) && (a2+a3+a4)) {printf(" * "); c++;};
-		if(a2) {printf("y^%d",a2); c++;};
-		if((a2) && (a3+a4)) {printf(" * "); c++;};
-		if(a3) {printf("z^%d",a3); c++;};
-		if((a3) && (a4)) {printf(" * "); c++;};
-		if(a4) {printf("w^%d",a4); c++;};
-		while(8-c) {printf("   ");c++;};
-		printf("= ");
+		if (print) {
+			printf("Coefficient of   ");
+			if(a1) {printf("x^%d",a1); c++;};
+			if((a1) && (a2+a3+a4)) {printf(" * "); c++;};
+			if(a2) {printf("y^%d",a2); c++;};
+			if((a2) && (a3+a4)) {printf(" * "); c++;};
+			if(a3) {printf("z^%d",a3); c++;};
+			if((a3) && (a4)) {printf(" * "); c++;};
+			if(a4) {printf("w^%d",a4); c++;};
+			while(8-c) {printf("   ");c++;};
+			printf("= ");
+		}
 #ifndef INPUT_F
-		if (print) printmscalar(uitterm->c);
- 		printf("\n");
+		if (print) {
+			printmscalar(uitterm->c);
+ 			printf("\n");
+		}
 #else
  #ifdef OUTPUT_LIST
  		printf("\n");

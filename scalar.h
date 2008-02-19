@@ -21,7 +21,8 @@
  *
  *									*/
 
-mpz_t modulus;
+int extra;
+mpz_t modulus[r+10];
 mpz_t prime;
 mpz_t temp;
 
@@ -29,42 +30,38 @@ void setup_scalars(void);
 
 void printmscalar(mscalar a);
 
-#ifndef PROFILER
-#define make_scalar(a)		mpz_init(a)
-#define free_scalar(a)		mpz_clear(a)
-#else
 void make_scalar(mscalar a);
+
 void free_scalar(mscalar a);
-#endif
 
-#define valuation(x)		mpz_remove(temp,x,prime)
+int valuation(mscalar x);
 
-#define sc_add(a,b,c)		{mpz_add(temp,a,b);mpz_mod(c,temp,modulus);}
+void sc_add(mscalar a, mscalar b, mscalar c);
 
-#define sc_mult(a,b,c)		{mpz_mul(temp,a,b);mpz_mod(c,temp,modulus);}
+void sc_mult(mscalar a, mscalar b, mscalar c);
 
-#define sc_imult(a,b,c)		{mpz_mul_si(temp,b,(long)a);mpz_mod(c,temp,modulus);}
+void sc_imult(int a, mscalar b, mscalar c);
 
-#define sc_inv(a,b)		mpz_invert(b,a,modulus)
+void sc_inv(mscalar a, mscalar b);
 
 void sc_div(mscalar a, mscalar b, mscalar c);	
 
-#define div_p(a)		mpz_divexact_ui(a,a,(unsigned long)p)
+void div_p(mscalar a);
 
-#define sc_add_replace(a,b)	{mpz_add(temp,a,b);mpz_mod(b,temp,modulus);}
+void sc_add_replace(mscalar a, mscalar b);
 
-#define sc_mult_replace(a,b)	{mpz_mul(temp,a,b);mpz_mod(b,temp,modulus);}
+void sc_mult_replace(mscalar a, mscalar b);
 
-#define sc_imult_replace(a,b)	{mpz_mul_si(temp,b,(long)a);mpz_mod(b,temp,modulus);}
+void sc_imult_replace(int a, mscalar b);
 
-#define sc_zero(a)		mpz_set_ui(a,0)
+void sc_zero(mscalar a);
 
-#define sc_one(a)		mpz_set_ui(a,1)
+void sc_one(mscalar a);
 
-#define sc_copy(a,b)		mpz_set(b,a)
+void sc_copy(mscalar a, mscalar b);
 
-#define sc_negate(a)		{mpz_neg(temp,a);mpz_mod(a,temp,modulus);}
+void sc_negate(mscalar a);
 
-#define ito_sc(a,b)		{mpz_set_si(temp,(long)a);mpz_mod(b,temp,modulus);}
+void ito_sc(int a, mscalar b);
 
-#define sc_is_zero(a)		mpz_divisible_p(a,modulus)
+int sc_is_zero(mscalar a);

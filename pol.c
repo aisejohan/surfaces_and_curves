@@ -113,8 +113,7 @@ void clean_pol(struct polynomial *pol)
 
 	ptrterm = &(pol->leading);
 	while(*ptrterm) {
-		mpz_mod((*ptrterm)->c,(*ptrterm)->c,modulus);
-		if(sc_is_zero((*ptrterm)->c)) {
+		if (sc_is_zero((*ptrterm)->c)) {
 			tmp = *ptrterm;
 			*ptrterm = (*ptrterm)->next;
 			free_term(tmp);
@@ -534,6 +533,7 @@ make_times_term(struct term t, struct polynomial f)
 }
 
 /* Do not compute reductions. */
+/*
 static void times_term_variant(struct term t, struct polynomial f, struct polynomial *g)
 {
 	struct term *fterm, *gterm;
@@ -552,8 +552,10 @@ static void times_term_variant(struct term t, struct polynomial f, struct polyno
 	};
 	return;
 }
+*/
 
 /* We do not check for zero or reduce mod modulus. */
+/*
 static void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 {
 	int vergelijk;
@@ -604,7 +606,6 @@ static void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 			ptrterm = &((*ptrterm)->next);
 			gterm = gterm->next;
 		} else {
-			/* vergelijk == GELIJK */
 			mpz_add(fterm->c, gterm->c, fterm->c);
 			*ptrterm = fterm;
 			ptrterm = &(fterm->next);
@@ -614,7 +615,9 @@ static void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 		};
 	};
 }
+*/
 
+/*
 static struct polynomial
 make_times_term_variant(struct term t, struct polynomial f)
 {
@@ -638,6 +641,8 @@ make_times_term_variant(struct term t, struct polynomial f)
 	};
 	return(uit);
 }
+*/
+
 
 /*
 static unsigned int nr_terms(struct term *aa)
@@ -651,21 +656,20 @@ static unsigned int nr_terms(struct term *aa)
 }
 */
 
-/* Only clean up and do modulo modulus at the very end. */
 static struct polynomial __pol_mult(struct term *tt, struct polynomial g)
 {
 	struct polynomial uit, tmppol;
 
-	uit = make_times_term_variant(*tt, g);
+	uit = make_times_term(*tt, g);
 	tt = tt->next;
 
-	tmppol = make_times_term_variant(*tt, g);
-	rep_pol_add_variant(&uit,tmppol);
+	tmppol = make_times_term(*tt, g);
+	rep_pol_add(&uit,tmppol);
 	tt = tt->next;
 
 	while(tt) {
-		times_term_variant(*tt, g, &tmppol);
-		rep_pol_add_variant(&uit,tmppol);
+		times_term(*tt, g, &tmppol);
+		rep_pol_add(&uit,tmppol);
 		tt = tt->next;
 	};
 
