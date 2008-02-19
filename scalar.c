@@ -27,6 +27,11 @@
 #include "scalar.h"
 #include "helper.h"
 
+static int extra;
+static mpz_t *modulus;
+static mpz_t temp;
+static mpz_t prime;
+
 /* Only called once. */
 void setup_scalars(void)
 {
@@ -47,6 +52,8 @@ void setup_scalars(void)
 
 	mpz_init_set_ui(prime,(unsigned long) p);
 	mpz_init(temp);
+	
+	modulus = (mpz_t *)malloc((r+extra)*sizeof(mpz_t));
 	i=0;
 	while (i < r + extra) {
 		mpz_init(modulus[i]);
@@ -57,6 +64,7 @@ void setup_scalars(void)
 	}
 }
 
+#ifdef KIJKEN
 void test_scalar(mscalar a)
 {
 	if (a->e > r) {
@@ -88,6 +96,7 @@ void test_scalar(mscalar a)
 		exit(1);
 	}
 }
+#endif
 
 void printmscalar(mscalar a)
 {
@@ -123,8 +132,7 @@ void printmscalar(mscalar a)
 void make_scalar(mscalar a)
 {
 	a->e = r;
-	mpz_init(a->i);
-	mpz_set_si(a->i, 0);
+	mpz_init_set_ui(a->i, 0);
 }
 
 void free_scalar(mscalar a)
@@ -165,12 +173,12 @@ void sc_add(mscalar a, mscalar b, mscalar c)
 	c->e = a->e;
 	mpz_add(temp, a->i, b->i);
 	c->e += mpz_remove(temp, temp, prime);
-	if (c->e >= r) {
-		c->e = r;
-		mpz_set_ui(c->i, (unsigned long) 0);
+	if (c->e < r) {
+		mpz_mod(c->i, temp, modulus[extra + c->e]);
 		return;
 	}
-	mpz_mod(c->i, temp, modulus[extra + c->e]);
+	c->e = r;
+	mpz_set_ui(c->i, (unsigned long) 0);
 	return;
 }
 
@@ -198,11 +206,11 @@ void sc_imult(int a, mscalar b, mscalar c)
 	test_scalar(b);
 	test_scalar(c);
 #endif
-	if ((a) && b->e != r) {
+	if (a) {
 		mpz_mul_si(temp, b->i, (long) a);
-		c->e = b->e + mpz_remove(c->i, temp, prime);
+		c->e = b->e + mpz_remove(temp, temp, prime);
 		if (c->e < r) {
-			mpz_mod(c->i, c->i, modulus[extra + c->e]);
+			mpz_mod(c->i, temp, modulus[extra + c->e]);
 			return;
 		}
 	}
@@ -216,35 +224,36 @@ void sc_inv(mscalar a, mscalar b)
 #ifdef KIJKEN
 	test_scalar(a);
 	test_scalar(b);
-#endif
 	if (a->e != 0) {
-		printf("Not invertible!");
+		printf("Not a unit!");
 		exit(1);
 	}
+#endif
 	b->e = 0;
 	mpz_invert(b->i, a->i, modulus[extra]);
 }
 
-/* Divides a by b. If b is not a unit then this assumes 	*
- * valuation(a) >= valuation(b), and the result is lifted	*
- * to an integer mod p^r.					*/
-/* Does not destroy a and b.					*/
+/* Divides a by b. If b is not a unit then this assumes 		*
+ * valuation(a) >= valuation(b), and the result is lifted		*
+ * to an integer mod p^r. It is also assumed that a is not zero.	*/
+/* Does not destroy a and b.						*/
 void sc_div(mscalar a, mscalar b, mscalar c)
 {
 #ifdef KIJKEN
 	test_scalar(a);
 	test_scalar(b);
 	test_scalar(c);
+	if (a->e < b->e) {printf("Not divisible in sc_div.\n");exit(1);}
+	if (a->e - b->e >= r) {printf("Zero divided by something.\n");exit(1);}
 #endif
 	mpz_invert(temp, b->i , modulus[extra + b->e]);
-	c->e = a->e - b->e;
-	if (c->e < 0) {printf("sc_div");exit(1);}
 	mpz_mul(temp, temp, a->i);
+	c->e = a->e - b->e;
 	mpz_mod(c->i, temp, modulus[extra + c->e]);
 	return;
 }
 
-/* Divides a by p. The assumption is that this can be done. */
+/* Divides a by p. */
 void div_p(mscalar a)
 {
 #ifdef KIJKEN
@@ -278,7 +287,7 @@ void sc_zero(mscalar a)
 	test_scalar(a);
 #endif
 	a->e = r;
-	mpz_set_si(a->i, (long) 0);
+	mpz_set_ui(a->i, (unsigned long) 0);
 }
 
 
@@ -315,14 +324,16 @@ void ito_sc(int a, mscalar b)
 #ifdef KIJKEN
 	test_scalar(b);
 #endif
-	if (a != 0) {
-		mpz_set_si(b->i, (long) a);
-		b->e = mpz_remove(b->i, b->i, prime);
-		mpz_mod(b->i, b->i, modulus[extra + b->e]);
-		if (b->e < r) return;
+	if (a) {
+		mpz_set_si(temp, (long) a);
+		b->e = mpz_remove(temp, temp, prime);
+		if (b->e < r) {
+			mpz_mod(b->i, temp, modulus[extra + b->e]);
+			return;
+		}
 	}
 	b->e = r;
-	mpz_set_si(b->i, (long) 0);
+	mpz_set_ui(b->i, 0);
 }
 
 int sc_is_zero(mscalar a)
@@ -330,5 +341,5 @@ int sc_is_zero(mscalar a)
 #ifdef KIJKEN
 	test_scalar(a);
 #endif
-	return((a->e >= r));
+	return((a->e == r));
 }

@@ -21,11 +21,6 @@
  *
  *									*/
 
-int extra;
-mpz_t modulus[r+10];
-mpz_t prime;
-mpz_t temp;
-
 void setup_scalars(void);
 
 void printmscalar(mscalar a);

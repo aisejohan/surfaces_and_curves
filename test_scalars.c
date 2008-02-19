@@ -57,6 +57,10 @@ int main()
 	printf("The number 0 is: ");
 	printmscalar(ma);
 	printf(".\n");
+	mpz_t c;
+	mpz_init(c);
+	mpz_set_ui(c,0);
+	printf("The valuation of mpz_t 0 is: %lu.\n", mpz_remove(c, c, prime));
 	sc_one(mb);
 	printf("The number 1 is: ");
 	printmscalar(mb);
