@@ -21,6 +21,8 @@
  *
  *									*/
 
+int rr;
+
 void setup_scalars(void);
 
 void printmscalar(mscalar a);

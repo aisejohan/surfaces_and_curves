@@ -27,7 +27,6 @@
 #include "scalar.h"
 #include "helper.h"
 
-static int extra;
 static mpz_t *modulus;
 static mpz_t temp;
 static mpz_t prime;
@@ -35,7 +34,7 @@ static mpz_t prime;
 /* Only called once. */
 void setup_scalars(void)
 {
-	int c,i,j;
+	int c,i,j,extra;
 
 	/* Initialize extra. */
 	extra=0;
@@ -48,16 +47,17 @@ void setup_scalars(void)
 		}
 		if (c > extra) extra = c;
 	}
-	printf("The invariant extra is equal to %d.\n",extra);
+	rr = r + extra;
+	printf("The invariant extra is equal to %d and rr is %d.\n",extra,rr);
 
 	mpz_init_set_ui(prime,(unsigned long) p);
 	mpz_init(temp);
 	
-	modulus = (mpz_t *)malloc((r+extra)*sizeof(mpz_t));
+	modulus = (mpz_t *)malloc(rr*sizeof(mpz_t));
 	i=0;
-	while (i < r + extra) {
+	while (i < rr) {
 		mpz_init(modulus[i]);
-		j = r + extra - i;
+		j = rr - i;
 		mpz_ui_pow_ui(modulus[i], (unsigned long) p, (unsigned long) j);
 		i++;
 	}
@@ -66,11 +66,11 @@ void setup_scalars(void)
 #ifdef KIJKEN
 void test_scalar(mscalar a)
 {
-	if (a->e > r) {
+	if (a->e > rr) {
 		printf("Valuation too big.\n");
 		exit(1);
 	}
-	if (a->e == r) {
+	if (a->e == rr) {
 		if (mpz_cmp_si(a->i, 0) != 0) {
 			printf("Zero incorrect.\n");
 			exit(1);
@@ -78,15 +78,19 @@ void test_scalar(mscalar a)
 			return;
 		}
 	}
+	if (a->e < 0) {
+		printf("Negative power!");
+		exit(1);
+	}
 	if (mpz_cmp_si(a->i, 0) == 0) {
-		printf("Power not >= r but coeff == 0.\n");
+		printf("Power not >= rr but coeff == 0.\n");
 		exit(1);
 	}
 	if (mpz_remove(temp, a->i, prime)) {
 		printf("Coefficient pos valuation!\n");
 		exit(1);
 	}
-	if (mpz_cmp(a->i, modulus[extra + a->e]) > 0) {
+	if (mpz_cmp(a->i, modulus[a->e]) > 0) {
 		printf("a->i not reduced.\n");
 		exit(1);
 	}
@@ -107,14 +111,14 @@ void printmscalar(mscalar a)
 	mpz_init(s);
 	mpz_init(t);
 
-	if (a->e == r) {
+	if (a->e == rr) {
 		printf("0");
 		return;
 	}
 
 	if (a->e) printf("p^%d * ", a->e);
 
-	mpz_set(s, modulus[extra + a->e]);
+	mpz_set(s, modulus[a->e]);
 	mpz_cdiv_q_ui(t, s, 2);
 	if (mpz_cmp(a->i, t)>0) {
 		mpz_sub(t, a->i, s);
@@ -130,7 +134,7 @@ void printmscalar(mscalar a)
 
 void make_scalar(mscalar a)
 {
-	a->e = r;
+	a->e = rr;
 	mpz_init_set_ui(a->i, 0);
 }
 
@@ -143,7 +147,7 @@ int valuation(mscalar x)
 {
 #ifdef KIJKEN
 	test_scalar(x);
-	if (x->e >= r) {printf("Valuation of zero!");exit(1);}
+	if (x->e == rr) {printf("Valuation of zero!");exit(1);}
 #endif
 	return(x->e);
 }
@@ -156,27 +160,27 @@ void sc_add(mscalar a, mscalar b, mscalar c)
 	test_scalar(c);
 #endif
 	if (a->e < b->e) {
-		mpz_mul(temp, b->i, modulus[extra + r - b->e + a->e]);
+		mpz_mul(temp, b->i, modulus[rr - b->e + a->e]);
 		mpz_add(temp, temp, a->i);
 		c->e = a->e;
-		mpz_mod(c->i, temp, modulus[extra + c->e]);
+		mpz_mod(c->i, temp, modulus[c->e]);
 		return;
 	}
 	if (a->e > b->e) {
-		mpz_mul(temp, a->i, modulus[extra + r - a->e + b->e]);
+		mpz_mul(temp, a->i, modulus[rr - a->e + b->e]);
 		mpz_add(temp, temp, b->i);
 		c->e = b->e;
-		mpz_mod(c->i, temp, modulus[extra + c->e]);
+		mpz_mod(c->i, temp, modulus[c->e]);
 		return;
 	}
 	c->e = a->e;
 	mpz_add(temp, a->i, b->i);
 	c->e += mpz_remove(temp, temp, prime);
-	if (c->e < r) {
-		mpz_mod(c->i, temp, modulus[extra + c->e]);
+	if (c->e < rr) {
+		mpz_mod(c->i, temp, modulus[c->e]);
 		return;
 	}
-	c->e = r;
+	c->e = rr;
 	mpz_set_ui(c->i, (unsigned long) 0);
 	return;
 }
@@ -189,12 +193,12 @@ void sc_mult(mscalar a, mscalar b, mscalar c)
 	test_scalar(c);
 #endif
 	c->e = a->e + b->e;
-	if (c->e < r) {
+	if (c->e < rr) {
 		mpz_mul(temp, a->i, b->i);
-		mpz_mod(c->i, temp, modulus[extra + c->e]);
+		mpz_mod(c->i, temp, modulus[c->e]);
 		return;
 	}
-	c->e = r;
+	c->e = rr;
 	mpz_set_ui(c->i, (unsigned long) 0);
 	return;
 }
@@ -208,12 +212,12 @@ void sc_imult(int a, mscalar b, mscalar c)
 	if (a) {
 		mpz_mul_si(temp, b->i, (long) a);
 		c->e = b->e + mpz_remove(temp, temp, prime);
-		if (c->e < r) {
-			mpz_mod(c->i, temp, modulus[extra + c->e]);
+		if (c->e < rr) {
+			mpz_mod(c->i, temp, modulus[c->e]);
 			return;
 		}
 	}
-	c->e = r;
+	c->e = rr;
 	mpz_set_ui(c->i, (unsigned long) 0);
 	return;
 }
@@ -229,7 +233,7 @@ void sc_inv(mscalar a, mscalar b)
 	}
 #endif
 	b->e = 0;
-	mpz_invert(b->i, a->i, modulus[extra]);
+	mpz_invert(b->i, a->i, modulus[0]);
 }
 
 /* Divides a by b. If b is not a unit then this assumes 		*
@@ -243,12 +247,12 @@ void sc_div(mscalar a, mscalar b, mscalar c)
 	test_scalar(b);
 	test_scalar(c);
 	if (a->e < b->e) {printf("Not divisible in sc_div.\n");exit(1);}
-	if (a->e - b->e >= r) {printf("Zero divided by something.\n");exit(1);}
+	if (a->e == rr) {printf("Zero divided by something.\n");exit(1);}
 #endif
-	mpz_invert(temp, b->i , modulus[extra + b->e]);
+	mpz_invert(temp, b->i , modulus[b->e]);
 	mpz_mul(temp, temp, a->i);
 	c->e = a->e - b->e;
-	mpz_mod(c->i, temp, modulus[extra + c->e]);
+	mpz_mod(c->i, temp, modulus[c->e]);
 	return;
 }
 
@@ -257,18 +261,10 @@ void div_p(int k, mscalar a)
 {
 #ifdef KIJKEN
 	test_scalar(a);
+	if (a->e - k < 0) {printf("Negative power.");exit(1);}
 #endif
-	if (a->e < r) {
+	if (a->e < rr) {
 		a->e = a->e - k;
-		if (k >= 0) return;
-		if (a->e < r) {
-			mpz_mod(a->i, a->i, modulus[extra + a->e]);
-			return;
-		} else {
-			a->e = r;
-			mpz_set_ui(a->i, 0);
-			return;
-		}
 	}
 	return;
 }
@@ -296,7 +292,7 @@ void sc_zero(mscalar a)
 #ifdef KIJKEN
 	test_scalar(a);
 #endif
-	a->e = r;
+	a->e = rr;
 	mpz_set_ui(a->i, (unsigned long) 0);
 }
 
@@ -326,7 +322,7 @@ void sc_negate(mscalar a)
 	test_scalar(a);
 #endif
 	mpz_neg(a->i, a->i);
-	mpz_mod(a->i, a->i, modulus[extra + a->e]);
+	mpz_mod(a->i, a->i, modulus[a->e]);
 }
 
 void ito_sc(int a, mscalar b)
@@ -337,12 +333,12 @@ void ito_sc(int a, mscalar b)
 	if (a) {
 		mpz_set_si(temp, (long) a);
 		b->e = mpz_remove(temp, temp, prime);
-		if (b->e < r) {
-			mpz_mod(b->i, temp, modulus[extra + b->e]);
+		if (b->e < rr) {
+			mpz_mod(b->i, temp, modulus[b->e]);
 			return;
 		}
 	}
-	b->e = r;
+	b->e = rr;
 	mpz_set_ui(b->i, 0);
 }
 
@@ -351,5 +347,5 @@ int sc_is_zero(mscalar a)
 #ifdef KIJKEN
 	test_scalar(a);
 #endif
-	return((a->e == r));
+	return((a->e == rr));
 }

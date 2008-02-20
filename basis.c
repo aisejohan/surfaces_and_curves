@@ -117,7 +117,7 @@ static void print_fmatrix(void)
 
 int main() 
 {
-	int i,j,k,retry;
+	int i,j,k,retry,extra;
 	int c;
 	mscalar cc;
 	struct term *aaterm;
@@ -129,13 +129,13 @@ int main()
 	T.leading = NULL;
 	Delta.leading = NULL;
 	aaterm = NULL;
+	setup_scalars();
 	make_scalar(cc);
 	
 #ifdef KIJKEN
 	printf("Debug is set! To unset do not define KIJKEN.\n");
 #endif
 	/* Setup the scalars. */
-	setup_scalars();
 
 	/* Seed the randomness. */
 	set_seed(0);
@@ -311,9 +311,9 @@ int main()
 		exit(1);
 	};
 
-/* Initialize extra.
-	extra=0;
-	for(i=0;i<=q;i++) {
+	/* Initialize extra. */
+	extra = rr - r;
+/*	for(i=0;i<=q;i++) {
 		j=(3+i)*p-1;
 		c=-i-3;
 		while (j > 0) {
@@ -322,8 +322,8 @@ int main()
 		}
 		if (c > extra) extra = c;
 	}
-	printf("The invariant extra is equal to %d.\n",extra);
 */
+	printf("The invariant extra is equal to %d.\n",extra);
 
 	/* Initialize bb which is going to be equal to
 	 * 	p^i Delta^i p^3 (x1...x4)^(p-1)
@@ -331,7 +331,7 @@ int main()
 	T.degree = (p-1)*(d1+d2+d3+d4);
 	make_term(&T.leading);
 	sc_one(T.leading->c);
-	for(k=1;k<=3+0;k++) { /* Note extra powers of p. */
+	for(k=1;k<=extra+3+0;k++) { /* Note extra powers of p. */
 		sc_imult_replace(p,T.leading->c);
 	}
 	T.leading->n1 = p-1;
@@ -450,7 +450,6 @@ int main()
 	}
 	printf("\n");
 
-/*
 	k=extra+1;
 	for(i=0;i+1<=blen1+blen2+blen3;i++) {
 		for(j=0;j+1<=blen1+blen2+blen3;j++) {
@@ -458,15 +457,19 @@ int main()
 			if (!sc_is_zero(fmatrix[i][j]) && (c < k)) k = c;
 		}
 	}
-*/
 	for(i=0;i+1<=blen1+blen2+blen3;i++) {
 		for(j=0;j+1<=blen1+blen2+blen3;j++) {
-			div_p(1, fmatrix[i][j]);
+			div_p(k, fmatrix[i][j]);
 		}
 	}
 
 	print_fmatrix();
-	printf("This should be the matrix of frobenius!\n");
+	if (k == extra+1 ) {
+		printf("This should be the matrix of frobenius!\n");
+	} else {
+		printf("This matrix times %d^(-%d)"
+		" should be the matrix of frobenius.\n",p,extra+1-k);
+	}
 
 	/************************************************
 	 * Neurotic freeing continues even now.		*

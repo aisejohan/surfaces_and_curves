@@ -34,6 +34,7 @@ int main()
 {
 	mscalar ma,mb,mc,md,me;
 	struct polynomial A,B,C,D,E,F,G,H;
+	setup_scalars();
 	make_scalar(ma);
 	make_scalar(mb);
 	make_scalar(mc);
@@ -50,17 +51,12 @@ int main()
 
 	printf("The prime is: %d.\n",p);
 	printf("The power is: %d.\n",r);
-	setup_scalars();
 	set_seed(0);
 
 	sc_zero(ma);
 	printf("The number 0 is: ");
 	printmscalar(ma);
 	printf(".\n");
-	mpz_t c;
-	mpz_init(c);
-	mpz_set_ui(c,0);
-	printf("The valuation of mpz_t 0 is: %lu.\n", mpz_remove(c, c, prime));
 	sc_one(mb);
 	printf("The number 1 is: ");
 	printmscalar(mb);
