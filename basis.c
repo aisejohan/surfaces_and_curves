@@ -341,6 +341,8 @@ int main()
 		aa = copy_pol_star(cc,bb);
 		merge_add_split(&(hhh[1]),aa);
 	}
+	free_star(bb); free(bb);
+	free_star(dd); free(dd);
 
 	printf("Start computing aa.\n");
 	for(j=0;j+1<=blen2+blen1;j++) {
@@ -380,8 +382,6 @@ int main()
 	 * The reason for this is that it makes 	*
 	 * it easier to detect memory leaks.		*
 	 ************************************************/
-	free_star(bb); free(bb);
-	free_star(dd); free(dd);
 	free_star(hhh[0]); free(hhh[0]);
 	free_star(hhh[1]); free(hhh[1]);
 	free(hhh);
