@@ -181,7 +181,7 @@ int check_flatness(unsigned int degree)
 		
 		/* Make sure c = p^{r-1}. */
 		sc_one(c);
-		for(i=1;i+1<=r;i++) sc_imult_replace(p,c);
+		for(i=1;i+1<=rr;i++) sc_imult_replace(p,c);
 		
 		/* Make list of terms. */
 		i=0;

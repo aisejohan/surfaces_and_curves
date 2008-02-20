@@ -25,171 +25,327 @@
 #include <stdlib.h>
 #include "data.h"
 #include "scalar.h"
+#include "helper.h"
 
-
-#ifdef KIJKEN
-void empty_function(void)
-{
-	printf("This just for breakpoints when debugging.\n");
-}
-#endif
+static mpz_t *modulus;
+static mpz_t temp;
+static mpz_t prime;
 
 /* Only called once. */
 void setup_scalars(void)
 {
+	int c,i,j,extra;
+
+	/* Initialize extra. */
+	extra=0;
+	for(i=0;i<=q;i++) {
+		j = (3+i)*p-1;
+		c = -i-3;
+		while (j > 0) {
+			c += ivaluation(j);
+			j--;
+		}
+		if (c > extra) extra = c;
+	}
+	rr = r + extra;
+	printf("The invariant extra is equal to %d and rr is %d.\n",extra,rr);
+
 	mpz_init_set_ui(prime,(unsigned long) p);
-	mpz_init(modulus);
 	mpz_init(temp);
-	mpz_ui_pow_ui(modulus,(unsigned long) p,(unsigned long) r);
+	
+	modulus = (mpz_t *)malloc(rr*sizeof(mpz_t));
+	i=0;
+	while (i < rr) {
+		mpz_init(modulus[i]);
+		j = rr - i;
+		mpz_ui_pow_ui(modulus[i], (unsigned long) p, (unsigned long) j);
+		i++;
+	}
 }
+
+#ifdef KIJKEN
+void test_scalar(mscalar a)
+{
+	if (a->e > rr) {
+		printf("Valuation too big.\n");
+		exit(1);
+	}
+	if (a->e == rr) {
+		if (mpz_cmp_si(a->i, 0) != 0) {
+			printf("Zero incorrect.\n");
+			exit(1);
+		} else {
+			return;
+		}
+	}
+	if (a->e < 0) {
+		printf("Negative power!");
+		exit(1);
+	}
+	if (mpz_cmp_si(a->i, 0) == 0) {
+		printf("Power not >= rr but coeff == 0.\n");
+		exit(1);
+	}
+	if (mpz_remove(temp, a->i, prime)) {
+		printf("Coefficient pos valuation!\n");
+		exit(1);
+	}
+	if (mpz_cmp(a->i, modulus[a->e]) > 0) {
+		printf("a->i not reduced.\n");
+		exit(1);
+	}
+	if (mpz_cmp_si(a->i, 0) < 0) {
+		printf("a->i negative.\n");
+		exit(1);
+	}
+}
+#endif
 
 void printmscalar(mscalar a)
 {
-	mpz_cdiv_q_ui(temp,modulus,2);
-	if(mpz_cmp(a,temp)>0) {
-		mpz_sub(temp,a,modulus);
-		mpz_out_str(stdout,(int) 10,temp);
+#ifdef KIJKEN
+	test_scalar(a);
+#endif
+	mpz_t s,t;
+
+	mpz_init(s);
+	mpz_init(t);
+
+	if (a->e == rr) {
+		printf("0");
+		return;
+	}
+
+	if (a->e) printf("p^%d * ", a->e);
+
+	mpz_set(s, modulus[a->e]);
+	mpz_cdiv_q_ui(t, s, 2);
+	if (mpz_cmp(a->i, t)>0) {
+		mpz_sub(t, a->i, s);
+		mpz_out_str(stdout, (int) 10, t);
 	} else {
-		mpz_out_str(stdout,(int) 10,a);
-	};
+		mpz_out_str(stdout, (int) 10, a->i);
+	}
+
+	mpz_clear(s);
+	mpz_clear(t);
+	return;
 }
 
-#ifdef PROFILER
 void make_scalar(mscalar a)
 {
-	mpz_init(a);
+	a->e = rr;
+	mpz_init_set_ui(a->i, 0);
 }
 
 void free_scalar(mscalar a)
 {
-	mpz_clear(a);
+	mpz_clear(a->i);
 }
-#endif
 
-/*
-unsigned long int valuation(mscalar x)
+int valuation(mscalar x)
 {
-	return(mpz_remove(temp,x,prime));
+#ifdef KIJKEN
+	test_scalar(x);
+	if (x->e == rr) {printf("Valuation of zero!");exit(1);}
+#endif
+	return(x->e);
 }
-*/
 
-/*
 void sc_add(mscalar a, mscalar b, mscalar c)
 {
-	mpz_add(c,a,b);
-	mpz_mod(c,c,modulus);
+#ifdef KIJKEN
+	test_scalar(a);
+	test_scalar(b);
+	test_scalar(c);
+#endif
+	if (a->e < b->e) {
+		mpz_mul(temp, b->i, modulus[rr - b->e + a->e]);
+		mpz_add(temp, temp, a->i);
+		c->e = a->e;
+		mpz_mod(c->i, temp, modulus[c->e]);
+		return;
+	}
+	if (a->e > b->e) {
+		mpz_mul(temp, a->i, modulus[rr - a->e + b->e]);
+		mpz_add(temp, temp, b->i);
+		c->e = b->e;
+		mpz_mod(c->i, temp, modulus[c->e]);
+		return;
+	}
+	c->e = a->e;
+	mpz_add(temp, a->i, b->i);
+	c->e += mpz_remove(temp, temp, prime);
+	if (c->e < rr) {
+		mpz_mod(c->i, temp, modulus[c->e]);
+		return;
+	}
+	c->e = rr;
+	mpz_set_ui(c->i, (unsigned long) 0);
+	return;
 }
-*/
 
-/*
 void sc_mult(mscalar a, mscalar b, mscalar c)
 {
-	mpz_mul(c,a,b);
-	mpz_mod(c,c,modulus);
+#ifdef KIJKEN
+	test_scalar(a);
+	test_scalar(b);
+	test_scalar(c);
+#endif
+	c->e = a->e + b->e;
+	if (c->e < rr) {
+		mpz_mul(temp, a->i, b->i);
+		mpz_mod(c->i, temp, modulus[c->e]);
+		return;
+	}
+	c->e = rr;
+	mpz_set_ui(c->i, (unsigned long) 0);
+	return;
 }
-*/
 
-/*
 void sc_imult(int a, mscalar b, mscalar c)
 {
-	mpz_mul_si(c,b,(long) a);
-	mpz_mod(c,c,modulus);
+#ifdef KIJKEN
+	test_scalar(b);
+	test_scalar(c);
+#endif
+	if (a) {
+		mpz_mul_si(temp, b->i, (long) a);
+		c->e = b->e + mpz_remove(temp, temp, prime);
+		if (c->e < rr) {
+			mpz_mod(c->i, temp, modulus[c->e]);
+			return;
+		}
+	}
+	c->e = rr;
+	mpz_set_ui(c->i, (unsigned long) 0);
+	return;
 }
-*/
 
-/*
 void sc_inv(mscalar a, mscalar b)
 {
-	mpz_invert(b,a,modulus);
+#ifdef KIJKEN
+	test_scalar(a);
+	test_scalar(b);
+	if (a->e != 0) {
+		printf("Not a unit!");
+		exit(1);
+	}
+#endif
+	b->e = 0;
+	mpz_invert(b->i, a->i, modulus[0]);
 }
-*/
 
-/* Divides a by b. If b is not a unit then this assumes 	*
- * valuation(a) >= valuation(b), and the result is lifted	*
- * to an integer mod p^r.					*/
-/* Does not destroy a and b.					*/
+/* Divides a by b. If b is not a unit then this assumes 		*
+ * valuation(a) >= valuation(b), and the result is lifted		*
+ * to an integer mod p^r. It is also assumed that a is not zero.	*/
+/* Does not destroy a and b.						*/
 void sc_div(mscalar a, mscalar b, mscalar c)
 {
-	unsigned long e;
-	e = mpz_remove(temp,b,prime);
-	mpz_invert(temp,temp,modulus);
-	mpz_mul(temp,temp,a);
-	mpz_mod(c,temp,modulus);
-	while(e) {
-		mpz_divexact_ui(c,c,(unsigned long) p);
-		e--;
-	};
+#ifdef KIJKEN
+	test_scalar(a);
+	test_scalar(b);
+	test_scalar(c);
+	if (a->e < b->e) {printf("Not divisible in sc_div.\n");exit(1);}
+	if (a->e == rr) {printf("Zero divided by something.\n");exit(1);}
+#endif
+	mpz_invert(temp, b->i , modulus[b->e]);
+	mpz_mul(temp, temp, a->i);
+	c->e = a->e - b->e;
+	mpz_mod(c->i, temp, modulus[c->e]);
+	return;
 }
 
-/* Divides a by p. The assumption is that this can be done. */
-/*
-void div_p(mscalar a)
+/* Divides a by p^k where k is an integer. */
+void div_p(int k, mscalar a)
 {
-	mpz_divexact_ui(a,a,(unsigned long) p);
+#ifdef KIJKEN
+	test_scalar(a);
+	if (a->e - k < 0) {printf("Negative power.");exit(1);}
+#endif
+	if (a->e < rr) {
+		a->e = a->e - k;
+	}
+	return;
 }
-*/
 
-/*
 void sc_add_replace(mscalar a, mscalar b)
 {
 	sc_add(a,b,b);
 }
-*/
 
-/*
+
 void sc_mult_replace(mscalar a, mscalar b)
 {
 	sc_mult(a,b,b);
 }
-*/
 
-/*
+
 void sc_imult_replace(int a, mscalar b)
 {
 	sc_imult(a,b,b);
 }
-*/
 
-/*
+
 void sc_zero(mscalar a)
 {
-	mpz_set_ui(a,(unsigned long) 0);
+#ifdef KIJKEN
+	test_scalar(a);
+#endif
+	a->e = rr;
+	mpz_set_ui(a->i, (unsigned long) 0);
 }
-*/
 
-/*
+
 void sc_one(mscalar a)
 {
-	mpz_set_ui(a,(unsigned long) 1);
+#ifdef KIJKEN
+	test_scalar(a);
+#endif
+	a->e = 0;
+	mpz_set_ui(a->i, (unsigned long) 1);
 }
-*/
 
-/*
 void sc_copy(mscalar a, mscalar b)
 {
-	mpz_set(b,a);
+#ifdef KIJKEN
+	test_scalar(a);
+	test_scalar(b);
+#endif
+	b->e = a->e;
+	mpz_set(b->i, a->i);
 }
-*/
 
-/*
 void sc_negate(mscalar a)
 {
-	mpz_neg(a,a);
-	mpz_mod(a,a,modulus);
+#ifdef KIJKEN
+	test_scalar(a);
+#endif
+	mpz_neg(a->i, a->i);
+	mpz_mod(a->i, a->i, modulus[a->e]);
 }
-*/
 
-/*
 void ito_sc(int a, mscalar b)
 {
-	mpz_set_si(b,(long) a);
-	mpz_mod(b,b,modulus);
+#ifdef KIJKEN
+	test_scalar(b);
+#endif
+	if (a) {
+		mpz_set_si(temp, (long) a);
+		b->e = mpz_remove(temp, temp, prime);
+		if (b->e < rr) {
+			mpz_mod(b->i, temp, modulus[b->e]);
+			return;
+		}
+	}
+	b->e = rr;
+	mpz_set_ui(b->i, 0);
 }
-*/
 
-/*
 int sc_is_zero(mscalar a)
 {
-	return(mpz_divisible_p(a,modulus));
+#ifdef KIJKEN
+	test_scalar(a);
+#endif
+	return((a->e == rr));
 }
-*/
