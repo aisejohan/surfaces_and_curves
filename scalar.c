@@ -58,7 +58,6 @@ void setup_scalars(void)
 	while (i < r + extra) {
 		mpz_init(modulus[i]);
 		j = r + extra - i;
-		printf("Here %d.\n",j);
 		mpz_ui_pow_ui(modulus[i], (unsigned long) p, (unsigned long) j);
 		i++;
 	}
@@ -253,13 +252,24 @@ void sc_div(mscalar a, mscalar b, mscalar c)
 	return;
 }
 
-/* Divides a by p. */
-void div_p(mscalar a)
+/* Divides a by p^k where k is an integer. */
+void div_p(int k, mscalar a)
 {
 #ifdef KIJKEN
 	test_scalar(a);
 #endif
-	a->e--;
+	if (a->e < r) {
+		a->e = a->e - k;
+		if (k >= 0) return;
+		if (a->e < r) {
+			mpz_mod(a->i, a->i, modulus[extra + a->e]);
+			return;
+		} else {
+			a->e = r;
+			mpz_set_ui(a->i, 0);
+			return;
+		}
+	}
 	return;
 }
 

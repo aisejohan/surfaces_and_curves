@@ -461,7 +461,7 @@ int main()
 */
 	for(i=0;i+1<=blen1+blen2+blen3;i++) {
 		for(j=0;j+1<=blen1+blen2+blen3;j++) {
-			div_p(fmatrix[i][j]);
+			div_p(1, fmatrix[i][j]);
 		}
 	}
 

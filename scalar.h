@@ -41,7 +41,7 @@ void sc_inv(mscalar a, mscalar b);
 
 void sc_div(mscalar a, mscalar b, mscalar c);	
 
-void div_p(mscalar a);
+void div_p(int k, mscalar a);
 
 void sc_add_replace(mscalar a, mscalar b);
 
