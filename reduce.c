@@ -140,12 +140,18 @@ if(aa[i]->leading) {
 	ito_sc(i,c);
 	sc_inv(c,c);
 	sc_imult_replace(d/g,c);
-	if (k > 0) div_p(k, c);
 
 	times_scalar(c,&(fBC.bc1));
 	times_scalar(c,&(fBC.bc2));
 	times_scalar(c,&(fBC.bc3));
 	times_scalar(c,&(fBC.bc4));
+
+	if (k > 0) {
+		div_p_pol(k, &(fBC.bc1));
+		div_p_pol(k, &(fBC.bc2));
+		div_p_pol(k, &(fBC.bc3));
+		div_p_pol(k, &(fBC.bc4));
+	}
 
 	/* Adding up to get the result. */	
 	merge_add(&(fBC.bc5), fBC.bc4);
