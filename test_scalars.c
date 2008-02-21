@@ -34,6 +34,7 @@ int main()
 {
 	mscalar ma,mb,mc,md,me;
 	struct polynomial A,B,C,D,E,F,G,H;
+	setup_scalars();
 	make_scalar(ma);
 	make_scalar(mb);
 	make_scalar(mc);
@@ -50,7 +51,6 @@ int main()
 
 	printf("The prime is: %d.\n",p);
 	printf("The power is: %d.\n",r);
-	setup_scalars();
 	set_seed(0);
 
 	sc_zero(ma);
@@ -74,17 +74,17 @@ int main()
 	printmscalar(me);
 	printf(".\n");
 
-	A = make_random(10,0);
+	A = make_random(100,0);
 	F = copy_pol(A);
-/*	print_pol(A);
-	printf("\n"); */
-	B = make_random(11,0);
+	print_pol(A);
+	printf("\n");
+	B = make_random(100,0);
 	H = copy_pol(B);
-/*	print_pol(B);
-	printf("\n"); */
+	print_pol(B);
+	printf("\n");
 	C = pol_mult(A,B);
-/*	print_pol(C);
-	printf("\n"); */
+	print_pol(C);
+	printf("\n");
 	D = pol_mult(B,A);
 /*	print_pol(D);
 	printf("\n"); */

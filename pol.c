@@ -112,8 +112,7 @@ void clean_pol(struct polynomial *pol)
 
 	ptrterm = &(pol->leading);
 	while(*ptrterm) {
-		mpz_mod((*ptrterm)->c,(*ptrterm)->c,modulus);
-		if(sc_is_zero((*ptrterm)->c)) {
+		if (sc_is_zero((*ptrterm)->c)) {
 			tmp = *ptrterm;
 			*ptrterm = (*ptrterm)->next;
 			free_term(tmp);
@@ -455,23 +454,15 @@ void times_scalar(mscalar c, struct polynomial *f)
 	return;
 }
 
-/* Divides by p^k if possible. */
+/* Divides by p^k. */
 void div_p_pol(int k, struct polynomial *f)
 {
-	int i;
 	struct term *aaterm;
 
 	aaterm = f->leading;
 	while(aaterm) {
-		if(valuation(aaterm->c) >= k) {
-			for(i=1;i<=k;i++) {
-				div_p(aaterm->c);
-			}
-			aaterm = aaterm->next;
-		} else {
-			printf("FIXME!\n");
-			exit(1);
-		};
+		div_p(k, aaterm->c);
+		aaterm = aaterm->next;
 	};
 	return;
 }
@@ -534,7 +525,8 @@ static void times_term_variant(struct term t, struct polynomial f, struct polyno
 	gterm = g->leading;
 	fterm = f.leading;
 	while(fterm) {
-		mpz_mul(gterm->c, t.c, fterm->c);
+		gterm->c->e = t.c->e + fterm->c->e;
+		mpz_mul(gterm->c->i, t.c->i, fterm->c->i);
 		gterm->n1 = t.n1 + fterm->n1;
 		gterm->n2 = t.n2 + fterm->n2;
 		gterm->n3 = t.n3 + fterm->n3;
@@ -595,8 +587,7 @@ static void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 			ptrterm = &((*ptrterm)->next);
 			gterm = gterm->next;
 		} else {
-			/* vergelijk == GELIJK */
-			mpz_add(fterm->c, gterm->c, fterm->c);
+			sc_add_variant(fterm->c, gterm->c, fterm->c);
 			*ptrterm = fterm;
 			ptrterm = &(fterm->next);
 			fterm = fterm->next;
@@ -619,7 +610,8 @@ make_times_term_variant(struct term t, struct polynomial f)
 	fterm = f.leading;
 	while(fterm) {
 		make_term(ptrterm);
-		mpz_mul((*ptrterm)->c, t.c, fterm->c);
+		(*ptrterm)->c->e = t.c->e + fterm->c->e;
+		mpz_mul((*ptrterm)->c->i, t.c->i, fterm->c->i);
 		(*ptrterm)->n1 = t.n1 + fterm->n1;
 		(*ptrterm)->n2 = t.n2 + fterm->n2;
 		(*ptrterm)->n3 = t.n3 + fterm->n3;
@@ -641,10 +633,12 @@ static unsigned int nr_terms(struct term *aa)
 }
 */
 
-/* Only clean up and do modulo modulus at the very end. */
 static struct polynomial __pol_mult(struct term *tt, struct polynomial g)
 {
+	struct term **ptrterm;
 	struct polynomial uit, tmppol;
+	mscalar c;
+	make_scalar(c);
 
 	uit = make_times_term_variant(*tt, g);
 	tt = tt->next;
@@ -659,9 +653,25 @@ static struct polynomial __pol_mult(struct term *tt, struct polynomial g)
 		tt = tt->next;
 	};
 
-	clean_pol(&uit);
-
 	free_tail(tmppol.leading);
+
+	ptrterm = &(uit.leading);
+	while (*ptrterm) {
+		clean_scalar((*ptrterm)->c);
+		if (sc_is_zero((*ptrterm)->c)) {
+			tt = *ptrterm;
+			*ptrterm = (*ptrterm)->next;
+			free_term(tt);
+		} else {
+			sc_copy((*ptrterm)->c,c);
+			free_scalar((*ptrterm)->c);
+			make_scalar((*ptrterm)->c);
+			sc_copy(c,(*ptrterm)->c);
+			ptrterm = &((*ptrterm)->next);
+		}
+	}
+
+	free_scalar(c);
 
 	return(uit);
 }

@@ -15,8 +15,8 @@ profiler:
 	gcc -pg -Wall -lgmp -O2 -march=nocona -o tester basis.o  compute.o  delta.o  grobner.o  helper.o  pol.o  reduce.o  scalar.o
 
 test:
-	gcc -O3 -Wall -c scalar.c pol.c helper.c test_scalars.c
-	gcc -lgmp -O3 -Wall -o tester test_scalars.o pol.o helper.o scalar.o
+	gcc -g -DKIJKEN -Wall -c scalar.c pol.c helper.c test_scalars.c
+	gcc -g -lgmp -Wall -o tester test_scalars.o pol.o helper.o scalar.o
 
 make_list:
 	gcc -DLIST_F -Wall -c make_list.c silent_compute.c  delta.c  grobner.c  helper.c  pol.c  reduce.c  scalar.c

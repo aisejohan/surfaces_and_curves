@@ -126,6 +126,7 @@ int main()
 	T.leading = NULL;
 	Delta.leading = NULL;
 	aaterm = NULL;
+	setup_scalars();
 	make_scalar(cc);
 	make_scalar(cc1);
 	make_scalar(cc2);
@@ -149,7 +150,6 @@ int main()
 	}
 
 	/* Setup the scalars. */
-	setup_scalars();
 
 	/* Seed the randomness. */
 	set_seed(0);
@@ -316,16 +316,7 @@ int main()
 	};
 
 	/* Initialize extra. */
-	extra = 0;
-	for(i=0;i<=q;i++) {
-		j = (5+2*i)*p-2;
-		c = -i-2;
-		while (j > 0) {
-			c += ivaluation(j);
-			j -= 2;
-		}
-		if (c > extra) extra = c;
-	}
+	extra = rr - r;
 	printf("The invariant extra is equal to %d.\n",extra);
 
 	/* Initialize bb which is going to be equal to
@@ -458,6 +449,8 @@ int main()
 		aa = copy_pol_star(cc,bb);
 		merge_add_split(&(hhh[2]),aa);
 	}
+	free_star(bb); free(bb);
+	free_star(dd); free(dd);
 
 	printf("Start computing aa.\n");
 	for(j=0;j+1<=blen3+blen2+blen1;j++) {
@@ -481,7 +474,7 @@ int main()
 	}
 	for(i=0;i+1<=blen1+blen2+blen3;i++) {
 		for(j=0;j+1<=blen1+blen2+blen3;j++) {
-			for(c=1;c<=k;c++) div_p(fmatrix[i][j]);
+			div_p(k, fmatrix[i][j]);
 		}
 	}
 
@@ -498,8 +491,6 @@ int main()
 	 * The reason for this is that it makes 	*
 	 * it easier to detect memory leaks.		*
 	 ************************************************/
-	free_star(bb); free(bb);
-	free_star(dd); free(dd);
 	free_star(hhh[0]); free(hhh[0]);
 	free_star(hhh[1]); free(hhh[1]);
 	free_star(hhh[2]); free(hhh[2]);

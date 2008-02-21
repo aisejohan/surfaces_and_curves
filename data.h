@@ -54,7 +54,10 @@
 
 /* This type will be used for our scalars. */
 #include <gmp.h>
-typedef mpz_t mscalar;
+typedef struct scalar {
+	int e;
+	mpz_t i;
+} mscalar[1];
 
 struct term {
 	mscalar c;
