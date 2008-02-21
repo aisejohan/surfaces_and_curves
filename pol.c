@@ -517,7 +517,6 @@ make_times_term(struct term t, struct polynomial f)
 }
 
 /* Do not compute reductions. */
-/*
 static void times_term_variant(struct term t, struct polynomial f, struct polynomial *g)
 {
 	struct term *fterm, *gterm;
@@ -526,7 +525,8 @@ static void times_term_variant(struct term t, struct polynomial f, struct polyno
 	gterm = g->leading;
 	fterm = f.leading;
 	while(fterm) {
-		mpz_mul(gterm->c, t.c, fterm->c);
+		gterm->c->e = t.c->e + fterm->c->e;
+		mpz_mul(gterm->c->i, t.c->i, fterm->c->i);
 		gterm->n1 = t.n1 + fterm->n1;
 		gterm->n2 = t.n2 + fterm->n2;
 		gterm->n3 = t.n3 + fterm->n3;
@@ -535,10 +535,8 @@ static void times_term_variant(struct term t, struct polynomial f, struct polyno
 	};
 	return;
 }
-*/
 
 /* We do not check for zero or reduce mod modulus. */
-/*
 static void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 {
 	int vergelijk;
@@ -589,7 +587,7 @@ static void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 			ptrterm = &((*ptrterm)->next);
 			gterm = gterm->next;
 		} else {
-			mpz_add(fterm->c, gterm->c, fterm->c);
+			sc_add_variant(fterm->c, gterm->c, fterm->c);
 			*ptrterm = fterm;
 			ptrterm = &(fterm->next);
 			fterm = fterm->next;
@@ -598,9 +596,7 @@ static void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 		};
 	};
 }
-*/
 
-/*
 static struct polynomial
 make_times_term_variant(struct term t, struct polynomial f)
 {
@@ -614,7 +610,8 @@ make_times_term_variant(struct term t, struct polynomial f)
 	fterm = f.leading;
 	while(fterm) {
 		make_term(ptrterm);
-		mpz_mul((*ptrterm)->c, t.c, fterm->c);
+		(*ptrterm)->c->e = t.c->e + fterm->c->e;
+		mpz_mul((*ptrterm)->c->i, t.c->i, fterm->c->i);
 		(*ptrterm)->n1 = t.n1 + fterm->n1;
 		(*ptrterm)->n2 = t.n2 + fterm->n2;
 		(*ptrterm)->n3 = t.n3 + fterm->n3;
@@ -623,8 +620,6 @@ make_times_term_variant(struct term t, struct polynomial f)
 	};
 	return(uit);
 }
-*/
-
 
 /*
 static unsigned int nr_terms(struct term *aa)
@@ -640,24 +635,43 @@ static unsigned int nr_terms(struct term *aa)
 
 static struct polynomial __pol_mult(struct term *tt, struct polynomial g)
 {
+	struct term **ptrterm;
 	struct polynomial uit, tmppol;
+	mscalar c;
+	make_scalar(c);
 
-	uit = make_times_term(*tt, g);
+	uit = make_times_term_variant(*tt, g);
 	tt = tt->next;
 
-	tmppol = make_times_term(*tt, g);
-	rep_pol_add(&uit,tmppol);
+	tmppol = make_times_term_variant(*tt, g);
+	rep_pol_add_variant(&uit,tmppol);
 	tt = tt->next;
 
 	while(tt) {
-		times_term(*tt, g, &tmppol);
-		rep_pol_add(&uit,tmppol);
+		times_term_variant(*tt, g, &tmppol);
+		rep_pol_add_variant(&uit,tmppol);
 		tt = tt->next;
 	};
 
-	clean_pol(&uit);
-
 	free_tail(tmppol.leading);
+
+	ptrterm = &(uit.leading);
+	while (*ptrterm) {
+		clean_scalar((*ptrterm)->c);
+		if (sc_is_zero((*ptrterm)->c)) {
+			tt = *ptrterm;
+			*ptrterm = (*ptrterm)->next;
+			free_term(tt);
+		} else {
+			sc_copy((*ptrterm)->c,c);
+			free_scalar((*ptrterm)->c);
+			make_scalar((*ptrterm)->c);
+			sc_copy(c,(*ptrterm)->c);
+			ptrterm = &((*ptrterm)->next);
+		}
+	}
+
+	free_scalar(c);
 
 	return(uit);
 }

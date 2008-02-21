@@ -185,6 +185,62 @@ void sc_add(mscalar a, mscalar b, mscalar c)
 	return;
 }
 
+void sc_add_variant(mscalar a, mscalar b, mscalar c)
+{
+	if (a->e < b->e) {
+		if (b->e - a->e < rr + 1) {
+			mpz_mul(temp, b->i, modulus[rr - b->e + a->e]);
+			mpz_add(c->i, temp, a->i);
+			c->e = a->e;
+			return;
+		}
+		mpz_ui_pow_ui(temp, p, b->e - a->e);
+		mpz_mul(temp, b->i, temp);
+		mpz_add(c->i, temp, a->i);
+		c->e = a->e;
+		return;
+	}
+	if (a->e > b->e) {
+		if (a->e - b->e < rr + 1) {
+			mpz_mul(temp, a->i, modulus[rr - a->e + b->e]);
+			mpz_add(c->i, temp, b->i);
+			c->e = b->e;
+			return;
+		}
+		mpz_ui_pow_ui(temp, p, a->e - b->e);
+		mpz_mul(temp, a->i, temp);
+		mpz_add(c->i, temp, b->i);
+		c->e = b->e;
+		return;
+	}
+	c->e = a->e;
+	mpz_add(c->i, a->i, b->i);
+	return;
+}
+
+void clean_scalar(mscalar a)
+{
+	if (a->e >= rr) {
+		a->e = rr;
+		mpz_set_ui(a->i,0);
+		return;
+	}
+	mpz_mod(temp, a->i, modulus[a->e]);
+	if (mpz_sgn(temp) == 0) {
+		a->e = rr;
+		mpz_set_ui(a->i,0);
+		return;
+	}
+	a->e += mpz_remove(temp, temp, prime);
+	if (a->e < rr) {
+		mpz_mod(a->i, temp, modulus[a->e]);
+		return;
+	}
+	a->e = rr;
+	mpz_set_ui(a->i,0);
+	return;
+}
+
 void sc_mult(mscalar a, mscalar b, mscalar c)
 {
 #ifdef KIJKEN
@@ -308,7 +364,7 @@ void sc_one(mscalar a)
 
 void sc_copy(mscalar a, mscalar b)
 {
-#ifdef KIJKEN
+#ifdef OLD_KIJKEN
 	test_scalar(a);
 	test_scalar(b);
 #endif

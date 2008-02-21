@@ -34,6 +34,8 @@ void free_scalar(mscalar a);
 int valuation(mscalar x);
 
 void sc_add(mscalar a, mscalar b, mscalar c);
+void sc_add_variant(mscalar a, mscalar b, mscalar c);
+void clean_scalar(mscalar a);
 
 void sc_mult(mscalar a, mscalar b, mscalar c);
 
