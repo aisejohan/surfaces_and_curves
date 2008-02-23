@@ -214,7 +214,6 @@ int check_flatness(unsigned int degree)
 			tmp.n1 = a1;
 			tmp.n2 = a2;
 			tmp.n3 = a3;
-			tmp.n4 = a4;
 			copy_term(&tmp,tt[i]);
 			tt[i]->next = NULL;
 			i++;
@@ -351,7 +350,6 @@ struct term **find_basis(unsigned int degree, int blen)
 			tmp.n1 = a1;
 			tmp.n2 = a2;
 			tmp.n3 = a3;
-			tmp.n4 = a4;
 			copy_term(&tmp,tt[count2-1]);
 			tt[count2-1]->next = NULL;
 		};

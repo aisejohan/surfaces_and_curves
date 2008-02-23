@@ -55,7 +55,7 @@ static struct exponents take_exponents(struct polynomial f)
 	uit.e1 = f.leading->n1;
 	uit.e2 = f.leading->n2;
 	uit.e3 = f.leading->n3;
-	uit.e4 = f.leading->n4;
+	uit.e4 = (f.degree - (uit.e1*d1 + uit.e2*d2 + uit.e3*d3))/d4;
 	uit.e5 = (unsigned int) valuation(f.leading->c);
 	return(uit);
 }
@@ -118,8 +118,13 @@ static unsigned int smaller(struct exponents mon1, struct exponents mon2)
 }
 
 /* Computes the coefficient terms needed to make the s_pol.	*/
-static void s_pol_terms(struct term *a, struct term *b, struct term *fterm, struct term *gterm)
+static unsigned int *s_pol_terms(struct term *a, struct term *b, unsigned int df, struct term *fterm, unsigned int dg, struct term *gterm)
 {
+	unsigned int fn4, gn4;
+	unsigned int *ab;
+
+	ab = (unsigned int *) malloc(2*sizeof(unsigned int));
+
 	if(fterm->n1 > gterm->n1) {
 		a->n1 = 0;
 		b->n1 = fterm->n1 - gterm->n1;
@@ -141,13 +146,17 @@ static void s_pol_terms(struct term *a, struct term *b, struct term *fterm, stru
 		a->n3 = gterm->n3 - fterm->n3;
 		b->n3 = 0;
 	};
-	if(fterm->n4 > gterm->n4) {
-		a->n4 = 0;
-		b->n4 = fterm->n4 - gterm->n4;
+	fn4 = (df - (fterm->n1*d1 + fterm->n2*d2 + fterm->n3*d3))/d4;
+	gn4 = (dg - (gterm->n1*d1 + gterm->n2*d2 + gterm->n3*d3))/d4;
+	if(fn4 > gn4) {
+		ab[0] = 0;
+		ab[1] = fn4 - gn4;
 	} else {
-		a->n4 = gterm->n4 - fterm->n4;
-		b->n4 = 0;
+		ab[0] = gn4 - fn4;
+		ab[1] = 0;
 	};
+	ab[0] = a->n1*d1 + a->n2*d2 + a->n3*d3 + ab[0]*d4;
+	ab[1] = b->n1*d1 + b->n2*d2 + b->n3*d3 + ab[1]*d4;
 	sc_copy(gterm->c,a->c);
 	sc_copy(fterm->c,b->c);
 	/* Note sign. */
@@ -156,12 +165,13 @@ static void s_pol_terms(struct term *a, struct term *b, struct term *fterm, stru
 		div_p(a->c);
 		div_p(b->c);
 	};
-	return;
+	return(ab);
 }
 
 /* Computes the s_pol.						*/
 static struct polynomial s_pol(struct polynomial f, struct polynomial g)
 {
+	unsigned int *ab;
 	struct term a,b;
 	struct polynomial A,B;
 	make_scalar(a.c);
@@ -169,10 +179,11 @@ static struct polynomial s_pol(struct polynomial f, struct polynomial g)
 	A.leading = NULL;
 	B.leading = NULL;
 
-	s_pol_terms(&a,&b,f.leading,g.leading);
-	A = make_times_term(a,f);
+	ab = s_pol_terms(&a, &b, f.degree, f.leading, g.degree, g.leading);
+	A = make_times_term(ab[0], a, f);
 	clean_pol(&A);
-	B = make_times_term(b,g);
+	B = make_times_term(ab[1], b, g);
+	free(ab);
 	merge_add(&A,B);
 	free_scalar(a.c);
 	free_scalar(b.c);
@@ -183,6 +194,7 @@ static struct polynomial s_pol(struct polynomial f, struct polynomial g)
  * Computes the base change vector of the s_pol.		*/
 static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 {
+	unsigned int *ab;
 	struct base_change uit;
 	struct polynomial A,B;
 	struct term a,b;
@@ -191,20 +203,20 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 	A.leading = NULL;
 	B.leading = NULL;
 
-	s_pol_terms(&a,&b,G.ff[i]->leading,G.ff[j]->leading);
+	ab = s_pol_terms(&a, &b, G.ff[i]->degree, G.ff[i]->leading, G.ff[j]->degree, G.ff[j]->leading);
 	/* Do the same onto BC as you do onto G.ff.	*/
 	if((G.BC[i]->bc1.leading) && (G.BC[j]->bc1.leading)) {
-		A = make_times_term(a,G.BC[i]->bc1);
+		A = make_times_term(ab[0], a, G.BC[i]->bc1);
 		clean_pol(&A);
-		B = make_times_term(b,G.BC[j]->bc1);
+		B = make_times_term(ab[1], b, G.BC[j]->bc1);
 		merge_add(&A,B);
 		uit.bc1 = A;
 	} else if (G.BC[i]->bc1.leading) {
-		A = make_times_term(a,G.BC[i]->bc1);
+		A = make_times_term(ab[0], a, G.BC[i]->bc1);
 		clean_pol(&A);
 		uit.bc1 = A;
 	} else if (G.BC[j]->bc1.leading) {
-		B = make_times_term(b,G.BC[j]->bc1);
+		B = make_times_term(ab[1], b, G.BC[j]->bc1);
 		clean_pol(&B);
 		uit.bc1 = B;
 	} else {
@@ -212,17 +224,17 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 		uit.bc1.leading = NULL;
 	};
 	if((G.BC[i]->bc2.leading) && (G.BC[j]->bc2.leading)) {
-		A = make_times_term(a,G.BC[i]->bc2);
+		A = make_times_term(ab[0], a, G.BC[i]->bc2);
 		clean_pol(&A);
-		B = make_times_term(b,G.BC[j]->bc2);
+		B = make_times_term(ab[1], b, G.BC[j]->bc2);
 		merge_add(&A,B);
 		uit.bc2 = A;
 	} else if (G.BC[i]->bc2.leading) {
-		A = make_times_term(a,G.BC[i]->bc2);
+		A = make_times_term(ab[0], a, G.BC[i]->bc2);
 		clean_pol(&A);
 		uit.bc2 = A;
 	} else if (G.BC[j]->bc2.leading) {
-		B = make_times_term(b,G.BC[j]->bc2);
+		B = make_times_term(ab[1], b, G.BC[j]->bc2);
 		clean_pol(&B);
 		uit.bc2 = B;
 	} else {
@@ -230,17 +242,17 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 		uit.bc2.leading = NULL;
 	};
 	if((G.BC[i]->bc3.leading) && (G.BC[j]->bc3.leading)) {
-		A = make_times_term(a,G.BC[i]->bc3);
+		A = make_times_term(ab[0], a, G.BC[i]->bc3);
 		clean_pol(&A);
-		B = make_times_term(b,G.BC[j]->bc3);
+		B = make_times_term(ab[1], b, G.BC[j]->bc3);
 		merge_add(&A,B);
 		uit.bc3 = A;
 	} else if (G.BC[i]->bc3.leading) {
-		A = make_times_term(a,G.BC[i]->bc3);
+		A = make_times_term(ab[0], a, G.BC[i]->bc3);
 		clean_pol(&A);
 		uit.bc3 = A;
 	} else if (G.BC[j]->bc3.leading) {
-		B = make_times_term(b,G.BC[j]->bc3);
+		B = make_times_term(ab[1], b, G.BC[j]->bc3);
 		clean_pol(&B);
 		uit.bc3 = B;
 	} else {
@@ -248,17 +260,17 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 		uit.bc3.leading = NULL;
 	};
 	if((G.BC[i]->bc4.leading) && (G.BC[j]->bc4.leading)) {
-		A = make_times_term(a,G.BC[i]->bc4);
+		A = make_times_term(ab[0], a, G.BC[i]->bc4);
 		clean_pol(&A);
-		B = make_times_term(b,G.BC[j]->bc4);
+		B = make_times_term(ab[1], b, G.BC[j]->bc4);
 		merge_add(&A,B);
 		uit.bc4 = A;
 	} else if (G.BC[i]->bc4.leading) {
-		A = make_times_term(a,G.BC[i]->bc4);
+		A = make_times_term(ab[0], a, G.BC[i]->bc4);
 		clean_pol(&A);
 		uit.bc4 = A;
 	} else if (G.BC[j]->bc4.leading) {
-		B = make_times_term(b,G.BC[j]->bc4);
+		B = make_times_term(ab[1], b, G.BC[j]->bc4);
 		clean_pol(&B);
 		uit.bc4 = B;
 	} else {
@@ -266,24 +278,24 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 		uit.bc4.leading = NULL;
 	};
 	if((G.BC[i]->bc5.leading) && (G.BC[j]->bc5.leading)) {
-		A = make_times_term(a,G.BC[i]->bc5);
+		A = make_times_term(ab[0], a, G.BC[i]->bc5);
 		clean_pol(&A);
-		B = make_times_term(b,G.BC[j]->bc5);
+		B = make_times_term(ab[1], b, G.BC[j]->bc5);
 		merge_add(&A,B);
 		uit.bc5 = A;
 	} else if (G.BC[i]->bc5.leading) {
-		A = make_times_term(a,G.BC[i]->bc5);
+		A = make_times_term(ab[0], a, G.BC[i]->bc5);
 		clean_pol(&A);
 		uit.bc5 = A;
 	} else if (G.BC[j]->bc5.leading) {
-		B = make_times_term(b,G.BC[j]->bc5);
+		B = make_times_term(ab[1], b, G.BC[j]->bc5);
 		clean_pol(&B);
 		uit.bc5 = B;
 	} else {
 		uit.bc5.degree = 0; /* Not correct! */
 		uit.bc5.leading = NULL;
 	};
-		
+	free(ab);
 	free_scalar(a.c);
 	free_scalar(b.c);
 	return(uit);
@@ -381,7 +393,7 @@ static unsigned int print_G(void)
 			s4=1;
 		};
 #ifdef KIJKEN
-		if((tmp.e1 != G.ff[i]->leading->n1) || (tmp.e2 != G.ff[i]->leading->n2) || (tmp.e3 != G.ff[i]->leading->n3) || (tmp.e4 != G.ff[i]->leading->n4) || (tmp.e5 != valuation(G.ff[i]->leading->c))) {
+		if((tmp.e1 != G.ff[i]->leading->n1) || (tmp.e2 != G.ff[i]->leading->n2) || (tmp.e3 != G.ff[i]->leading->n3) || (tmp.e5 != valuation(G.ff[i]->leading->c))) {
 			printf("Wrong exponents!\n");
 			exit(1);
 		};
@@ -415,7 +427,6 @@ static unsigned int test_G(void)
 		if((tmp.e1 != G.ff[i]->leading->n1) ||
 		(tmp.e2 != G.ff[i]->leading->n2) || 
 		(tmp.e3 != G.ff[i]->leading->n3) || 
-		(tmp.e4 != G.ff[i]->leading->n4) || 
 		(tmp.e5 != valuation(G.ff[i]->leading->c))) {
 			printf("Wrong exponents!\n");
 			exit(1);
@@ -514,7 +525,6 @@ int setup(void)
 	EEN.leading->n1 = 0;
 	EEN.leading->n2 = 0;
 	EEN.leading->n3 = 0;
-	EEN.leading->n4 = 0;
 	
 	/* Zero polynomial of degree 0. */
 	NIKS.degree = 0;
@@ -1035,8 +1045,7 @@ while((m>0) || (check == 1)) {
 		if((G.ff[i]->leading) && 
 		((G.ff[i]->leading->n1 != G.ee[i]->e1) || 
 		 (G.ff[i]->leading->n2 != G.ee[i]->e2) || 
-		 (G.ff[i]->leading->n3 != G.ee[i]->e3) || 
-		 (G.ff[i]->leading->n4 != G.ee[i]->e4))) {
+		 (G.ff[i]->leading->n3 != G.ee[i]->e3))) {
 			printf("The following should have been zero: ");
 			print_pol(*G.ff[i]);
 			exit(1);

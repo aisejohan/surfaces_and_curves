@@ -41,6 +41,10 @@ void setup_scalars(void)
 	mpz_init(modulus);
 	mpz_init(temp);
 	mpz_ui_pow_ui(modulus,(unsigned long) p,(unsigned long) r);
+	printf("The size of term is %d.\n",sizeof(struct term));
+	printf("The size of pointer to term is %d.\n",sizeof(struct term *));
+	printf("The size of mscalar is %d.\n",sizeof(mscalar));
+	printf("The size of unsigned int is %d.\n",sizeof(unsigned int));
 }
 
 void printmscalar(mscalar a)

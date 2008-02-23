@@ -51,8 +51,7 @@ static void add_coefficients(struct polynomial **aa, int column)
 		if(
 		(aaterm->n1 == basis3[row]->n1) &&
 		(aaterm->n2 == basis3[row]->n2) &&
-		(aaterm->n3 == basis3[row]->n3) &&
-		(aaterm->n4 == basis3[row]->n4)) {
+		(aaterm->n3 == basis3[row]->n3)) {
 			sc_add_replace(aaterm->c,fmatrix[row][column]);
 			row++;
 			aaterm = aaterm->next;
@@ -68,8 +67,7 @@ static void add_coefficients(struct polynomial **aa, int column)
 		if(
 		(aaterm->n1 == basis2[row-blen3]->n1) &&
 		(aaterm->n2 == basis2[row-blen3]->n2) &&
-		(aaterm->n3 == basis2[row-blen3]->n3) &&
-		(aaterm->n4 == basis2[row-blen3]->n4)) {
+		(aaterm->n3 == basis2[row-blen3]->n3)) {
 			sc_add_replace(aaterm->c,fmatrix[row][column]);
 			row++;
 			aaterm = aaterm->next;
@@ -85,8 +83,7 @@ static void add_coefficients(struct polynomial **aa, int column)
 		if(
 		(aaterm->n1 == basis1[row-blen3-blen2]->n1) &&
 		(aaterm->n2 == basis1[row-blen3-blen2]->n2) &&
-		(aaterm->n3 == basis1[row-blen3-blen2]->n3) &&
-		(aaterm->n4 == basis1[row-blen3-blen2]->n4)) {
+		(aaterm->n3 == basis1[row-blen3-blen2]->n3)) {
 			sc_add_replace(aaterm->c,fmatrix[row][column]);
 			row++;
 			aaterm = aaterm->next;
@@ -336,7 +333,6 @@ int main()
 	T.leading->n1 = p-1;
 	T.leading->n2 = p-1;
 	T.leading->n3 = p-1;
-	T.leading->n4 = p-1;
 	T.leading->next = NULL;
 	bb = split_up(&T);
 
@@ -353,7 +349,6 @@ int main()
 		T.leading->n1 = p*basis3[i]->n1;
 		T.leading->n2 = p*basis3[i]->n2;
 		T.leading->n3 = p*basis3[i]->n3;
-		T.leading->n4 = p*basis3[i]->n4;
 		T.leading->next = NULL;
 		fbasis[i] = split_up(&T);
 	};
@@ -370,7 +365,6 @@ int main()
 		T.leading->n1 = p*basis2[i]->n1;
 		T.leading->n2 = p*basis2[i]->n2;
 		T.leading->n3 = p*basis2[i]->n3;
-		T.leading->n4 = p*basis2[i]->n4;
 		T.leading->next = NULL;
 		fbasis[blen3+i] = split_up(&T);
 	};
@@ -387,7 +381,6 @@ int main()
 		T.leading->n1 = p*basis1[i]->n1;
 		T.leading->n2 = p*basis1[i]->n2;
 		T.leading->n3 = p*basis1[i]->n3;
-		T.leading->n4 = p*basis1[i]->n4;
 		T.leading->next = NULL;
 		fbasis[blen3+blen2+i] = split_up(&T);
 	};
