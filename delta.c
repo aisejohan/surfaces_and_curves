@@ -93,6 +93,8 @@ int check_flatness(unsigned int degree)
 	struct term **tt;
 	struct polynomial T,TT;
 	struct polynomial **bb, **aa;
+	tmp = NULL;
+	least = NULL;
 	make_scalar(&c);
 	make_term(&tmp);
 	make_term(&least);
@@ -212,7 +214,6 @@ int check_flatness(unsigned int degree)
 			tmp->n1 = a1;
 			tmp->n2 = a2;
 			tmp->n3 = a3;
-			tmp->n4 = a4;
 			copy_term(tmp, tt[i]);
 			tt[i]->next = NULL;
 			i++;
@@ -311,6 +312,7 @@ struct term **find_basis(unsigned int degree, int blen)
 	int a1,a2,a3,a4,count2,i,j,b2;	
 	struct term *tmp;
 	struct term **tt;
+	tmp = NULL;
 	make_term(&tmp);
 
 	tt = (struct term **)malloc(blen*sizeof(struct term *));
@@ -349,7 +351,6 @@ struct term **find_basis(unsigned int degree, int blen)
 			tmp->n1 = a1;
 			tmp->n2 = a2;
 			tmp->n3 = a3;
-			tmp->n4 = a4;
 			copy_term(tmp, tt[count2-1]);
 			tt[count2-1]->next = NULL;
 		};

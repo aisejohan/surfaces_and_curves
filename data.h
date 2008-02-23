@@ -69,7 +69,6 @@ struct term {
 	unsigned int n1;
 	unsigned int n2;
 	unsigned int n3;
-	unsigned int n4;
 	struct term *next;
 };
 

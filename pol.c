@@ -60,6 +60,7 @@ void make_pol(struct polynomial **f)
 		perror("Malloc failed.");
 		exit(1);
 	};
+	(*f)->degree = 0;
 	(*f)->leading=NULL;
 }
 
@@ -86,7 +87,6 @@ void copy_term(struct term *mon1, struct term *mon2)
 	mon2->n1 = mon1->n1;
 	mon2->n2 = mon1->n2;
 	mon2->n3 = mon1->n3;
-	mon2->n4 = mon1->n4;
 }
 
 /* This frees memory starting with mon.					*
@@ -120,6 +120,14 @@ void clean_pol(struct polynomial *pol)
 			*ptrterm = (*ptrterm)->next;
 			free_term(tmp);
 		} else {
+#ifdef KIJKEN
+if (pol->degree < d1*(*ptrterm)->n1 + d2*(*ptrterm)->n2 + d3*(*ptrterm)->n3) {
+	printf("clean_pol: negative 4th exponent!\n");
+	printf("%d  %d %d %d\n", pol->degree, (*ptrterm)->n1, (*ptrterm)->n2, (*ptrterm)->n3);
+	print_pol(*pol);
+	exit(1);
+}
+#endif
 			ptrterm = &((*ptrterm)->next);
 		};
 	};
@@ -149,11 +157,28 @@ struct polynomial copy_pol(struct polynomial f)
 	return(uit);
 }
 
+inline unsigned int
+i_n4(unsigned int degree, unsigned int n1, unsigned int n2, unsigned int n3)
+{
+#ifdef KIJKEN
+	if (degree < (n1*d1 + n2*d2 + n3*d3)) {
+		printf("Negative 4th exponent!\n");
+		printf("%u  %u %u %u\n", degree, n1, n2, n3);
+		exit(1);
+	}
+#endif
+	return((degree - (n1*d1 + n2*d2 + n3*d3))/d4);
+}
 
+inline unsigned int t_n4(unsigned int degree, struct term *tt)
+{
+	return(i_n4(degree, tt->n1, tt->n2, tt->n3));
+}
 
 /* Prints a polynomial. 				*/
 void print_pol(struct polynomial f)
 {
+	unsigned int n4;
 	struct term *fterm;
 
 	fterm = f.leading;
@@ -167,7 +192,8 @@ void print_pol(struct polynomial f)
 			if(fterm->n1) printf("*x^%d",fterm->n1);
 			if(fterm->n2) printf("*y^%d",fterm->n2);
 			if(fterm->n3) printf("*z^%d",fterm->n3);
-			if(fterm->n4) printf("*w^%d",fterm->n4);
+			n4 = t_n4(f.degree, fterm);
+			if(n4) printf("*w^%d", n4);
 			if(fterm->next) printf(" + ");
 			else printf("\n");
 		} else {
@@ -196,7 +222,13 @@ struct polynomial pol_add(struct polynomial f, struct polynomial g)
 
 #ifdef KIJKEN
 	if(f.degree != g.degree) {
-		printf("Can't add these!\n");
+		printf("pol_add: Can't add these!\n");
+		printf("Degree f is %d and degree g is %d\n",
+				f.degree, g.degree);
+		print_pol(f);
+		printf("\n");
+		print_pol(g);
+
 		exit(1);
 	};
 #endif
@@ -242,7 +274,6 @@ struct polynomial pol_add(struct polynomial f, struct polynomial g)
 				(*ptrterm)->n1 = fterm->n1;
 				(*ptrterm)->n2 = fterm->n2;
 				(*ptrterm)->n3 = fterm->n3;
-				(*ptrterm)->n4 = fterm->n4;
 				ptrterm = &((*ptrterm)->next);
 				fterm = fterm->next;
 				gterm = gterm->next;
@@ -350,7 +381,7 @@ void rep_pol_add(struct polynomial *f, struct polynomial g)
 
 #ifdef KIJKEN
 	if(f->degree != g.degree) {
-		printf("Can't add these!\n");
+		printf("rep_pol_add: Can't add these!\n");
 		printf("Degree f is %d and degree g is %d\n",
 				f->degree,g.degree);
 		print_pol(*f);
@@ -482,11 +513,11 @@ void div_p_pol(int k, struct polynomial *f)
  * g need not be. The result t*f is put into g, but	*
  * it may not be a polynomial since some terms may be	*
  * zero.						*/
-void times_term(struct term *t, struct polynomial f, struct polynomial *g)
+void times_term(unsigned int d_t, struct term *t, struct polynomial f, struct polynomial *g)
 {
 	struct term *fterm, *gterm;
 
-	g->degree = f.degree + d1*t->n1 + d2*t->n2 + d3*t->n3 + d4*t->n4;
+	g->degree = f.degree + d_t;
 	gterm = g->leading;
 	fterm = f.leading;
 	while(fterm) {
@@ -494,7 +525,6 @@ void times_term(struct term *t, struct polynomial f, struct polynomial *g)
 		gterm->n1 = t->n1 + fterm->n1;
 		gterm->n2 = t->n2 + fterm->n2;
 		gterm->n3 = t->n3 + fterm->n3;
-		gterm->n4 = t->n4 + fterm->n4;
 		fterm = fterm->next;
 		gterm = gterm->next;
 	};
@@ -505,14 +535,14 @@ void times_term(struct term *t, struct polynomial f, struct polynomial *g)
 /* Same as above but it creates and outputs the product. 	*
  * Same caveats as above.					*/
 struct polynomial
-make_times_term(struct term *t, struct polynomial f)
+make_times_term(unsigned int d_t, struct term *t, struct polynomial f)
 {
 	struct term *fterm;
 	struct term **ptrterm;
 	struct polynomial uit;
 	uit.leading = NULL;
 
-	uit.degree = f.degree + d1*t->n1 + d2*t->n2 + d3*t->n3 + d4*t->n4;
+	uit.degree = f.degree + d_t;
 	ptrterm = &(uit.leading);
 	fterm = f.leading;
 	while(fterm) {
@@ -521,7 +551,6 @@ make_times_term(struct term *t, struct polynomial f)
 		(*ptrterm)->n1 = t->n1 + fterm->n1;
 		(*ptrterm)->n2 = t->n2 + fterm->n2;
 		(*ptrterm)->n3 = t->n3 + fterm->n3;
-		(*ptrterm)->n4 = t->n4 + fterm->n4;
 		fterm = fterm->next;
 		ptrterm = &((*ptrterm)->next);
 	};
@@ -529,11 +558,12 @@ make_times_term(struct term *t, struct polynomial f)
 }
 
 /* Do not compute reductions. */
-static void times_term_variant(struct term t, struct polynomial f, struct polynomial *g)
+static void times_term_variant(unsigned int d_t, struct term t,
+	struct polynomial f, struct polynomial *g)
 {
 	struct term *fterm, *gterm;
 
-	g->degree = f.degree + d1*t.n1 + d2*t.n2 + d3*t.n3 + d4*t.n4;
+	g->degree = f.degree + d_t;
 	gterm = g->leading;
 	fterm = f.leading;
 	while(fterm) {
@@ -542,7 +572,6 @@ static void times_term_variant(struct term t, struct polynomial f, struct polyno
 		gterm->n1 = t.n1 + fterm->n1;
 		gterm->n2 = t.n2 + fterm->n2;
 		gterm->n3 = t.n3 + fterm->n3;
-		gterm->n4 = t.n4 + fterm->n4;
 		fterm = fterm->next;
 		gterm = gterm->next;
 	};
@@ -558,7 +587,7 @@ static void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 
 #ifdef KIJKEN
 	if(f->degree != g.degree) {
-		printf("Can't add these!\n");
+		printf("rep_pol_add_variant: Can't add these!\n");
 		printf("Degree f is %d and degree g is %d\n",
 				f->degree,g.degree);
 		print_pol(*f);
@@ -611,14 +640,14 @@ static void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 }
 
 static struct polynomial
-make_times_term_variant(struct term t, struct polynomial f)
+make_times_term_variant(unsigned int d_t, struct term t, struct polynomial f)
 {
 	struct term *fterm;
 	struct term **ptrterm;
 	struct polynomial uit;
 	uit.leading = NULL;
 
-	uit.degree = f.degree + d1*t.n1 + d2*t.n2 + d3*t.n3 + d4*t.n4;
+	uit.degree = f.degree + d_t;
 	ptrterm = &(uit.leading);
 	fterm = f.leading;
 	while(fterm) {
@@ -628,7 +657,6 @@ make_times_term_variant(struct term t, struct polynomial f)
 		(*ptrterm)->n1 = t.n1 + fterm->n1;
 		(*ptrterm)->n2 = t.n2 + fterm->n2;
 		(*ptrterm)->n3 = t.n3 + fterm->n3;
-		(*ptrterm)->n4 = t.n4 + fterm->n4;
 		fterm = fterm->next;
 		ptrterm = &((*ptrterm)->next);
 	};
@@ -647,22 +675,23 @@ static unsigned int nr_terms(struct term *aa)
 }
 */
 
-static struct polynomial __pol_mult(struct term *tt, struct polynomial g)
+/* Only clean up and do modulo modulus at the very end. */
+static struct polynomial __pol_mult(unsigned int d_t, struct term *tt, struct polynomial g)
 {
 	struct term **ptrterm;
 	struct polynomial uit, tmppol;
 	mpz_t i;
 	mpz_init(i);
 
-	uit = make_times_term_variant(*tt, g);
+	uit = make_times_term_variant(d_t, *tt, g);
 	tt = tt->next;
 
-	tmppol = make_times_term_variant(*tt, g);
+	tmppol = make_times_term_variant(d_t, *tt, g);
 	rep_pol_add_variant(&uit,tmppol);
 	tt = tt->next;
 
 	while(tt) {
-		times_term_variant(*tt, g, &tmppol);
+		times_term_variant(d_t, *tt, g, &tmppol);
 		rep_pol_add_variant(&uit,tmppol);
 		tt = tt->next;
 	};
@@ -701,11 +730,11 @@ struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 	}
 
 	if (!f.leading->next) {
-		return make_times_term(f.leading, g);
+		return make_times_term(f.degree, f.leading, g);
 	}
 
 	if (!g.leading->next) {
-		return make_times_term(g.leading, f);
+		return make_times_term(g.degree, g.leading, f);
 	}
 	
 	tf = f.leading->next;
@@ -717,8 +746,8 @@ struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 	}
 
 	if (tf) {
-		return __pol_mult(g.leading, f);
+		return __pol_mult(g.degree, g.leading, f);
 	} else {
-		return __pol_mult(f.leading, g);
+		return __pol_mult(f.degree, f.leading, g);
 	}
 }
