@@ -415,12 +415,7 @@ struct polynomial **split_up(struct polynomial *f)
 {
 	int i,count;
 	struct polynomial **uit;
-#ifdef OLD_GROBNER
-	struct polynomial *tussen;
-	struct polynomial **aa;
-#else
 	struct polynomial *aa;
-#endif
 
 	count = 1 + f->degree/d;
 	uit=(struct polynomial **)malloc(count*sizeof(struct polynomial *));
@@ -439,25 +434,14 @@ struct polynomial **split_up(struct polynomial *f)
 		return(uit);
 	};
 
-#ifdef OLD_GROBNER
-	tussen = &myf;
-#endif
 	uit[0]->leading = f->leading;
 	f->leading = NULL;
 	for(i=0;i+1+1<=count;i++) {
-#ifdef OLD_GROBNER
-		aa = gen_division(uit[i],1,&tussen);
-		times_int(-1,aa[0]);
-		uit[i+1]->leading = aa[0]->leading;
-		uit[i+1]->degree = aa[0]->degree;
-		free(aa[0]);
-#else
 		aa = myf_division(uit[i]);
 		times_int(-1,aa);
 		uit[i+1]->leading = aa->leading;
 		uit[i+1]->degree = aa->degree;
 		free(aa);
-#endif
 	};
 	return(uit);
 }

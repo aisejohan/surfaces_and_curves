@@ -28,21 +28,6 @@
 #define GELIJK	-1
 #define GROTER	0
 
-/* There are two orderings. LEX and REVLEX. Chose one by
- * commenting out one of the following two lines. */
-#define LEX_ORDER
-/* #define REVLEX_ORDER */
-
-/* There are three strategies for reducing the polynomials
- * encountered during the computation. OLD, NEW and MIXED.
- * Setting MIXED_GROBNER is a good choice on average, but
- * for certain choices of degrees etc the combinations
- * 	LEX_ORDER + NEW_GROBNER
- * or
- * 	REVLEX_ORDER + OLD_GROBNER
- * can be much faster. */
-#define NEW_GROBNER
-
 #define d1	8
 #define d2	7
 #define d3	15
@@ -50,7 +35,7 @@
 #define d	64
 #define p	5
 #define r	13		/* Exponent. */
-#define q	10		/* Largest power of Delta. */
+#define q	5		/* Largest power of Delta. */
 
 #define maxlength	256
 

@@ -55,108 +55,6 @@ static int deelbaar(unsigned int d_1, struct term *mon1, unsigned int d_2, struc
  *	(output pp)						*
  *								*
  * **************************************************************/
-#if defined OLD_GROBNER || defined MIXED_GROBNER
-struct polynomial ** 
-gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
-{
-	struct polynomial tmp[ss];
-	struct polynomial vh_rest[ss];
-	struct polynomial **aa;
-	struct polynomial *ppp;
-	struct term *aaterm[ss];
-	struct term **ptrterm;
-	struct term *pppterm;
-	struct term mon;
-	unsigned int i, dividing, d_t;
-
-	make_scalar(&mon.c);
-	ppp = NULL;
-	make_pol(&ppp);
-	aa = (struct polynomial **)malloc(ss*sizeof(struct polynomial *));
-	if(!aa) {
-		perror("Malloc failed!");
-		exit(1);
-	};
-	for(i=0;i+1<=ss;i++) {
-		tmp[i].leading = NULL;
-		aaterm[i] = NULL;
-		aa[i] = NULL;
-		make_pol(&aa[i]);
-		aa[i]->degree = (pp->degree > vh[i]->degree) ?
-			(pp->degree - vh[i]->degree) : 0;
-	};
-
-	/* Copy pp into ppp. */
-	ppp->degree = pp->degree;
-	ppp->leading = pp->leading;
-	/* Set pp equal to ``zero'' */
-	pp->leading = NULL;
-	ptrterm = &pp->leading;
-
-	while (ppp->leading) {
-		i = 0;
-		dividing = 1;
-		while (i+1 <= ss && dividing) {
-			if (deelbaar(vh[i]->degree, vh[i]->leading, ppp->degree, ppp->leading)) {
-				/* No sign in front of pppterm->c */
-				sc_div(ppp->leading->c, vh[i]->leading->c,
-					mon.c);
-				/* Change sign mon.c */
-				sc_negate(mon.c);
-				mon.n1 = ppp->leading->n1 - vh[i]->leading->n1;
-				mon.n2 = ppp->leading->n2 - vh[i]->leading->n2;
-				mon.n3 = ppp->leading->n3 - vh[i]->leading->n3;
-				d_t = ppp->degree - vh[i]->degree;
-
-				pppterm = ppp->leading;
-				ppp->leading = ppp->leading->next;
-				free_term(pppterm);
-
-				if (aaterm[i]) {
-					times_term(d_t, mon, vh_rest[i], &(tmp[i]));
-					make_term(&aaterm[i]->next);
-					copy_term(&mon, aaterm[i]->next);
-					aaterm[i] = aaterm[i]->next;
-				} else {
-					vh_rest[i].degree = vh[i]->degree;
-					vh_rest[i].leading = 
-						vh[i]->leading->next;
-					tmp[i] = make_times_term(d_t, mon,
-						vh_rest[i]);
-					make_term(&aa[i]->leading);
-					copy_term(&mon, aa[i]->leading);
-					aaterm[i] = aa[i]->leading;
-				};
-
-				rep_pol_add(ppp, tmp[i]);
-
-				dividing = 0;
-			} else {
-				i=i+1;
-			};
-		};
-		/* dividing == 1 means that we cannot get rid of the leading
-		 * term. So we put it back in pp. */
-		if(dividing) {
-			*ptrterm = ppp->leading;
-			ptrterm = &((*ptrterm)->next);
-			/* Move on to the next one. */
-			ppp->leading = ppp->leading->next;
-			/* Terminate pp. */
-			*ptrterm = NULL;
-		};
-	};
-	for(i=0;i+1<=ss;i++) {
-		free_tail(tmp[i].leading);
-	};
-	free(ppp);
-	free_scalar(mon.c);
-	return(aa);
-}
-#endif
-
-
-#ifdef NEW_GROBNER
 struct polynomial ** 
 gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 {
@@ -255,9 +153,7 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	free_scalar(c);
 	return(aa);
 }
-#endif
 
-#if defined NEW_GROBNER || defined MIXED_GROBNER
 /* Optimized for dividing by myf. */
 struct polynomial *myf_division(struct polynomial *pp)
 {
@@ -351,7 +247,6 @@ struct polynomial *myf_division(struct polynomial *pp)
 	free_scalar(c);
 	return(aa);
 }
-#endif
 
 /* ppp does not get changed */
 unsigned int
