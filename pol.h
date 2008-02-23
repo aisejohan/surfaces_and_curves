@@ -51,8 +51,8 @@ static inline int kleiner(struct term *mon1, struct term *mon2)
 }
 
 void copy_term(struct term *mon1, struct term *mon2);
-void times_term(struct term t, struct polynomial f, struct polynomial *g);
-struct polynomial make_times_term(struct term t, struct polynomial f);
+void times_term(struct term *t, struct polynomial f, struct polynomial *g);
+struct polynomial make_times_term(struct term *t, struct polynomial f);
 void free_tail(struct term *mon);
 void copy_tail(struct term *mon, struct term **ptrterm);
 struct polynomial copy_pol(struct polynomial f);

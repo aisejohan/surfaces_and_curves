@@ -53,7 +53,7 @@ static void add_coefficients(struct polynomial **aa, int column)
 		(aaterm->n2 == basis3[row]->n2) &&
 		(aaterm->n3 == basis3[row]->n3) &&
 		(aaterm->n4 == basis3[row]->n4)) {
-			sc_add_replace(aaterm->c,fmatrix[row][column]);
+			sc_add_replace((mscalar) aaterm, fmatrix[row][column]);
 			row++;
 			aaterm = aaterm->next;
 		} else {
@@ -70,7 +70,7 @@ static void add_coefficients(struct polynomial **aa, int column)
 		(aaterm->n2 == basis2[row-blen3]->n2) &&
 		(aaterm->n3 == basis2[row-blen3]->n3) &&
 		(aaterm->n4 == basis2[row-blen3]->n4)) {
-			sc_add_replace(aaterm->c,fmatrix[row][column]);
+			sc_add_replace((mscalar) aaterm, fmatrix[row][column]);
 			row++;
 			aaterm = aaterm->next;
 		} else {
@@ -87,7 +87,7 @@ static void add_coefficients(struct polynomial **aa, int column)
 		(aaterm->n2 == basis1[row-blen3-blen2]->n2) &&
 		(aaterm->n3 == basis1[row-blen3-blen2]->n3) &&
 		(aaterm->n4 == basis1[row-blen3-blen2]->n4)) {
-			sc_add_replace(aaterm->c,fmatrix[row][column]);
+			sc_add_replace((mscalar) aaterm, fmatrix[row][column]);
 			row++;
 			aaterm = aaterm->next;
 		} else {
@@ -130,7 +130,7 @@ int main()
 	Delta.leading = NULL;
 	aaterm = NULL;
 	setup_scalars();
-	make_scalar(cc);
+	make_scalar(&cc);
 	
 #ifdef KIJKEN
 	printf("Debug is set! To unset do not define KIJKEN.\n");
@@ -290,7 +290,7 @@ int main()
 	};
 	for(i=0;i+1<=blen1+blen2+blen3;i++) {
 		for(j=0;j+1<=blen1+blen2+blen3;j++) {
-			make_scalar(fmatrix[i][j]);
+			make_scalar(&fmatrix[i][j]);
 			sc_zero(fmatrix[i][j]);
 		};
 	};
@@ -330,9 +330,9 @@ int main()
 	 * at various stages. */
 	T.degree = (p-1)*(d1+d2+d3+d4);
 	make_term(&T.leading);
-	sc_one(T.leading->c);
+	sc_one((mscalar) T.leading);
 	for(k=1;k<=extra+3+0;k++) { /* Note extra powers of p. */
-		sc_imult_replace(p,T.leading->c);
+		sc_imult_replace(p, (mscalar) T.leading);
 	}
 	T.leading->n1 = p-1;
 	T.leading->n2 = p-1;
@@ -350,7 +350,7 @@ int main()
 	for(i=0;i+1<=blen3;i++) {
 		T.degree = p*(3*d-d1-d2-d3-d4);
 		make_term(&T.leading);
-		sc_one(T.leading->c);
+		sc_one((mscalar) T.leading);
 		T.leading->n1 = p*basis3[i]->n1;
 		T.leading->n2 = p*basis3[i]->n2;
 		T.leading->n3 = p*basis3[i]->n3;
@@ -367,7 +367,7 @@ int main()
 	for(i=0;i+1<=blen2;i++) {
 		T.degree = p*(2*d-d1-d2-d3-d4);
 		make_term(&T.leading);
-		sc_one(T.leading->c);
+		sc_one((mscalar) T.leading);
 		T.leading->n1 = p*basis2[i]->n1;
 		T.leading->n2 = p*basis2[i]->n2;
 		T.leading->n3 = p*basis2[i]->n3;
@@ -384,7 +384,7 @@ int main()
 	for(i=0;i+1<=blen1;i++) {
 		T.degree = p*(d-d1-d2-d3-d4);
 		make_term(&T.leading);
-		sc_one(T.leading->c);
+		sc_one((mscalar) T.leading);
 		T.leading->n1 = p*basis1[i]->n1;
 		T.leading->n2 = p*basis1[i]->n2;
 		T.leading->n3 = p*basis1[i]->n3;

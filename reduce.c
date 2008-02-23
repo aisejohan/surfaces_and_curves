@@ -54,7 +54,7 @@ struct polynomial one_step_down(struct polynomial *f)
 	struct polynomial T;
 	struct polynomial **aa;
 	struct base_change fBC;
-	make_scalar(c);
+	make_scalar(&c);
 	
 	if (f->degree < d) {
 		printf("one_step_down: Incorrect degree. Stop.");

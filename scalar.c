@@ -132,15 +132,17 @@ void printmscalar(mscalar a)
 	return;
 }
 
-void make_scalar(mscalar a)
+void make_scalar(mscalar *a)
 {
-	a->e = rr;
-	mpz_init_set_ui(a->i, 0);
+	*a = (struct scalar *) malloc(sizeof(struct scalar));
+	(*a)->e = rr;
+	mpz_init_set_ui((*a)->i, 0);
 }
 
 void free_scalar(mscalar a)
 {
 	mpz_clear(a->i);
+	free(a);
 }
 
 int valuation(mscalar x)

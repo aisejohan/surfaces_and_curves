@@ -27,7 +27,7 @@ void setup_scalars(void);
 
 void printmscalar(mscalar a);
 
-void make_scalar(mscalar a);
+void make_scalar(mscalar *a);
 
 void free_scalar(mscalar a);
 

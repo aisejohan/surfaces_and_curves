@@ -38,7 +38,7 @@ static int deelbaar(struct term *mon1, struct term *mon2)
 		(mon1->n2 <= mon2->n2) &&
 		(mon1->n3 <= mon2->n3) &&
 		(mon1->n4 <= mon2->n4) &&
-		(valuation(mon1->c) <= valuation(mon2->c))));
+		(mon1->e <= mon2->e)));
 }
 
 
@@ -68,7 +68,7 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	struct term mon;
 	unsigned int i, dividing;
 
-	make_scalar(mon.c);
+	make_scalar(&mon.c);
 	ppp = NULL;
 	make_pol(&ppp);
 	aa = (struct polynomial **)malloc(ss*sizeof(struct polynomial *));
@@ -169,7 +169,7 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	unsigned int i, first;
 	mscalar c;
 
-	make_scalar(c);
+	make_scalar(&c);
 	ppp = NULL;
 	make_pol(&ppp);
 	aa = (struct polynomial **)malloc(ss*sizeof(struct polynomial *));
@@ -204,7 +204,7 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 
 			do {
 				/* No sign in front of c */
-				sc_div(ppp->leading->c, vh[i]->leading->c, c);
+				sc_div((mscalar) ppp->leading, (mscalar) vh[i]->leading, c);
 				/* Change sign c */
 				sc_negate(c);
 
@@ -214,7 +214,7 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 				ppp->leading->n2 -= vh[i]->leading->n2;
 				ppp->leading->n3 -= vh[i]->leading->n3;
 				ppp->leading->n4 -= vh[i]->leading->n4;
-				sc_copy(c, ppp->leading->c);
+				sc_copy(c, (mscalar) ppp->leading);
 
 				ppp->leading = ppp->leading->next;
 				(*ptraa[i])->next = NULL;
@@ -276,8 +276,8 @@ struct polynomial *myf_division(struct polynomial *pp)
 	myf_rest.degree = myf.degree;
 	myf_rest.leading = myf.leading->next;
 
-	make_scalar(c);
-	sc_inv(myf.leading->c,c);
+	make_scalar(&c);
+	sc_inv((mscalar) myf.leading, c);
 
 	ppp = NULL;
 	make_pol(&ppp);
@@ -305,9 +305,9 @@ struct polynomial *myf_division(struct polynomial *pp)
 			do {
 		
 				/* No sign in front of pppterm->c */
-				sc_mult_replace(c, ppp->leading->c);
+				sc_mult_replace(c, (mscalar) ppp->leading);
 				/* Change sign mon.c */
-				sc_negate(ppp->leading->c);
+				sc_negate((mscalar) ppp->leading);
 
 				*ptraa = ppp->leading;
 
@@ -357,10 +357,10 @@ unsigned int
 zero_on_division(struct polynomial ppp, unsigned int ss, struct polynomial **vh)
 {
 	struct polynomial tmp[ss];
-	struct term mon;
+	struct term *mon;
 	struct polynomial pp;
 	unsigned int i, dividing;
-	make_scalar(mon.c);
+	make_term(&mon);
 	pp.leading = NULL;
 	for(i=0;i+1<=ss;i++) {
 		tmp[i].leading = NULL;
@@ -374,13 +374,13 @@ zero_on_division(struct polynomial ppp, unsigned int ss, struct polynomial **vh)
 		while((i+1<=ss) && dividing) {
 			if(deelbaar(vh[i]->leading, pp.leading)) {
 				/* No sign in front of ppterm->c */
-				sc_div(pp.leading->c, vh[i]->leading->c,mon.c);
+				sc_div((mscalar) pp.leading, (mscalar) vh[i]->leading, (mscalar) mon);
 				/* Change sign mon.c */
-				sc_negate(mon.c);
-				mon.n1 = pp.leading->n1 - vh[i]->leading->n1;
-				mon.n2 = pp.leading->n2 - vh[i]->leading->n2;
-				mon.n3 = pp.leading->n3 - vh[i]->leading->n3;
-				mon.n4 = pp.leading->n4 - vh[i]->leading->n4;
+				sc_negate((mscalar) mon);
+				mon->n1 = pp.leading->n1 - vh[i]->leading->n1;
+				mon->n2 = pp.leading->n2 - vh[i]->leading->n2;
+				mon->n3 = pp.leading->n3 - vh[i]->leading->n3;
+				mon->n4 = pp.leading->n4 - vh[i]->leading->n4;
 				if(tmp[i].leading) {
 					times_term(mon, *(vh[i]), &(tmp[i]));
 				} else {
@@ -398,7 +398,7 @@ zero_on_division(struct polynomial ppp, unsigned int ss, struct polynomial **vh)
 				free_tail(tmp[i].leading);
 			};
 			free_tail(pp.leading);
-			free_scalar(mon.c);
+			free_term(mon);
 			return(0);
 		};
 	};
@@ -406,6 +406,6 @@ zero_on_division(struct polynomial ppp, unsigned int ss, struct polynomial **vh)
 		free_tail(tmp[i].leading);
 	};
 	free_tail(pp.leading);
-	free_scalar(mon.c);
+	free_term(mon);
 	return(1);
 }

@@ -56,7 +56,7 @@ static struct exponents take_exponents(struct polynomial f)
 	uit.e2 = f.leading->n2;
 	uit.e3 = f.leading->n3;
 	uit.e4 = f.leading->n4;
-	uit.e5 = (unsigned int) valuation(f.leading->c);
+	uit.e5 = f.leading->e;
 	return(uit);
 }
 
@@ -148,13 +148,13 @@ static void s_pol_terms(struct term *a, struct term *b, struct term *fterm, stru
 		a->n4 = gterm->n4 - fterm->n4;
 		b->n4 = 0;
 	};
-	sc_copy(gterm->c,a->c);
-	sc_copy(fterm->c,b->c);
+	sc_copy((mscalar) gterm, (mscalar) a);
+	sc_copy((mscalar) fterm, (mscalar) b);
 	/* Note sign. */
-	sc_negate(b->c);
-	while((valuation(a->c) > 0) && (valuation(b->c) > 0)) {
-		div_p(1, a->c);
-		div_p(1, b->c);
+	sc_negate((mscalar) b);
+	while ((a->e > 0) && (b->e > 0)) {
+		a->e--;
+		b->e--;
 	};
 	return;
 }
@@ -162,20 +162,20 @@ static void s_pol_terms(struct term *a, struct term *b, struct term *fterm, stru
 /* Computes the s_pol.						*/
 static struct polynomial s_pol(struct polynomial f, struct polynomial g)
 {
-	struct term a,b;
+	struct term *a, *b;
 	struct polynomial A,B;
-	make_scalar(a.c);
-	make_scalar(b.c);
+	make_term(&a);
+	make_term(&b);
 	A.leading = NULL;
 	B.leading = NULL;
 
-	s_pol_terms(&a,&b,f.leading,g.leading);
-	A = make_times_term(a,f);
+	s_pol_terms(a, b, f.leading, g.leading);
+	A = make_times_term(a, f);
 	clean_pol(&A);
-	B = make_times_term(b,g);
+	B = make_times_term(b, g);
 	merge_add(&A,B);
-	free_scalar(a.c);
-	free_scalar(b.c);
+	free_term(a);
+	free_term(b);
 	return(A);
 }
 
@@ -185,13 +185,13 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 {
 	struct base_change uit;
 	struct polynomial A,B;
-	struct term a,b;
-	make_scalar(a.c);
-	make_scalar(b.c);
+	struct term *a, *b;
+	make_term(&a);
+	make_term(&b);
 	A.leading = NULL;
 	B.leading = NULL;
 
-	s_pol_terms(&a,&b,G.ff[i]->leading,G.ff[j]->leading);
+	s_pol_terms(a, b, G.ff[i]->leading, G.ff[j]->leading);
 	/* Do the same onto BC as you do onto G.ff.	*/
 	if((G.BC[i]->bc1.leading) && (G.BC[j]->bc1.leading)) {
 		A = make_times_term(a,G.BC[i]->bc1);
@@ -284,8 +284,8 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 		uit.bc5.leading = NULL;
 	};
 		
-	free_scalar(a.c);
-	free_scalar(b.c);
+	free_term(a);
+	free_term(b);
 	return(uit);
 }
 
@@ -510,7 +510,7 @@ int setup(void)
 	/* Unit polynomial */
 	EEN.degree = 0;
 	make_term(&EEN.leading);
-	sc_one(EEN.leading->c);
+	sc_one((mscalar) EEN.leading);
 	EEN.leading->n1 = 0;
 	EEN.leading->n2 = 0;
 	EEN.leading->n3 = 0;
@@ -647,7 +647,7 @@ int setup(void)
 	G.len = 5;
 
 	/* Deal with leading coefficients being divisible by p! */
-	make_scalar(c);
+	make_scalar(&c);
 	i=0;
 	while(i+1<=G.len) {
 		if(G.ee[i]->e5 > 0) {

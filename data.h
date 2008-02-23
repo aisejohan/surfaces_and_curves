@@ -56,13 +56,16 @@
 
 /* This type will be used for our scalars. */
 #include <gmp.h>
-typedef struct scalar {
-	int e;
+struct scalar {
 	mpz_t i;
-} mscalar[1];
+	int e;
+};
+
+typedef struct scalar *mscalar;
 
 struct term {
-	mscalar c;
+	mpz_t i;
+	int e;
 	unsigned int n1;
 	unsigned int n2;
 	unsigned int n3;
@@ -71,6 +74,6 @@ struct term {
 };
 
 struct polynomial {
-	unsigned int degree;
 	struct term *leading;
+	unsigned int degree;
 };

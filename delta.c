@@ -89,22 +89,20 @@ int check_flatness(unsigned int degree)
 	int count,count1,count2,goodcount;
 	mscalar c;
 	unsigned int a1,a2,a3,a4;
-	struct term tmp, least;
+	struct term *tmp, *least;
 	struct term **tt;
 	struct polynomial T,TT;
 	struct polynomial **bb, **aa;
-	tmp.next = NULL;
-	least.next = NULL;
-	make_scalar(c);
-	make_scalar(tmp.c);
-	make_scalar(least.c);
+	make_scalar(&c);
+	make_term(&tmp);
+	make_term(&least);
 	T.leading = NULL;
 	TT.leading = NULL;
 	
 	if(!count_sum(degree)) {
-		free_scalar(least.c);
-		free_scalar(tmp.c);
 		free_scalar(c);
+		free_term(tmp);
+		free_term(least);
 		return(0);
 	};
 	count = 0;
@@ -204,18 +202,18 @@ int check_flatness(unsigned int degree)
 		
 		/* Make list of terms. */
 		i=0;
-		sc_copy(c,tmp.c);
-		tmp.next = NULL;
+		sc_copy(c, (mscalar) tmp);
+		tmp->next = NULL;
 		for(a1=0;(d1*a1 <= degree);a1++) {
 		  for(a2=0;(d1*a1+d2*a2 <= degree);a2++) {
 		    for(a3=0;(d1*a1+d2*a2+d3*a3 <= degree);a3++) {
 		      if((degree - (a1*d1+a2*d2+a3*d3)) % d4 == 0) {
 			a4 = (degree - (a1*d1+a2*d2+a3*d3))/d4;
-			tmp.n1 = a1;
-			tmp.n2 = a2;
-			tmp.n3 = a3;
-			tmp.n4 = a4;
-			copy_term(&tmp,tt[i]);
+			tmp->n1 = a1;
+			tmp->n2 = a2;
+			tmp->n3 = a3;
+			tmp->n4 = a4;
+			copy_term(tmp, tt[i]);
 			tt[i]->next = NULL;
 			i++;
 		      };
@@ -236,19 +234,19 @@ int check_flatness(unsigned int degree)
 		for(i=0;i<=aantal-1;i++) {
 			for(j=i+1;j<=aantal-1;j++) {
 				if(kleiner(tt[i],tt[j]) == GROTER) {
-					copy_term(tt[i],&tmp);
+					copy_term(tt[i],tmp);
 					copy_term(tt[j],tt[i]);
-					copy_term(&tmp,tt[j]);
+					copy_term(tmp,tt[j]);
 				};
 			};
 		};
 		
 		count = 0;
 		for(j=0;j<=aantal-1;j++) {
-			copy_term(tt[j],&least);
-			least.next = NULL;
+			copy_term(tt[j], least);
+			least->next = NULL;
 			T.degree = degree;
-			T.leading = &least;
+			T.leading = least;
 			if(!zero_on_division(T,blen,bb)) {
 				TT = copy_pol(T);
 				aa = gen_division(&TT,blen,bb);
@@ -288,19 +286,19 @@ int check_flatness(unsigned int degree)
 		if(count != goodcount) {
 			printf("In the final analysis we have: "
 			"count = %d and goodcount = %d\n",count,goodcount);
-			free_scalar(least.c);
-			free_scalar(tmp.c);
+			free_term(least);
+			free_term(tmp);
 			free_scalar(c);
 			return(-2);
 		} else {
-			free_scalar(least.c);
-			free_scalar(tmp.c);
+			free_term(least);
+			free_term(tmp);
 			free_scalar(c);
 			return(-1);
 		};
 	};
-	free_scalar(least.c);
-	free_scalar(tmp.c);
+	free_term(least);
+	free_term(tmp);
 	free_scalar(c);
 	return(goodcount);
 }
@@ -311,9 +309,9 @@ int check_flatness(unsigned int degree)
 struct term **find_basis(unsigned int degree, int blen)
 {
 	int a1,a2,a3,a4,count2,i,j,b2;	
-	struct term tmp;
+	struct term *tmp;
 	struct term **tt;
-	make_scalar(tmp.c);
+	make_term(&tmp);
 
 	tt = (struct term **)malloc(blen*sizeof(struct term *));
 	if(!tt) {
@@ -326,7 +324,7 @@ struct term **find_basis(unsigned int degree, int blen)
 	};
 	
 	count2=0;
-	sc_one(tmp.c);
+	sc_one((mscalar) tmp);
 	for(a1=0;(d1*a1 <= degree);a1++) {
 	  for(a2=0;(d1*a1+d2*a2 <= degree);a2++) {
 	    for(a3=0;(d1*a1+d2*a2+d3*a3 <= degree);a3++) {
@@ -348,11 +346,11 @@ struct term **find_basis(unsigned int degree, int blen)
 				exit(1);
 			};
 			/* tmp.c = 1 */
-			tmp.n1 = a1;
-			tmp.n2 = a2;
-			tmp.n3 = a3;
-			tmp.n4 = a4;
-			copy_term(&tmp,tt[count2-1]);
+			tmp->n1 = a1;
+			tmp->n2 = a2;
+			tmp->n3 = a3;
+			tmp->n4 = a4;
+			copy_term(tmp, tt[count2-1]);
 			tt[count2-1]->next = NULL;
 		};
 	      };
@@ -366,13 +364,13 @@ struct term **find_basis(unsigned int degree, int blen)
 	for(i=0;i<=blen-1;i++) {
 		for(j=i+1;j<=blen-1;j++) {
 			if(kleiner(tt[i],tt[j]) == KLEINER) {
-				copy_term(tt[i],&tmp);
-				copy_term(tt[j],tt[i]);
-				copy_term(&tmp,tt[j]);
+				copy_term(tt[i], tmp);
+				copy_term(tt[j], tt[i]);
+				copy_term(tmp, tt[j]);
 			};
 		};
 	};
-	free_scalar(tmp.c);
+	free_term(tmp);
 	return(tt);
 }
 

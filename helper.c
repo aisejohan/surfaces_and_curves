@@ -142,7 +142,7 @@ struct polynomial make_random(unsigned int degree, int print)
 		uitterm->n2 = a2;
 		uitterm->n3 = a3;
 		uitterm->n4 = a4;
-		ito_sc(c,uitterm->c);
+		ito_sc(c, (mscalar) uitterm);
 		ptrterm = &(uit.leading);
 		while((*ptrterm) && (kleiner(uitterm, *ptrterm) == KLEINER)) {
 			ptrterm = &((*ptrterm)->next);
@@ -175,7 +175,7 @@ struct polynomial make_random(unsigned int degree, int print)
 		}
 #ifndef INPUT_F
 		if (print) {
-			printmscalar(uitterm->c);
+			printmscalar((mscalar) uitterm);
  			printf("\n");
 		}
 #else
@@ -184,7 +184,7 @@ struct polynomial make_random(unsigned int degree, int print)
  #else
 		scanf("%d",&c);
  #endif
-		ito_sc(c,uitterm->c);
+		ito_sc(c, (mscalar) uitterm);
 #endif
 		uitterm = uitterm->next;
 	}
@@ -231,7 +231,7 @@ struct polynomial frobenius(struct polynomial f)
 	fterm = f.leading;
 	while(fterm) {
 		make_term(ptrterm);
-		sc_copy(fterm->c,(*ptrterm)->c);
+		sc_copy((mscalar) fterm, (mscalar) (*ptrterm));
 		(*ptrterm)->n1 = p*fterm->n1;
 		(*ptrterm)->n2 = p*fterm->n2;
 		(*ptrterm)->n3 = p*fterm->n3;
@@ -252,7 +252,7 @@ struct polynomial deriv(struct polynomial f, unsigned int i)
 	struct term **ptrterm;
 	uit.leading=NULL;
 	ptrterm=NULL;
-	make_scalar(c);
+	make_scalar(&c);
 
 	fterm = f.leading;
 	switch (i) {
@@ -260,10 +260,10 @@ struct polynomial deriv(struct polynomial f, unsigned int i)
 		uit.degree = (f.degree > d1) ? (f.degree - d1) : 0;
 		ptrterm = &(uit.leading);
 		while(fterm) {
-			sc_imult(fterm->n1,fterm->c,c);
+			sc_imult(fterm->n1, (mscalar) fterm, c);
 			if(!sc_is_zero(c)) {
 				make_term(ptrterm);
-				sc_copy(c,(*ptrterm)->c);
+				sc_copy(c, (mscalar) (*ptrterm));
 				(*ptrterm)->n1 = fterm->n1 - 1;
 				(*ptrterm)->n2 = fterm->n2;
 				(*ptrterm)->n3 = fterm->n3;
@@ -279,10 +279,10 @@ struct polynomial deriv(struct polynomial f, unsigned int i)
 		uit.degree = (f.degree > d2) ? (f.degree - d2) : 0;
 		ptrterm = &(uit.leading);
 		while(fterm) {
-			sc_imult(fterm->n2,fterm->c,c);
+			sc_imult(fterm->n2,(mscalar) fterm, c);
 			if (!sc_is_zero(c)) {
 				make_term(ptrterm);
-				sc_copy(c,(*ptrterm)->c);
+				sc_copy(c, (mscalar) (*ptrterm));
 				(*ptrterm)->n1 = fterm->n1;
 				(*ptrterm)->n2 = fterm->n2 - 1;
 				(*ptrterm)->n3 = fterm->n3;
@@ -298,10 +298,10 @@ struct polynomial deriv(struct polynomial f, unsigned int i)
 		uit.degree = (f.degree > d3) ? (f.degree - d3) : 0;
 		ptrterm = &(uit.leading);
 		while(fterm) {
-			sc_imult(fterm->n3,fterm->c,c);
+			sc_imult(fterm->n3, (mscalar) fterm, c);
 			if (!sc_is_zero(c)) {
 				make_term(ptrterm);
-				sc_copy(c,(*ptrterm)->c);
+				sc_copy(c, (mscalar) (*ptrterm));
 				(*ptrterm)->n1 = fterm->n1;
 				(*ptrterm)->n2 = fterm->n2;
 				(*ptrterm)->n3 = fterm->n3 - 1;
@@ -317,10 +317,10 @@ struct polynomial deriv(struct polynomial f, unsigned int i)
 		uit.degree = (f.degree > d4) ? (f.degree - d4) : 0;
 		ptrterm = &(uit.leading);
 		while(fterm) {
-			sc_imult(fterm->n4,fterm->c,c);
+			sc_imult(fterm->n4, (mscalar) fterm, c);
 			if (!sc_is_zero(c)) {
 				make_term(ptrterm);
-				sc_copy(c,(*ptrterm)->c);
+				sc_copy(c, (mscalar) (*ptrterm));
 				(*ptrterm)->n1 = fterm->n1;
 				(*ptrterm)->n2 = fterm->n2;
 				(*ptrterm)->n3 = fterm->n3;
@@ -352,8 +352,8 @@ void rep_deriv(struct polynomial *f, unsigned int i)
 		case 1: 
 		f->degree = (f->degree > d1) ? (f->degree - d1) : 0;
 		while(fterm) {
-			sc_imult_replace(fterm->n1,fterm->c);
-			if(!sc_is_zero(fterm->c)) {
+			sc_imult_replace(fterm->n1, (mscalar) fterm);
+			if(!sc_is_zero((mscalar) fterm)) {
 				fterm->n1 = fterm->n1 - 1;
 				*ptrterm = fterm;
 				ptrterm = &(fterm->next);
@@ -369,8 +369,8 @@ void rep_deriv(struct polynomial *f, unsigned int i)
 		case 2: 
 		f->degree = (f->degree > d2) ? (f->degree - d2) : 0;
 		while(fterm) {
-			sc_imult_replace(fterm->n2,fterm->c);
-			if(!sc_is_zero(fterm->c)) {
+			sc_imult_replace(fterm->n2, (mscalar) fterm);
+			if(!sc_is_zero((mscalar) fterm)) {
 				fterm->n2 = fterm->n2 - 1;
 				*ptrterm = fterm;
 				ptrterm = &(fterm->next);
@@ -386,8 +386,8 @@ void rep_deriv(struct polynomial *f, unsigned int i)
 		case 3: 
 		f->degree = (f->degree > d3) ? (f->degree - d3) : 0;
 		while(fterm) {
-			sc_imult_replace(fterm->n3,fterm->c);
-			if(!sc_is_zero(fterm->c)) {
+			sc_imult_replace(fterm->n3, (mscalar) fterm);
+			if(!sc_is_zero((mscalar) fterm)) {
 				fterm->n3 = fterm->n3 - 1;
 				*ptrterm = fterm;
 				ptrterm = &(fterm->next);
@@ -403,8 +403,8 @@ void rep_deriv(struct polynomial *f, unsigned int i)
 		case 4:
 		f->degree = (f->degree > d4) ? (f->degree - d4) : 0;
 		while(fterm) {
-			sc_imult_replace(fterm->n4,fterm->c);
-			if(!sc_is_zero(fterm->c)) {
+			sc_imult_replace(fterm->n4, (mscalar) fterm);
+			if(!sc_is_zero((mscalar) fterm)) {
 				fterm->n4 = fterm->n4 - 1;
 				*ptrterm = fterm;
 				ptrterm = &(fterm->next);
