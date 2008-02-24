@@ -43,14 +43,14 @@
 #include <gmp.h>
 struct scalar {
 	mpz_t i;
-	int e;
+	unsigned int e;
 };
 
 typedef struct scalar *mscalar;
 
 struct term {
 	mpz_t i;
-	int e;
+	unsigned int e;
 	unsigned int n1;
 	unsigned int n2;
 	unsigned int n3;
