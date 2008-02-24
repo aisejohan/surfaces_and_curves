@@ -115,7 +115,7 @@ void clean_pol(struct polynomial *pol)
 
 	ptrterm = &(pol->leading);
 	while(*ptrterm) {
-		if (sc_is_zero((struct scalar *) *ptrterm)) {
+		if (sc_is_zero((mscalar) *ptrterm)) {
 			tmp = *ptrterm;
 			*ptrterm = (*ptrterm)->next;
 			free_term(tmp);
@@ -187,8 +187,8 @@ void print_pol(struct polynomial f)
 		return;
 	};
 	while(fterm) {
-		if(!sc_is_zero((struct scalar *) fterm)) {
-			printmscalar((struct scalar *) fterm);
+		if(!sc_is_zero((mscalar) fterm)) {
+			printmscalar((mscalar) fterm);
 			if(fterm->n1) printf("*x^%d",fterm->n1);
 			if(fterm->n2) printf("*y^%d",fterm->n2);
 			if(fterm->n3) printf("*z^%d",fterm->n3);
@@ -263,14 +263,13 @@ struct polynomial pol_add(struct polynomial f, struct polynomial g)
 			gterm = gterm->next;
 		} else {
 			/* vergelijk == GELIJK */
-			sc_add((struct scalar *) fterm,
-				(struct scalar *) gterm, c);
+			sc_add((mscalar) fterm, (mscalar) gterm, c);
 			if(sc_is_zero(c)) {
 				fterm=fterm->next;
 				gterm=gterm->next;
 			} else {
 				make_term(ptrterm);
-				sc_copy(c, (struct scalar *) (*ptrterm));
+				sc_copy(c, (mscalar) (*ptrterm));
 				(*ptrterm)->n1 = fterm->n1;
 				(*ptrterm)->n2 = fterm->n2;
 				(*ptrterm)->n3 = fterm->n3;
@@ -304,7 +303,7 @@ void merge_add(struct polynomial *f, struct polynomial g)
 			/* if(!gterm) return; */
 			*ptrterm = gterm;
 			while(*ptrterm)  {
-				if(sc_is_zero((struct scalar *) (*ptrterm))) {
+				if(sc_is_zero((mscalar) (*ptrterm))) {
 					gterm = *ptrterm;
 					*ptrterm = (*ptrterm)->next;
 					free_term(gterm);
@@ -328,7 +327,7 @@ void merge_add(struct polynomial *f, struct polynomial g)
 			*ptrterm = NULL;
 		} else if (vergelijk == KLEINER) {
 			/* Check for zero in g. */
-			if(!sc_is_zero((struct scalar *) gterm)) {
+			if(!sc_is_zero((mscalar) gterm)) {
 				*ptrterm = gterm;
 				ptrterm = &(gterm->next);
 				gterm = gterm->next;
@@ -341,9 +340,8 @@ void merge_add(struct polynomial *f, struct polynomial g)
 			}
 		} else {
 			/* vergelijk == GELIJK */
-			sc_add_replace((struct scalar *) gterm,
-				(struct scalar *) fterm);
-			if(sc_is_zero((struct scalar *) fterm)) {
+			sc_add_replace((mscalar) gterm, (mscalar) fterm);
+			if(sc_is_zero((mscalar) fterm)) {
 				/* Here we use *ptrterm as temp	*
 				 * storage. A little ugly.	*/
 				*ptrterm = fterm->next;
