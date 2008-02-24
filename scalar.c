@@ -145,7 +145,7 @@ void free_scalar(mscalar a)
 	free(a);
 }
 
-int valuation(mscalar x)
+unsigned int valuation(mscalar x)
 {
 #ifdef KIJKEN
 	test_scalar(x);
