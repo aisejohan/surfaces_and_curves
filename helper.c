@@ -62,6 +62,7 @@ void set_seed(unsigned int zaadje)
 		};
 	};
 	srand(willekeurig);
+	uit = close(fd);
 	return;
 }
 
