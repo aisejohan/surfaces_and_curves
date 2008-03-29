@@ -578,7 +578,7 @@ int setup(void)
 		if(G.ee[i]->e4 > 0) {
 			T = copy_pol(*G.ff[i]);
 			sc_one(c);
-			for(j=1;j<=r-G.ee[i]->e4;j++) 
+			for(j=1;j<=rr-G.ee[i]->e4;j++) 
 				sc_imult_replace(p,c);
 			times_scalar(c,&T);
 			if(T.leading) {
@@ -643,7 +643,7 @@ while((m>0) || (check == 1)) {
 		 * of p to cancel off the leading term and we see if	*
 		 * there is anything left.				*/
 		sc_one(c);
-		for(i=1;i<=r-G.ee[G.len-1]->e4;i++)
+		for(i=1;i<=rr-G.ee[G.len-1]->e4;i++)
 			sc_imult_replace(p,c);
 		SS = copy_pol(*G.ff[G.len-1]);
 		/* Multiply by power of p. */
@@ -1038,7 +1038,7 @@ while((m>0) || (check == 1)) {
 	for(i=0;i<=G.len-1;i++) {
 		if(G.ee[i]->e4 > 0) {
 			sc_one(c);
-			for(j=1;j<=r-G.ee[i]->e4;j++)
+			for(j=1;j<=rr-G.ee[i]->e4;j++)
 				sc_imult_replace(p,c);
 			T = copy_pol(*G.ff[i]);
 			times_scalar(c,&T);
