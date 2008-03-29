@@ -48,9 +48,9 @@ void setup_scalars(void)
 		if (c > extra) extra = c;
 	}
 	rr = r + extra;
-	printf("The invariant extra is equal to %d and rr is %d.\n",extra,rr);
+	printf("The invariant extra is equal to %d and rr is %d.\n", extra, rr);
 
-	mpz_init_set_ui(prime,(unsigned long) p);
+	mpz_init_set_ui(prime, p);
 	mpz_init(temp);
 	
 	modulus = (mpz_t *)malloc(rr*sizeof(mpz_t));
@@ -58,7 +58,7 @@ void setup_scalars(void)
 	while (i < rr) {
 		mpz_init(modulus[i]);
 		j = rr - i;
-		mpz_ui_pow_ui(modulus[i], (unsigned long) p, (unsigned long) j);
+		mpz_ui_pow_ui(modulus[i], p, j);
 		i++;
 	}
 	return;
@@ -124,9 +124,9 @@ void printmscalar(mscalar a)
 	mpz_cdiv_q_ui(t, s, 2);
 	if (mpz_cmp(a->i, t)>0) {
 		mpz_sub(t, a->i, s);
-		mpz_out_str(stdout, (int) 10, t);
+		mpz_out_str(stdout, 10, t);
 	} else {
-		mpz_out_str(stdout, (int) 10, a->i);
+		mpz_out_str(stdout, 10, a->i);
 	}
 
 	mpz_clear(s);
@@ -162,6 +162,8 @@ static inline unsigned int my_p_remove(mpz_t b)
 {
 	unsigned int e=0;
 	mpz_t x;
+
+	if (mpz_sgn(b) == 0) return(rr);
 
 	mpz_init(x);
 
@@ -199,19 +201,19 @@ void sc_add(mscalar a, mscalar b, mscalar c)
 	c->e = a->e;
 	mpz_add(temp, a->i, b->i);
 	c->e += my_p_remove(temp);
-	if (__builtin_expect (c->e < rr, 1)) {
+	if (c->e < rr) {
 		mpz_mod(c->i, temp, modulus[c->e]);
 		return;
 	}
 	c->e = rr;
-	mpz_set_ui(c->i, (unsigned long) 0);
+	mpz_set_ui(c->i, 0);
 	return;
 }
 
 void sc_add_variant(mscalar a, mscalar b, mscalar c)
 {
 	if (a->e < b->e) {
-		if (__builtin_expect (b->e < rr, 1)) {
+		if (b->e < rr) {
 			mpz_mul(temp, b->i, modulus[rr - b->e + a->e]);
 			mpz_add(c->i, temp, a->i);
 			c->e = a->e;
@@ -222,7 +224,7 @@ void sc_add_variant(mscalar a, mscalar b, mscalar c)
 		return;
 	}
 	if (a->e > b->e) {
-		if (__builtin_expect (a->e < rr, 1)) {
+		if (a->e < rr) {
 			mpz_mul(temp, a->i, modulus[rr - a->e + b->e]);
 			mpz_add(c->i, temp, b->i);
 			c->e = b->e;
@@ -239,24 +241,19 @@ void sc_add_variant(mscalar a, mscalar b, mscalar c)
 
 void clean_scalar(mscalar a)
 {
-	if (__builtin_expect (a->e >= rr, 0)) {
+	if (a->e >= rr) {
 		a->e = rr;
-		mpz_set_ui(a->i,0);
+		mpz_set_ui(a->i, 0);
 		return;
 	}
 	mpz_mod(temp, a->i, modulus[a->e]);
-	if (__builtin_expect (mpz_sgn(temp) == 0, 0)) {
-		a->e = rr;
-		mpz_set_ui(a->i,0);
-		return;
-	}
 	a->e += my_p_remove(temp);
-	if (__builtin_expect (a->e < rr, 1)) {
+	if (a->e < rr) {
 		mpz_mod(a->i, temp, modulus[a->e]);
 		return;
 	}
 	a->e = rr;
-	mpz_set_ui(a->i,0);
+	mpz_set_ui(a->i, 0);
 	return;
 }
 
@@ -268,13 +265,13 @@ void sc_mult(mscalar a, mscalar b, mscalar c)
 	test_scalar(c);
 #endif
 	c->e = a->e + b->e;
-	if (__builtin_expect (c->e < rr, 1)) {
+	if (c->e < rr) {
 		mpz_mul(temp, a->i, b->i);
 		mpz_mod(c->i, temp, modulus[c->e]);
 		return;
 	}
 	c->e = rr;
-	mpz_set_ui(c->i, (unsigned long) 0);
+	mpz_set_ui(c->i, 0);
 	return;
 }
 
@@ -284,16 +281,15 @@ void sc_imult(int a, mscalar b, mscalar c)
 	test_scalar(b);
 	test_scalar(c);
 #endif
-	if (a) {
-		mpz_mul_si(temp, b->i, (long) a);
-		c->e = b->e + my_p_remove(temp);
-		if (c->e < rr) {
-			mpz_mod(c->i, temp, modulus[c->e]);
-			return;
-		}
+
+	mpz_mul_si(temp, b->i, a);
+	c->e = b->e + my_p_remove(temp);
+	if (c->e < rr) {
+		mpz_mod(c->i, temp, modulus[c->e]);
+		return;
 	}
 	c->e = rr;
-	mpz_set_ui(c->i, (unsigned long) 0);
+	mpz_set_ui(c->i, 0);
 	return;
 }
 
@@ -307,6 +303,7 @@ void sc_inv(mscalar a, mscalar b)
 		exit(1);
 	}
 #endif
+
 	b->e = 0;
 	mpz_invert(b->i, a->i, modulus[0]);
 	return;
@@ -322,9 +319,16 @@ void sc_div(mscalar a, mscalar b, mscalar c)
 	test_scalar(a);
 	test_scalar(b);
 	test_scalar(c);
-	if (a->e < b->e) {printf("Not divisible in sc_div.\n");exit(1);}
-	if (a->e == rr) {printf("Zero divided by something.\n");exit(1);}
+	if (a->e < b->e) {
+		printf("Not divisible in sc_div.\n");
+		exit(1);
+	}
+	if (a->e == rr) {
+		printf("Zero divided by something.\n");
+		exit(1);
+	}
 #endif
+
 	mpz_invert(temp, b->i , modulus[b->e]);
 	mpz_mul(temp, temp, a->i);
 	c->e = a->e - b->e;
@@ -337,9 +341,13 @@ void div_p(int k, mscalar a)
 {
 #ifdef KIJKEN
 	test_scalar(a);
-	if (a->e - k < 0) {printf("Negative power.");exit(1);}
+	if (a->e - k < 0) {
+		printf("Negative power.");
+		exit(1);
+	}
 #endif
-	if (__builtin_expect (a->e < rr, 1)) {
+
+	if (a->e < rr) {
 		a->e = a->e - k;
 	}
 	return;
@@ -368,8 +376,9 @@ void sc_zero(mscalar a)
 #ifdef KIJKEN
 	test_scalar(a);
 #endif
+
 	a->e = rr;
-	mpz_set_ui(a->i, (unsigned long) 0);
+	mpz_set_ui(a->i, 0);
 	return;
 }
 
@@ -379,17 +388,19 @@ void sc_one(mscalar a)
 #ifdef KIJKEN
 	test_scalar(a);
 #endif
+
 	a->e = 0;
-	mpz_set_ui(a->i, (unsigned long) 1);
+	mpz_set_ui(a->i, 1);
 	return;
 }
 
 void sc_copy(mscalar a, mscalar b)
 {
-#ifdef OLD_KIJKEN
+#ifdef KIJKEN
 	test_scalar(a);
 	test_scalar(b);
 #endif
+
 	b->e = a->e;
 	mpz_set(b->i, a->i);
 	return;
@@ -400,6 +411,7 @@ void sc_negate(mscalar a)
 #ifdef KIJKEN
 	test_scalar(a);
 #endif
+
 	mpz_neg(a->i, a->i);
 	mpz_mod(a->i, a->i, modulus[a->e]);
 	return;
@@ -410,13 +422,12 @@ void ito_sc(int a, mscalar b)
 #ifdef KIJKEN
 	test_scalar(b);
 #endif
-	if (__builtin_expect ((a),1)) {
-		mpz_set_si(temp, (long) a);
-		b->e = my_p_remove(temp);
-		if (__builtin_expect (b->e < rr, 1)) {
-			mpz_mod(b->i, temp, modulus[b->e]);
-			return;
-		}
+
+	mpz_set_si(temp, a);
+	b->e = my_p_remove(temp);
+	if (b->e < rr) {
+		mpz_mod(b->i, temp, modulus[b->e]);
+		return;
 	}
 	b->e = rr;
 	mpz_set_ui(b->i, 0);
@@ -428,5 +439,6 @@ int sc_is_zero(mscalar a)
 #ifdef KIJKEN
 	test_scalar(a);
 #endif
+
 	return((a->e == rr));
 }
