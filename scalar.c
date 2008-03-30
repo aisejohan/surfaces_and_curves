@@ -153,12 +153,16 @@ unsigned int valuation(mscalar x)
 {
 #ifdef KIJKEN
 	test_scalar(x);
-	if (x->e == rr) {printf("Valuation of zero!");exit(1);}
+	if (x->e == rr) {
+		printf("Valuation of zero!");
+		exit(1);
+	}
 #endif
+
 	return(x->e);
 }
 
-static inline unsigned int my_p_remove(mpz_t b)
+static unsigned int my_p_remove(mpz_t b)
 {
 	unsigned int e=0;
 	mpz_t x;
@@ -184,6 +188,7 @@ void sc_add(mscalar a, mscalar b, mscalar c)
 	test_scalar(b);
 	test_scalar(c);
 #endif
+
 	if (a->e < b->e) {
 		mpz_mul(temp, b->i, modulus[rr - b->e + a->e]);
 		mpz_add(temp, temp, a->i);
@@ -264,6 +269,7 @@ void sc_mult(mscalar a, mscalar b, mscalar c)
 	test_scalar(b);
 	test_scalar(c);
 #endif
+
 	c->e = a->e + b->e;
 	if (c->e < rr) {
 		mpz_mul(temp, a->i, b->i);
@@ -353,23 +359,22 @@ void div_p(int k, mscalar a)
 	return;
 }
 
+/*
 void sc_add_replace(mscalar a, mscalar b)
 {
 	sc_add(a,b,b);
 }
-
 
 void sc_mult_replace(mscalar a, mscalar b)
 {
 	sc_mult(a,b,b);
 }
 
-
 void sc_imult_replace(int a, mscalar b)
 {
 	sc_imult(a,b,b);
 }
-
+*/
 
 void sc_zero(mscalar a)
 {
@@ -381,7 +386,6 @@ void sc_zero(mscalar a)
 	mpz_set_ui(a->i, 0);
 	return;
 }
-
 
 void sc_one(mscalar a)
 {

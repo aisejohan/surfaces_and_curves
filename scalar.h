@@ -47,11 +47,11 @@ void sc_div(mscalar a, mscalar b, mscalar c);
 
 void div_p(int k, mscalar a);
 
-void sc_add_replace(mscalar a, mscalar b);
+#define	sc_add_replace(a,b)	sc_add(a,b,b)
 
-void sc_mult_replace(mscalar a, mscalar b);
+#define	sc_mult_replace(a,b)	sc_mult(a,b,b)
 
-void sc_imult_replace(int a, mscalar b);
+#define	sc_imult_replace(a,b)	sc_imult(a,b,b)
 
 void sc_zero(mscalar a);
 
