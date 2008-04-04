@@ -68,8 +68,7 @@ struct polynomial make_initial_pol(unsigned int degree, int print)
 		uitterm->n1 = a1;
 		uitterm->n2 = a2;
 		uitterm->n3 = a3;
-		uitterm->n4 = a4;
-		ito_sc(c,uitterm->c);
+		ito_sc(c,(mscalar) uitterm);
 		ptrterm = &(uit.leading);
 		while((*ptrterm) && (kleiner(uitterm, *ptrterm) == KLEINER)) {
 			ptrterm = &((*ptrterm)->next);
@@ -87,7 +86,7 @@ struct polynomial make_initial_pol(unsigned int degree, int print)
 			a1 = uitterm->n1;
 			a2 = uitterm->n2;
 			a3 = uitterm->n3;
-			a4 = uitterm->n4;
+			a4 = (degree - (a1*d1+a2*d2+a3*d3))/d4;
 			c=0;
 			printf("Coefficient of   ");
 			if(a1) {printf("x^%d",a1); c++;};
@@ -99,7 +98,7 @@ struct polynomial make_initial_pol(unsigned int degree, int print)
 			if(a4) {printf("w^%d",a4); c++;};
 			while(8-c) {printf("   ");c++;};
 			printf("= ");
-			printmscalar(uitterm->c);
+			printmscalar((mscalar) uitterm);
 			printf("\n");
 			uitterm = uitterm->next;
 		}
@@ -169,7 +168,8 @@ int is_min(unsigned int nr, int *coeff, struct polynomial f)
 		different = 0;
 		i = 0;
 		do {
-			t = mm(tt->n1,tt->n2,tt->n3,tt->n4,
+			t = mm(tt->n1,tt->n2,tt->n3,
+				(f.degree-tt->n1*d1-tt->n2*d2-tt->n3*d3)/d4,
 				i1,i2,i3,i4,coeff[i]);
 			if (t != coeff[i]) {
 				 different = (t < coeff[i]) - (t > coeff[i]);
@@ -221,7 +221,7 @@ int main()
 				tt = myf.leading;
 				i=0;
 				while (tt) {
-					ito_sc(coeff[i],tt->c);
+					ito_sc(coeff[i],(mscalar) tt);
 					i++;
 					tt = tt->next;
 				}
