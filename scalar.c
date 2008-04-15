@@ -37,21 +37,21 @@ void empty_function(void)
 /* Only called once. */
 void setup_scalars(void)
 {
-	mpz_init_set_ui(prime,(unsigned long) p);
+	mpz_init_set_ui(prime, (unsigned long) p);
 	mpz_init(modulus);
 	mpz_init(temp);
-	mpz_ui_pow_ui(modulus,(unsigned long) p,(unsigned long) r);
+	mpz_ui_pow_ui(modulus, (unsigned long) p, (unsigned long) r);
 }
 
 void printmscalar(mscalar a)
 {
-	mpz_cdiv_q_ui(temp,modulus,2);
-	if(mpz_cmp(a,temp)>0) {
-		mpz_sub(temp,a,modulus);
-		mpz_out_str(stdout,(int) 10,temp);
+	mpz_cdiv_q_ui(temp, modulus, 2);
+	if (mpz_cmp(a, temp)>0) {
+		mpz_sub(temp, a, modulus);
+		mpz_out_str(stdout, (int) 10, temp);
 	} else {
-		mpz_out_str(stdout,(int) 10,a);
-	};
+		mpz_out_str(stdout, (int) 10, a);
+	}
 }
 
 #ifdef PROFILER
@@ -111,14 +111,14 @@ void sc_inv(mscalar a, mscalar b)
 void sc_div(mscalar a, mscalar b, mscalar c)
 {
 	unsigned long e;
-	e = mpz_remove(temp,b,prime);
-	mpz_invert(temp,temp,modulus);
-	mpz_mul(temp,temp,a);
-	mpz_mod(c,temp,modulus);
-	while(e) {
-		mpz_divexact_ui(c,c,(unsigned long) p);
+	e = mpz_remove(temp, b, prime);
+	mpz_invert(temp, temp, modulus);
+	mpz_mul(temp, temp, a);
+	mpz_mod(c, temp, modulus);
+	while (e) {
+		mpz_divexact_ui(c, c, (unsigned long) p);
 		e--;
-	};
+	}
 }
 
 /* Divides a by p. The assumption is that this can be done. */
