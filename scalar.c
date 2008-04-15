@@ -26,6 +26,9 @@
 #include "data.h"
 #include "scalar.h"
 
+mpz_t modulus;
+mpz_t prime;
+mpz_t temp;
 
 #ifdef KIJKEN
 void empty_function(void)
