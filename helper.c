@@ -72,15 +72,16 @@ unsigned int count_sum(unsigned int degree)
 {
 	unsigned int count, a1, a2, a3;
 	count = 0;
-	for(a1=0;(d1*a1 <= degree);a1++) {
-		for(a2=0;(d1*a1+d2*a2 <= degree);a2++) {
-			for(a3=0;(d1*a1+d2*a2+d3*a3 <= degree);a3++) {
-				if((degree - (a1*d1+a2*d2+a3*d3)) % d4 == 0) {
+	for (a1 = 0; (d1*a1 <= degree); a1++) {
+		for (a2 = 0; (d1*a1 + d2*a2 <= degree); a2++) {
+			for (a3 = 0; (d1*a1 + d2*a2 + d3*a3 <= degree); a3++) {
+				if ((degree - (a1*d1 + a2*d2 + a3*d3)) % d4
+									== 0) {
 					count++;
-				};
-			};
-		};
-	};
+				}
+			}
+		}
+	}
 	return(count);
 }
 
@@ -145,7 +146,7 @@ struct polynomial make_random(unsigned int degree, int print)
 		uitterm->n2 = a2;
 		uitterm->n3 = a3;
 		uitterm->n4 = a4;
-		ito_sc(c,uitterm->c);
+		ito_sc(c, uitterm->c);
 		ptrterm = &(uit.leading);
 		while ((*ptrterm) && (kleiner(uitterm, *ptrterm) == KLEINER)) {
 			ptrterm = &((*ptrterm)->next);
@@ -166,7 +167,7 @@ struct polynomial make_random(unsigned int degree, int print)
 		c = 0;
 		printf("Coefficient of   ");
 		if (a1) {
-			printf("x^%d",a1);
+			printf("x^%d", a1);
 			c++;
 		}
 		if ((a1) && (a2+a3+a4)) {
@@ -225,14 +226,14 @@ unsigned int number_terms(struct polynomial f)
 	int count = 0;
 	struct term *fterm;
 
-	if(!f.leading) {
-		if(!f.degree) {
+	if (!f.leading) {
+		if (!f.degree) {
 			printf("Zero but not degree 0.");
 		}
 		return(0);
 	}
 	fterm = f.leading;
-	while(fterm) {
+	while (fterm) {
 		count++;
 		fterm = fterm->next;
 	}
@@ -283,7 +284,7 @@ struct polynomial deriv(struct polynomial f, unsigned int i)
 		uit.degree = (f.degree > d1) ? (f.degree - d1) : 0;
 		ptrterm = &(uit.leading);
 		while (fterm) {
-			sc_imult(fterm->n1, fterm->c,c);
+			sc_imult(fterm->n1, fterm->c, c);
 			if (!sc_is_zero(c)) {
 				make_term(ptrterm);
 				sc_copy(c, (*ptrterm)->c);
@@ -443,6 +444,6 @@ void rep_deriv(struct polynomial *f, unsigned int i)
 		default:
 		printf("Wrong again honey!");
 		exit(1);
-	};
+	}
 	exit(1);
 }

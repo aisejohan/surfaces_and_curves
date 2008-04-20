@@ -196,8 +196,8 @@ int is_min(unsigned int nr, int *coeff, struct polynomial f)
 		different = 0;
 		i = 0;
 		do {
-			t = mm(tt->n1,tt->n2,tt->n3,tt->n4,
-				i1,i2,i3,i4,coeff[i]);
+			t = mm(tt->n1, tt->n2, tt->n3, tt->n4,
+				i1, i2, i3, i4, coeff[i]);
 			if (t != coeff[i]) {
 				 different = (t < coeff[i]) - (t > coeff[i]);
 			}
@@ -240,8 +240,8 @@ int main()
 		coeff[i] = 0;
 	}
 	retry = 1;
-	while(retry == 1) {
-		while(retry == 1) {
+	while (retry == 1) {
+		while (retry == 1) {
 			next_one(nr, coeff);
 			if (is_min(nr, coeff, uit)) {
 				myf = copy_pol(uit);

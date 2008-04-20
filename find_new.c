@@ -193,7 +193,7 @@ int hilbert_function(int d1, int d2, int d3, int d4, int d, int i)
 
         if (i < 0) return(0);
 
-        phi = count_sum(d1,d2,d3,d4,i,0,0);
+        phi = count_sum(d1, d2, d3, d4, i, 0, 0);
         if (i >= d - d1) phi -= count_sum(d1, d2, d3, d4, i - d + d1, 0, 0);
         if (i >= d - d2) phi -= count_sum(d1, d2, d3, d4, i - d + d2, 0, 0);
         if (i >= d - d3) phi -= count_sum(d1, d2, d3, d4, i - d + d3, 0, 0); 

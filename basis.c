@@ -103,7 +103,7 @@ static void add_coefficients(struct polynomial **aa, int column)
 
 static void print_fmatrix(void)
 {
-	int i,j;
+	int i, j;
 	printf("[");
 	for (i = 0; i + 1 <= blen1 + blen2 + blen3; i++) {
 		for (j = 0; j + 1 <= blen1 + blen2 + blen3; j++) {

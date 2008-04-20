@@ -47,7 +47,7 @@ struct polynomial compute_delta(void)
 	B = copy_pol(myf);
 	for (i = 2; i <= p; i++)
 	{
-		C = pol_mult(A,B);
+		C = pol_mult(A, B);
 		free_tail(B.leading);
 		B = C;
 		C.leading = NULL;
@@ -289,7 +289,7 @@ int check_flatness(unsigned int degree)
 
 		if (count != goodcount) {
 			printf("In the final analysis we have: "
-			"count = %d and goodcount = %d\n",count,goodcount);
+			"count = %d and goodcount = %d\n", count, goodcount);
 			free_scalar(least.c);
 			free_scalar(tmp.c);
 			free_scalar(c);
@@ -336,11 +336,11 @@ struct term **find_basis(unsigned int degree, int blen)
 		a4 = (degree - (a1*d1 + a2*d2 + a3*d3))/d4;
 		b2 = 0;
 		for (i = 0; i + 1 <= G.len; i++) {
-			if((G.ee[i]->e1 <= a1) &&
+			if ((G.ee[i]->e1 <= a1) &&
 			(G.ee[i]->e2 <= a2) &&
 			(G.ee[i]->e3 <= a3) &&
 			(G.ee[i]->e4 <= a4)) {
-				if(G.ee[i]->e5 == 0) b2 = 1;
+				if (G.ee[i]->e5 == 0) b2 = 1;
 			}
 		}
 		if (!b2) {

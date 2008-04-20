@@ -79,11 +79,11 @@ static struct exponents lcm(struct exponents *mon1, struct exponents *mon2)
 /* Rarely the case.							*/
 static unsigned int rel_prime(struct exponents *mon1, struct exponents *mon2)
 {
-	if((mon1->e1 > 0) && (mon2->e1 > 0)) return(0);
-	if((mon1->e2 > 0) && (mon2->e2 > 0)) return(0);
-	if((mon1->e3 > 0) && (mon2->e3 > 0)) return(0);
-	if((mon1->e4 > 0) && (mon2->e4 > 0)) return(0);
-	if((mon1->e5 > 0) && (mon2->e5 > 0)) return(0);
+	if ((mon1->e1 > 0) && (mon2->e1 > 0)) return(0);
+	if ((mon1->e2 > 0) && (mon2->e2 > 0)) return(0);
+	if ((mon1->e3 > 0) && (mon2->e3 > 0)) return(0);
+	if ((mon1->e4 > 0) && (mon2->e4 > 0)) return(0);
+	if ((mon1->e5 > 0) && (mon2->e5 > 0)) return(0);
 	return(1);
 }
 
@@ -131,7 +131,7 @@ static void s_pol_terms(struct term *a, struct term *b, struct term *fterm, stru
 		a->n1 = gterm->n1 - fterm->n1;
 		b->n1 = 0;
 	}
-	if(fterm->n2 > gterm->n2) {
+	if (fterm->n2 > gterm->n2) {
 		a->n2 = 0;
 		b->n2 = fterm->n2 - gterm->n2;
 	} else {
@@ -269,7 +269,7 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 		uit.bc4.degree = 0; /* Not correct! */
 		uit.bc4.leading = NULL;
 	}
-	if((G.BC[i]->bc5.leading) && (G.BC[j]->bc5.leading)) {
+	if ((G.BC[i]->bc5.leading) && (G.BC[j]->bc5.leading)) {
 		A = make_times_term(a, G.BC[i]->bc5);
 		clean_pol(&A);
 		B = make_times_term(b, G.BC[j]->bc5);
@@ -297,7 +297,7 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 /* Test function. 						*/
 static void test_base_change(struct base_change B, struct polynomial new)
 {
-	unsigned int degree,i;
+	unsigned int degree, i;
 	struct polynomial lijst[10];
 	degree = new.degree;
 	for (i = 0; i <= 4; i++) {
@@ -443,7 +443,7 @@ static unsigned int test_G(void)
  * in the leading coefficient come last.				*/
 static void sort_G(void)
 {
-	int i,j;
+	int i, j;
 	struct exponents *s_ee;
 	struct base_change *s_bc;
 	struct polynomial *s_ff;
@@ -486,13 +486,13 @@ static unsigned int test_skip(struct pair try, struct exponents least)
 		}
 	}
 	for (k = try.i + 1; k + 1 <= try.j; k++) {
-		if((!V[try.i][k]) && (!V[k][try.j]) &&
+		if ((!V[try.i][k]) && (!V[k][try.j]) &&
 					divides(G.ee[k],&least)) {
 			return(1);
 		}
 	}
 	for (k = try.j + 1; k + 1 <= G.len; k++) {
-		if((!V[try.i][k]) && (!V[try.j][k]) &&
+		if ((!V[try.i][k]) && (!V[try.j][k]) &&
 					divides(G.ee[k],&least)) {
 			return(1);
 		}
@@ -700,7 +700,7 @@ int setup(int silent)
 	
 	/* Initialize V */
 	for (i = 0; i + 1 <= maxlength; i++) {
-		for(j = 0; j + 1 <= maxlength; j++) {
+		for (j = 0; j + 1 <= maxlength; j++) {
 			V[i][j] = 0;
 		}
 	}
@@ -805,7 +805,7 @@ while ((m > 0) || (check == 1)) {
 			/* Make S-pol. */
 			SS = s_pol(*G.ff[ii], *G.ff[jj]); 
 			if ((SS.leading) &&
-					(!zero_on_division(SS, G.len,G.ff))) {
+					(!zero_on_division(SS, G.len, G.ff))) {
 				G.len++;		
 				if (G.len > maxlength) {
 					printf("Please increase maxlength.\n");
@@ -916,7 +916,7 @@ while ((m > 0) || (check == 1)) {
 				while ((j + 1 <= mnew) &&
 					(smaller(lcm_new, lcm(G.ee[Mnew[j].i],
 						G.ee[Mnew[j].j])))) j++;
-				if(j == mnew) {
+				if (j == mnew) {
 					mnew = mnew + 1;
 					Mnew[mnew - 1].i = i;
 					Mnew[mnew - 1].j = G.len - 1;

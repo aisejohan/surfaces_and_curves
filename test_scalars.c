@@ -61,7 +61,7 @@ int main()
 	printf("The number 1 is: ");
 	printmscalar(mb);
 	printf(".\n");
-	ito_sc(541,mc);
+	ito_sc(541, mc);
 	printf("The number 541 is: ");
 	printmscalar(mc);
 	printf(".\n");
