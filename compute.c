@@ -21,6 +21,7 @@
  *
  *									*/
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -30,7 +31,6 @@
 #include "pol.h"
 #include "grobner.h"
 #include "helper.h"
-
 #include "compute.h"
 #include "delta.h"
 #include "reduce.h"
@@ -43,9 +43,13 @@ struct pair {
 	unsigned short int j;
 };
 
-/* Extern variables only used in this file.			*/	
-unsigned char V[maxlength][maxlength];
-struct polynomial myf1,myf2,myf3,myf4;
+/* Variable used outside this file as well. */
+struct lijst G;
+struct polynomial myf;
+
+/* Variables only used in this file.			*/
+static unsigned char V[maxlength][maxlength];
+static struct polynomial myf1, myf2, myf3, myf4;
 
 /* Note that this produces a segfault or hangs if either	*
  * f.leading is NULL or if f.leading->c == 0.			*/
@@ -75,11 +79,11 @@ static struct exponents lcm(struct exponents *mon1, struct exponents *mon2)
 /* Rarely the case.							*/
 static unsigned int rel_prime(struct exponents *mon1, struct exponents *mon2)
 {
-	if((mon1->e1 > 0) && (mon2->e1 > 0)) return(0);
-	if((mon1->e2 > 0) && (mon2->e2 > 0)) return(0);
-	if((mon1->e3 > 0) && (mon2->e3 > 0)) return(0);
-	if((mon1->e4 > 0) && (mon2->e4 > 0)) return(0);
-	if((mon1->e5 > 0) && (mon2->e5 > 0)) return(0);
+	if ((mon1->e1 > 0) && (mon2->e1 > 0)) return(0);
+	if ((mon1->e2 > 0) && (mon2->e2 > 0)) return(0);
+	if ((mon1->e3 > 0) && (mon2->e3 > 0)) return(0);
+	if ((mon1->e4 > 0) && (mon2->e4 > 0)) return(0);
+	if ((mon1->e5 > 0) && (mon2->e5 > 0)) return(0);
 	return(1);
 }
 
@@ -96,16 +100,16 @@ static unsigned int divides(struct exponents *mon1, struct exponents *mon2)
  * valuation of the coefficients being smaller means smaller.		*/
 static unsigned int smaller(struct exponents mon1, struct exponents mon2)
 {
-	if(d1*mon1.e1+d2*mon1.e2+d3*mon1.e3+d4*mon1.e4 !=
-	d1*mon2.e1+d2*mon2.e2+d3*mon2.e3+d4*mon2.e4) return((
-	d1*mon1.e1+d2*mon1.e2+d3*mon1.e3+d4*mon1.e4 < 
-	d1*mon2.e1+d2*mon2.e2+d3*mon2.e3+d4*mon2.e4));
+	if (d1*mon1.e1 + d2*mon1.e2 + d3*mon1.e3 + d4*mon1.e4 !=
+	d1*mon2.e1 + d2*mon2.e2 + d3*mon2.e3 + d4*mon2.e4) return((
+		d1*mon1.e1 + d2*mon1.e2 + d3*mon1.e3 + d4*mon1.e4 < 
+		d1*mon2.e1 + d2*mon2.e2 + d3*mon2.e3 + d4*mon2.e4));
 	/* Same as in kleiner...				*/
-	if(mon1.e1 != mon2.e1) return((mon1.e1 < mon2.e1));
-	if(mon1.e2 != mon2.e2) return((mon1.e2 < mon2.e2));
-	if(mon1.e3 != mon2.e3) return((mon1.e3 < mon2.e3));
+	if (mon1.e1 != mon2.e1) return((mon1.e1 < mon2.e1));
+	if (mon1.e2 != mon2.e2) return((mon1.e2 < mon2.e2));
+	if (mon1.e3 != mon2.e3) return((mon1.e3 < mon2.e3));
 	/* Extra measuring valuation. 				*/
-	if(mon1.e5 != mon2.e5) return((mon1.e5 < mon2.e5));
+	if (mon1.e5 != mon2.e5) return((mon1.e5 < mon2.e5));
 	/* Means equal so not smaller. 				*/
 	return(0);
 }
@@ -118,36 +122,36 @@ static unsigned int *s_pol_terms(struct term *a, struct term *b, unsigned int df
 
 	ab = (unsigned int *) malloc(2*sizeof(unsigned int));
 
-	if(fterm->n1 > gterm->n1) {
+	if (fterm->n1 > gterm->n1) {
 		a->n1 = 0;
 		b->n1 = fterm->n1 - gterm->n1;
 	} else {
 		a->n1 = gterm->n1 - fterm->n1;
 		b->n1 = 0;
-	};
-	if(fterm->n2 > gterm->n2) {
+	}
+	if (fterm->n2 > gterm->n2) {
 		a->n2 = 0;
 		b->n2 = fterm->n2 - gterm->n2;
 	} else {
 		a->n2 = gterm->n2 - fterm->n2;
 		b->n2 = 0;
-	};
-	if(fterm->n3 > gterm->n3) {
+	}
+	if (fterm->n3 > gterm->n3) {
 		a->n3 = 0;
 		b->n3 = fterm->n3 - gterm->n3;
 	} else {
 		a->n3 = gterm->n3 - fterm->n3;
 		b->n3 = 0;
-	};
+	}
 	fn4 = (df - (fterm->n1*d1 + fterm->n2*d2 + fterm->n3*d3))/d4;
 	gn4 = (dg - (gterm->n1*d1 + gterm->n2*d2 + gterm->n3*d3))/d4;
-	if(fn4 > gn4) {
+	if (fn4 > gn4) {
 		ab[0] = 0;
 		ab[1] = fn4 - gn4;
 	} else {
 		ab[0] = gn4 - fn4;
 		ab[1] = 0;
-	};
+	}
 	sc_copy((mscalar) gterm, (mscalar) a);
 	sc_copy((mscalar) fterm, (mscalar) b);
 	ab[0] = a->n1*d1 + a->n2*d2 + a->n3*d3 + ab[0]*d4;
@@ -157,7 +161,7 @@ static unsigned int *s_pol_terms(struct term *a, struct term *b, unsigned int df
 	while ((a->e > 0) && (b->e > 0)) {
 		a->e--;
 		b->e--;
-	};
+	}
 	return(ab);
 }
 
@@ -166,9 +170,9 @@ static struct polynomial s_pol(struct polynomial f, struct polynomial g)
 {
 	struct term *a, *b;
 	unsigned int *ab;
-	struct polynomial A,B;
-	a=NULL;
-	b=NULL;
+	struct polynomial A, B;
+	a = NULL;
+	b = NULL;
 	make_term(&a);
 	make_term(&b);
 	A.leading = NULL;
@@ -179,7 +183,7 @@ static struct polynomial s_pol(struct polynomial f, struct polynomial g)
 	clean_pol(&A);
 	B = make_times_term(ab[1], b, g);
 	free(ab);
-	merge_add(&A,B);
+	merge_add(&A, B);
 	free_term(a);
 	free_term(b);
 	return(A);
@@ -191,7 +195,7 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 {
 	unsigned int *ab;
 	struct base_change uit;
-	struct polynomial A,B;
+	struct polynomial A, B;
 	struct term *a, *b;
 	a = NULL;
 	b = NULL;
@@ -200,13 +204,14 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 	A.leading = NULL;
 	B.leading = NULL;
 
-	ab = s_pol_terms(a, b, G.ff[i]->degree, G.ff[i]->leading, G.ff[j]->degree, G.ff[j]->leading);
+	ab = s_pol_terms(a, b, G.ff[i]->degree, G.ff[i]->leading,
+					G.ff[j]->degree, G.ff[j]->leading);
 	/* Do the same onto BC as you do onto G.ff.	*/
-	if((G.BC[i]->bc1.leading) && (G.BC[j]->bc1.leading)) {
+	if ((G.BC[i]->bc1.leading) && (G.BC[j]->bc1.leading)) {
 		A = make_times_term(ab[0], a, G.BC[i]->bc1);
 		clean_pol(&A);
 		B = make_times_term(ab[1], b, G.BC[j]->bc1);
-		merge_add(&A,B);
+		merge_add(&A, B);
 		uit.bc1 = A;
 	} else if (G.BC[i]->bc1.leading) {
 		A = make_times_term(ab[0], a, G.BC[i]->bc1);
@@ -219,12 +224,12 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 	} else {
 		uit.bc1.degree = 0; /* Not correct! */
 		uit.bc1.leading = NULL;
-	};
-	if((G.BC[i]->bc2.leading) && (G.BC[j]->bc2.leading)) {
+	}
+	if ((G.BC[i]->bc2.leading) && (G.BC[j]->bc2.leading)) {
 		A = make_times_term(ab[0], a, G.BC[i]->bc2);
 		clean_pol(&A);
 		B = make_times_term(ab[1], b, G.BC[j]->bc2);
-		merge_add(&A,B);
+		merge_add(&A, B);
 		uit.bc2 = A;
 	} else if (G.BC[i]->bc2.leading) {
 		A = make_times_term(ab[0], a, G.BC[i]->bc2);
@@ -237,12 +242,12 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 	} else {
 		uit.bc2.degree = 0; /* Not correct! */
 		uit.bc2.leading = NULL;
-	};
-	if((G.BC[i]->bc3.leading) && (G.BC[j]->bc3.leading)) {
+	}
+	if ((G.BC[i]->bc3.leading) && (G.BC[j]->bc3.leading)) {
 		A = make_times_term(ab[0], a, G.BC[i]->bc3);
 		clean_pol(&A);
 		B = make_times_term(ab[1], b, G.BC[j]->bc3);
-		merge_add(&A,B);
+		merge_add(&A, B);
 		uit.bc3 = A;
 	} else if (G.BC[i]->bc3.leading) {
 		A = make_times_term(ab[0], a, G.BC[i]->bc3);
@@ -255,12 +260,12 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 	} else {
 		uit.bc3.degree = 0; /* Not correct! */
 		uit.bc3.leading = NULL;
-	};
-	if((G.BC[i]->bc4.leading) && (G.BC[j]->bc4.leading)) {
+	}
+	if ((G.BC[i]->bc4.leading) && (G.BC[j]->bc4.leading)) {
 		A = make_times_term(ab[0], a, G.BC[i]->bc4);
 		clean_pol(&A);
 		B = make_times_term(ab[1], b, G.BC[j]->bc4);
-		merge_add(&A,B);
+		merge_add(&A, B);
 		uit.bc4 = A;
 	} else if (G.BC[i]->bc4.leading) {
 		A = make_times_term(ab[0], a, G.BC[i]->bc4);
@@ -273,12 +278,12 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 	} else {
 		uit.bc4.degree = 0; /* Not correct! */
 		uit.bc4.leading = NULL;
-	};
-	if((G.BC[i]->bc5.leading) && (G.BC[j]->bc5.leading)) {
+	}
+	if ((G.BC[i]->bc5.leading) && (G.BC[j]->bc5.leading)) {
 		A = make_times_term(ab[0], a, G.BC[i]->bc5);
 		clean_pol(&A);
 		B = make_times_term(ab[1], b, G.BC[j]->bc5);
-		merge_add(&A,B);
+		merge_add(&A, B);
 		uit.bc5 = A;
 	} else if (G.BC[i]->bc5.leading) {
 		A = make_times_term(ab[0], a, G.BC[i]->bc5);
@@ -291,7 +296,7 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 	} else {
 		uit.bc5.degree = 0; /* Not correct! */
 		uit.bc5.leading = NULL;
-	};
+	}
 
 	free_term(a);
 	free_term(b);
@@ -303,33 +308,33 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 /* Test function. 						*/
 static void test_base_change(struct base_change B, struct polynomial new)
 {
-	unsigned int degree,i;
+	unsigned int degree, i;
 	struct polynomial lijst[10];
 	degree = new.degree;
-	for(i=0;i<=4;i++) {
+	for (i = 0; i <= 4; i++) {
 		lijst[i].degree = degree; /* Just for this test function. */
 		lijst[i].leading = NULL;
-	};
-	if(B.bc1.leading) lijst[0] = pol_mult(B.bc1,myf1);
-	if(B.bc2.leading) lijst[1] = pol_mult(B.bc2,myf2);
-	if(B.bc3.leading) lijst[2] = pol_mult(B.bc3,myf3);
-	if(B.bc4.leading) lijst[3] = pol_mult(B.bc4,myf4);
-	if(B.bc5.leading) lijst[4] = pol_mult(B.bc5,myf);
-	lijst[5] = pol_add(lijst[0],lijst[1]);
-	lijst[6] = pol_add(lijst[2],lijst[3]);
-	lijst[7] = pol_add(lijst[5],lijst[6]);
-	lijst[8] = pol_add(lijst[7],lijst[4]);
-	times_int(-1,&lijst[8]);
-	lijst[9] = pol_add(new,lijst[8]);
-	if(lijst[9].leading) {
+	}
+	if (B.bc1.leading) lijst[0] = pol_mult(B.bc1, myf1);
+	if (B.bc2.leading) lijst[1] = pol_mult(B.bc2, myf2);
+	if (B.bc3.leading) lijst[2] = pol_mult(B.bc3, myf3);
+	if (B.bc4.leading) lijst[3] = pol_mult(B.bc4, myf4);
+	if (B.bc5.leading) lijst[4] = pol_mult(B.bc5, myf);
+	lijst[5] = pol_add(lijst[0], lijst[1]);
+	lijst[6] = pol_add(lijst[2], lijst[3]);
+	lijst[7] = pol_add(lijst[5], lijst[6]);
+	lijst[8] = pol_add(lijst[7], lijst[4]);
+	times_int(-1, &lijst[8]);
+	lijst[9] = pol_add(new, lijst[8]);
+	if (lijst[9].leading) {
 		print_pol(lijst[8]);
 		printf("? =========================================== ?\n");
 		print_pol(new);
 		exit(1);
-	};
-	for(i=0;i<=9;i++) {
+	}
+	for (i = 0; i <= 9; i++) {
 		free_tail(lijst[i].leading);
-	};
+	}
 	return;
 }
 
@@ -338,27 +343,28 @@ static void print_M(unsigned int mm, struct pair *MM)
 {
 	int i;
 	struct exponents tmp;
-	for(i=0; i+1 <= mm; i++) {
-		printf("[%d, %d] ",MM[i].i,MM[i].j);
-		tmp = lcm(G.ee[MM[i].i],G.ee[MM[i].j]);
-		printf("[%d, %d, %d, %d, %d] ",tmp.e1,tmp.e2,tmp.e3,tmp.e4,tmp.e5);
-		printf("%d ",d1*tmp.e1 + d2*tmp.e2 + d3*tmp.e3 + d4*tmp.e4);
+	for (i = 0; i + 1 <= mm; i++) {
+		printf("[%d, %d] ", MM[i].i, MM[i].j);
+		tmp = lcm(G.ee[MM[i].i], G.ee[MM[i].j]);
+		printf("[%d, %d, %d, %d, %d] ", tmp.e1, tmp.e2, tmp.e3, tmp.e4,
+					tmp.e5);
+		printf("%d ", d1*tmp.e1 + d2*tmp.e2 + d3*tmp.e3 + d4*tmp.e4);
 		printf("\n");
-	};
+	}
 	return;
 }
 
 /* Outputs V.							*/
 static void print_V(unsigned int mm)
 {
-	int i,j;
+	int i, j;
 
-	for(i=0;i+1<=mm;i++) {
-		for(j=0;j+1<=mm;j++) {
-			printf("%d ",V[i][j]);
-		};
+	for (i = 0; i + 1 <= mm; i++) {
+		for (j = 0; j + 1 <= mm; j++) {
+			printf("%d ", V[i][j]);
+		}
 		printf("\n");
-	};
+	}
 	return;
 }
 #endif
@@ -366,72 +372,78 @@ static void print_V(unsigned int mm)
 /* Outputs G.							*/
 static unsigned int print_G(void)
 {
-	int i, s1=0, s2=0, s3=0, s4=0, success;
+	int i, s1 = 0, s2 = 0, s3 = 0, s4 = 0, success;
 	struct exponents tmp;
 
-	for(i=0;i+1<=G.len;i++) {
+	for (i = 0; i + 1 <= G.len; i++) {
 		tmp = *G.ee[i];
-		printf("[%d, %d, %d, %d, %d]  \t",tmp.e1,tmp.e2,tmp.e3,tmp.e4,tmp.e5);
-		printf("%d\t",d1*tmp.e1 + d2*tmp.e2 + d3*tmp.e3 + d4*tmp.e4);
-		printf("%d ",number_terms(*G.ff[i]));
-		if((!tmp.e5) && ((tmp.e1 + tmp.e2 + tmp.e3) == 0)) {
+		printf("[%d, %d, %d, %d, %d]  \t",
+			tmp.e1, tmp.e2, tmp.e3, tmp.e4, tmp.e5);
+		printf("%d\t", d1*tmp.e1 + d2*tmp.e2 + d3*tmp.e3 + d4*tmp.e4);
+		printf("%d ", number_terms(*G.ff[i]));
+		if ((!tmp.e5) && ((tmp.e1 + tmp.e2 + tmp.e3) == 0)) {
 			printf(" <--- 4");
-			s1=1;
-		};
-		if((!tmp.e5) && ((tmp.e1 + tmp.e2 + tmp.e4) == 0)) {
+			s1 = 1;
+		}
+		if ((!tmp.e5) && ((tmp.e1 + tmp.e2 + tmp.e4) == 0)) {
 			printf(" <--- 3");
-			s2=1;
-		};
-		if((!tmp.e5) && ((tmp.e1 + tmp.e3 + tmp.e4) == 0)) {
+			s2 = 1;
+		}
+		if ((!tmp.e5) && ((tmp.e1 + tmp.e3 + tmp.e4) == 0)) {
 			printf(" <--- 2");
-			s3=1;
-		};
-		if((!tmp.e5) && ((tmp.e2 + tmp.e3 + tmp.e4) == 0)) {
+			s3 = 1;
+		}
+		if ((!tmp.e5) && ((tmp.e2 + tmp.e3 + tmp.e4) == 0)) {
 			printf(" <--- 1");
-			s4=1;
-		};
+			s4 = 1;
+		}
 #ifdef KIJKEN
-		if((tmp.e1 != G.ff[i]->leading->n1) || (tmp.e2 != G.ff[i]->leading->n2) || (tmp.e3 != G.ff[i]->leading->n3) || (tmp.e5 != valuation((mscalar) G.ff[i]->leading))) {
+		if (
+		(tmp.e1 != G.ff[i]->leading->n1) ||
+		(tmp.e2 != G.ff[i]->leading->n2) ||
+		(tmp.e3 != G.ff[i]->leading->n3) ||
+		(tmp.e5 != valuation((mscalar) G.ff[i]->leading))) {
 			printf("Wrong exponents!\n");
 			exit(1);
-		};
+		}
 #endif
 		printf("\n");
-	};
-	success=s1+s2+s3+s4;
+	}
+	success = s1 + s2 + s3 + s4;
 	return(success);
 }
 
 static unsigned int test_G(void)
 {
-	int i, s1=0, s2=0, s3=0, s4=0, success;
+	int i, s1 = 0, s2 = 0, s3 = 0, s4 = 0, success;
 	struct exponents tmp;
 
-	for(i=0;i+1<=G.len;i++) {
+	for (i = 0; i + 1 <= G.len; i++) {
 		tmp = *G.ee[i];
-		if((!tmp.e5) && ((tmp.e1 + tmp.e2 + tmp.e3) == 0)) {
-			s1=1;
-		};
-		if((!tmp.e5) && ((tmp.e1 + tmp.e2 + tmp.e4) == 0)) {
-			s2=1;
-		};
-		if((!tmp.e5) && ((tmp.e1 + tmp.e3 + tmp.e4) == 0)) {
-			s3=1;
-		};
-		if((!tmp.e5) && ((tmp.e2 + tmp.e3 + tmp.e4) == 0)) {
-			s4=1;
-		};
+		if ((!tmp.e5) && ((tmp.e1 + tmp.e2 + tmp.e3) == 0)) {
+			s1 = 1;
+		}
+		if ((!tmp.e5) && ((tmp.e1 + tmp.e2 + tmp.e4) == 0)) {
+			s2 = 1;
+		}
+		if ((!tmp.e5) && ((tmp.e1 + tmp.e3 + tmp.e4) == 0)) {
+			s3 = 1;
+		}
+		if ((!tmp.e5) && ((tmp.e2 + tmp.e3 + tmp.e4) == 0)) {
+			s4 = 1;
+		}
 #ifdef KIJKEN
-		if((tmp.e1 != G.ff[i]->leading->n1) ||
+		if (
+		(tmp.e1 != G.ff[i]->leading->n1) ||
 		(tmp.e2 != G.ff[i]->leading->n2) || 
 		(tmp.e3 != G.ff[i]->leading->n3) || 
 		(tmp.e5 != valuation((mscalar) G.ff[i]->leading))) {
 			printf("Wrong exponents!\n");
 			exit(1);
-		};
+		}
 #endif
-	};
-	success=s1+s2+s3+s4;
+	}
+	success = s1 + s2 + s3 + s4;
 	return(success);
 }
 
@@ -440,31 +452,32 @@ static unsigned int test_G(void)
  * in the leading coefficient come last.				*/
 static void sort_G(void)
 {
-	int i,j;
+	int i, j;
 	struct exponents *s_ee;
 	struct base_change *s_bc;
 	struct polynomial *s_ff;
 
-	for(i = 0; i+1 <= G.len; i++) {
-		for(j = i+1; j+1 <= G.len; j++) {
+	for (i = 0; i+1 <= G.len; i++) {
+		for (j = i+1; j+1 <= G.len; j++) {
 			if (
-/* Test for p-adic valuation of leading coefficient. */
-(G.ee[j]->e5 < G.ee[i]->e5) ||
-/* Test for degree of leading term. */
-((G.ee[j]->e5 == G.ee[i]->e5) && (G.ff[j]->degree < G.ff[i]->degree)) ||
-/* Test for ordering. */
-((G.ee[j]->e5 == G.ee[i]->e5) && (G.ff[j]->degree == G.ff[i]->degree) &&
-((smaller(*G.ee[i],*G.ee[j]))))
-			) {
-				s_ee = G.ee[i];
-				s_bc = G.BC[i];
-				s_ff = G.ff[i];
-				G.ee[i] = G.ee[j];
-				G.BC[i] = G.BC[j];
-				G.ff[i] = G.ff[j];
-				G.ee[j] = s_ee;
-				G.BC[j] = s_bc;
-				G.ff[j] = s_ff;
+			/* Test for p-adic valuation of leading coefficient. */
+			(G.ee[j]->e5 < G.ee[i]->e5) ||
+			/* Test for degree of leading term. */
+			((G.ee[j]->e5 == G.ee[i]->e5) &&
+				(G.ff[j]->degree < G.ff[i]->degree)) ||
+			/* Test for ordering. */
+			((G.ee[j]->e5 == G.ee[i]->e5) &&
+				(G.ff[j]->degree == G.ff[i]->degree) &&
+				((smaller(*G.ee[i],*G.ee[j]))))) {
+					s_ee = G.ee[i];
+					s_bc = G.BC[i];
+					s_ff = G.ff[i];
+					G.ee[i] = G.ee[j];
+					G.BC[i] = G.BC[j];
+					G.ff[i] = G.ff[j];
+					G.ee[j] = s_ee;
+					G.BC[j] = s_bc;
+					G.ff[j] = s_ff;
 			}
 		}
 	}
@@ -475,33 +488,33 @@ static unsigned int test_skip(struct pair try, struct exponents least)
 {
 	int k;
 
-	for(k=0;k+1<=try.i;k++) {
-		if((!V[k][try.i]) && (!V[k][try.j]) &&
-		divides(G.ee[k],&least)) {
+	for (k = 0; k + 1 <= try.i; k++) {
+		if ((!V[k][try.i]) && (!V[k][try.j]) &&
+					divides(G.ee[k],&least)) {
 			return(1);
-		};
-	};
-	for(k=try.i+1;k+1<=try.j;k++) {
-		if((!V[try.i][k]) && (!V[k][try.j]) &&
-		divides(G.ee[k],&least)) {
+		}
+	}
+	for (k = try.i + 1; k + 1 <= try.j; k++) {
+		if ((!V[try.i][k]) && (!V[k][try.j]) &&
+					divides(G.ee[k],&least)) {
 			return(1);
-		};
-	};
-	for(k=try.j+1;k+1<=G.len;k++) {
-		if((!V[try.i][k]) && (!V[try.j][k]) &&
-		divides(G.ee[k],&least)) {
+		}
+	}
+	for (k = try.j + 1; k + 1 <= G.len; k++) {
+		if ((!V[try.i][k]) && (!V[try.j][k]) &&
+					divides(G.ee[k],&least)) {
 			return(1);
-		};
-	};
+		}
+	}
 	return(0);
 }
 
-int setup(void)
+int setup(int silent)
 {
-	int i,j,k,ii,jj,old,new,check,epsilon;
+	int i, j, k, ii, jj, old, new, check, epsilon;
 	mscalar c;
 	struct pair tmppair;
-	struct polynomial EEN,NIKS,SS,T;
+	struct polynomial EEN, NIKS, SS, T;
 	struct polynomial *Tff;
 	struct exponents *Tee;
 	struct base_change *TBC;
@@ -511,10 +524,10 @@ int setup(void)
 	struct pair Mnew[maxlength];
 	unsigned int m, mold, mnew;
 	struct exponents lcm_new, lcm_old;
-	EEN.leading=NULL;
-	NIKS.leading=NULL;
-	SS.leading=NULL;
-	T.leading=NULL;
+	EEN.leading = NULL;
+	NIKS.leading = NULL;
+	SS.leading = NULL;
+	T.leading = NULL;
 
 	/* Unit polynomial */
 	EEN.degree = 0;
@@ -528,88 +541,92 @@ int setup(void)
 	NIKS.degree = 0;
 
 	/* Initialize myf,myf1,myf2,myf3,myf4 */
-	printf("\n\n");
-	myf = make_random(d,1);
-	printf("\n");
-	printf("Here is the polynomial we're using this time:\n");
-	printf("\n");
-	print_pol(myf);
-	if(!myf.leading) {
-		printf("Polynomial is zero!\n");
+	if (!silent) {
+		printf("\n\n");
+		myf = make_random(d, 1);
+		printf("\n");
+		printf("Here is the polynomial we're using this time:\n");
+		printf("\n");
+		print_pol(myf);
+	}
+	if (!myf.leading) {
+		if (!silent) printf("Polynomial is zero!\n");
 		free_tail(EEN.leading);
 		return(1);
-	};
-	printf("\n");
+	}
+	if (!silent) printf("\n");
 	
-	myf1 = deriv(myf,1);
-	if(!myf1.leading) {
-		printf("Polynomial does not depend on x!\n");
+	myf1 = deriv(myf, 1);
+	if (!myf1.leading) {
+		if (!silent) printf("Polynomial does not depend on x!\n");
 		free_tail(EEN.leading);
 		free_tail(myf.leading);
 		return(1);
-	};
-	myf2 = deriv(myf,2);
-	if(!myf2.leading) {
-		printf("Polynomial does not depend on y!\n");
+	}
+	myf2 = deriv(myf, 2);
+	if (!myf2.leading) {
+		if (!silent) printf("Polynomial does not depend on y!\n");
 		free_tail(EEN.leading);
 		free_tail(myf.leading);
 		free_tail(myf1.leading);
 		return(1);
-	};
-	myf3 = deriv(myf,3);
-	if(!myf3.leading) {
-		printf("Polynomial does not depend on z!\n");
+	}
+	myf3 = deriv(myf, 3);
+	if (!myf3.leading) {
+		if (!silent) printf("Polynomial does not depend on z!\n");
 		free_tail(EEN.leading);
 		free_tail(myf.leading);
 		free_tail(myf1.leading);
 		free_tail(myf2.leading);
 		return(1);
-	};
-	myf4 = deriv(myf,4);
-	if(!myf4.leading) {
-		printf("Polynomial does not depend on w!\n");
+	}
+	myf4 = deriv(myf, 4);
+	if (!myf4.leading) {
+		if (!silent) printf("Polynomial does not depend on w!\n");
 		free_tail(EEN.leading);
 		free_tail(myf.leading);
 		free_tail(myf1.leading);
 		free_tail(myf2.leading);
 		free_tail(myf3.leading);
 		return(1);
-	};
-	printf("\n");
+	}
+	if (!silent) printf("\n");
 	
 	/* Allocate memory for G */
-	G.BC=(struct base_change **)
-		malloc(maxlength*sizeof(struct base_change *));
-	if(!G.BC) {
+	G.BC = (struct base_change **)
+			malloc(maxlength*sizeof(struct base_change *));
+	if (!G.BC) {
 		perror("Malloc failed!");
 		exit(1);
-	};
-	G.ff=(struct polynomial **)
-		malloc(maxlength*sizeof(struct polynomial *));
-	if(!G.ff) {
+	}
+	G.ff = (struct polynomial **)
+			malloc(maxlength*sizeof(struct polynomial *));
+	if (!G.ff) {
 		perror("Malloc failed!");
 		exit(1);
-	};
-	G.ee=(struct exponents **)malloc(maxlength*sizeof(struct exponents *));
-	if(!G.ee) {
+	}
+	G.ee = (struct exponents **)
+			malloc(maxlength*sizeof(struct exponents *));
+	if (!G.ee) {
 		perror("Malloc failed!");
 		exit(1);
-	};
-	for(i=0;i+1<=maxlength;i++) {
-		G.BC[i]=(struct base_change *)
-			malloc(sizeof(struct base_change));
-		if(!G.BC[i]) {
+	}
+	for (i = 0; i + 1 <= maxlength; i++) {
+		G.BC[i] = (struct base_change *)
+				malloc(sizeof(struct base_change));
+		if (!G.BC[i]) {
 			perror("Malloc failed!");
 			exit(1);
-		};
+		}
 		G.ff[i] = NULL;
 		make_pol(&G.ff[i]);
-		G.ee[i]=(struct exponents *)malloc(sizeof(struct exponents));
-		if(!G.ee[i]) {
+		G.ee[i] = (struct exponents *)
+				malloc(sizeof(struct exponents));
+		if (!G.ee[i]) {
 			perror("Malloc failed!");
 			exit(1);
-		};
-	};
+		}
+	}
 	
 	/* Initialize G */
 	*G.ff[0] = copy_pol(myf4);
@@ -656,87 +673,88 @@ int setup(void)
 
 	/* Deal with leading coefficients being divisible by p! */
 	make_scalar(&c);
-	i=0;
-	while(i+1<=G.len) {
-		if(G.ee[i]->e5 > 0) {
+	i = 0;
+	while (i + 1 <= G.len) {
+		if (G.ee[i]->e5 > 0) {
 			T = copy_pol(*G.ff[i]);
 			sc_one(c);
-			for(j=1;j<=rr-G.ee[i]->e5;j++) 
-				sc_imult_replace(p,c);
-			times_scalar(c,&T);
+			for (j = 1; j <= rr - G.ee[i]->e5; j++) 
+				sc_imult_replace(p, c);
+			times_scalar(c, &T);
 			if(T.leading) {
 				G.len++;
-				*G.ff[G.len-1] = T;
-				*G.ee[G.len-1] = take_exponents(T);
+				*G.ff[G.len - 1] = T;
+				*G.ee[G.len - 1] = take_exponents(T);
 				T = copy_pol(G.BC[i]->bc1);
-				times_scalar(c,&T);
-				G.BC[G.len-1]->bc1 = T;
+				times_scalar(c, &T);
+				G.BC[G.len - 1]->bc1 = T;
 				T = copy_pol(G.BC[i]->bc2);
-				times_scalar(c,&T);
-				G.BC[G.len-1]->bc2 = T;
+				times_scalar(c, &T);
+				G.BC[G.len - 1]->bc2 = T;
 				T = copy_pol(G.BC[i]->bc3);
-				times_scalar(c,&T);
-				G.BC[G.len-1]->bc3 = T;
+				times_scalar(c, &T);
+				G.BC[G.len - 1]->bc3 = T;
 				T = copy_pol(G.BC[i]->bc4);
-				times_scalar(c,&T);
-				G.BC[G.len-1]->bc4 = T;
+				times_scalar(c, &T);
+				G.BC[G.len - 1]->bc4 = T;
 				T = copy_pol(G.BC[i]->bc5);
-				times_scalar(c,&T);
+				times_scalar(c, &T);
 				G.BC[G.len-1]->bc5 = T;
-			};
-		};
+			}
+		}
 		i++;
-	};
+	}
 	check = 0;
 	
 	/* Initialize V */
-	for(i=0;i+1<=maxlength;i++) {
-		for(j=0;j+1<=maxlength;j++) {
+	for (i = 0; i + 1 <= maxlength; i++) {
+		for (j = 0; j + 1 <= maxlength; j++) {
 			V[i][j] = 0;
-		};
-	};
+		}
+	}
 
 	/* Initialize M and m. */
 	m = 0;
-	for(i=0;i+1<=G.len;i++) {
-		for(j=i+1;j+1<=G.len;j++) {
-			if(!rel_prime(G.ee[i],G.ee[j])) {
-				m=m+1;
-				M[m-1].i=i;
-				M[m-1].j=j;
-				V[i][j]=1;
-			};
-		};
-	};
+	for (i = 0; i + 1 <= G.len; i++) {
+		for (j = i + 1; j + 1 <= G.len; j++) {
+			if (!rel_prime(G.ee[i], G.ee[j])) {
+				m = m + 1;
+				M[m - 1].i = i;
+				M[m - 1].j = j;
+				V[i][j] = 1;
+			}
+		}
+	}
 
 	/* Order entries in M such that the smallest one comes last! */
-	for(i=0;i+1<=m;i++) {
-		for(j=i+1;j+1<=m;j++) {
-			if(smaller(lcm(G.ee[M[i].i],G.ee[M[i].j]),lcm(G.ee[M[j].i],G.ee[M[j].j]))) {
+	for (i = 0; i + 1 <= m; i++) {
+		for (j = i + 1; j + 1 <= m; j++) {
+			if (smaller(lcm(G.ee[M[i].i], G.ee[M[i].j]),
+					lcm(G.ee[M[j].i], G.ee[M[j].j]))) {
 				tmppair = M[i];
 				M[i] = M[j];
 				M[j] = tmppair;
-			};
-		};
-	};
+			}
+		}
+	}
 
 
 /* Loop for computing the Grobner basis.	*
  * Needlessly complicated.			*/
-while((m>0) || (check == 1)) {
-	if(check) {
+while ((m > 0) || (check == 1)) {
+	if (check) {
 		/* Here we multiply the previous one found by a power	*
 		 * of p to cancel off the leading term and we see if	*
 		 * there is anything left.				*/
 		sc_one(c);
-		for(i=1;i<=rr-G.ee[G.len-1]->e5;i++)
-			sc_imult_replace(p,c);
-		SS = copy_pol(*G.ff[G.len-1]);
+		for (i = 1; i <= rr - G.ee[G.len - 1]->e5; i++)
+			sc_imult_replace(p ,c);
+		SS = copy_pol(*G.ff[G.len - 1]);
 		/* Multiply by power of p. */
-		times_scalar(c,&SS);
-		if((SS.leading) && (!zero_on_division(SS,G.len,G.ff))) {
+		times_scalar(c, &SS);
+		if ((SS.leading) && (!zero_on_division(SS, G.len, G.ff))) {
 			G.len++;
-			if(G.len > maxlength) {
+			if (G.len > maxlength) {
 				printf("This case requires an increase in "
 				"maxlength.\n");
 				free_tail(EEN.leading);
@@ -746,57 +764,58 @@ while((m>0) || (check == 1)) {
 				free_tail(myf3.leading);
 				free_tail(myf4.leading);
 				free_tail(SS.leading);
-				for(i=0;i+1+1<=G.len;i++) {
+				for (i = 0; i + 1 + 1 <= G.len; i++) {
 					free_tail(G.BC[i]->bc1.leading);
 					free_tail(G.BC[i]->bc2.leading);
 					free_tail(G.BC[i]->bc3.leading);
 					free_tail(G.BC[i]->bc4.leading);
 					free_tail(G.BC[i]->bc5.leading);
 					free_tail(G.ff[i]->leading);
-				};
-				for(i=0;i+1<=maxlength;i++) {
+				}
+				for (i = 0; i + 1 <= maxlength; i++) {
 					free(G.BC[i]);
 					free(G.ff[i]);
 					free(G.ee[i]);
-				};
+				}
 				free(G.BC);
 				free(G.ff);
 				free(G.ee);
 				return(1);
-			};
-			T = copy_pol(G.BC[G.len-1-1]->bc1);
-			times_scalar(c,&T);
-			G.BC[G.len-1]->bc1 = T;
-			T = copy_pol(G.BC[G.len-1-1]->bc2);
-			times_scalar(c,&T);
-			G.BC[G.len-1]->bc2 = T;
-			T = copy_pol(G.BC[G.len-1-1]->bc3);
-			times_scalar(c,&T);
-			G.BC[G.len-1]->bc3 = T;
-			T = copy_pol(G.BC[G.len-1-1]->bc4);
-			times_scalar(c,&T);
-			G.BC[G.len-1]->bc4 = T;
-			T = copy_pol(G.BC[G.len-1-1]->bc5);
-			times_scalar(c,&T);
-			G.BC[G.len-1]->bc5 = T;
+			}
+			T = copy_pol(G.BC[G.len - 1 - 1]->bc1);
+			times_scalar(c, &T);
+			G.BC[G.len - 1]->bc1 = T;
+			T = copy_pol(G.BC[G.len - 1 - 1]->bc2);
+			times_scalar(c, &T);
+			G.BC[G.len - 1]->bc2 = T;
+			T = copy_pol(G.BC[G.len - 1 - 1]->bc3);
+			times_scalar(c, &T);
+			G.BC[G.len - 1]->bc3 = T;
+			T = copy_pol(G.BC[G.len - 1 - 1]->bc4);
+			times_scalar(c, &T);
+			G.BC[G.len - 1]->bc4 = T;
+			T = copy_pol(G.BC[G.len - 1 - 1]->bc5);
+			times_scalar(c, &T);
+			G.BC[G.len - 1]->bc5 = T;
 			check = 2; /* success. */
 		} else {
 			free_tail(SS.leading);
 			check = 0; /* go around. */
-		};
+		}
 	} else {
 		/* Here we take the last pair from M and we reduce	*
 		 * it and we see if there is anything left.		*/
-		ii = M[m-1].i;
-		jj = M[m-1].j;
+		ii = M[m - 1].i;
+		jj = M[m - 1].j;
 		V[ii][jj] = 0; 		/* Update V. */
 		m = m - 1;		/* Update M. */
-		if(!test_skip(M[m],lcm(G.ee[ii],G.ee[jj]))) {
+		if (!test_skip(M[m], lcm(G.ee[ii], G.ee[jj]))) {
 			/* Make S-pol. */
-			SS = s_pol(*G.ff[ii],*G.ff[jj]); 
-			if((SS.leading) && (!zero_on_division(SS,G.len,G.ff))) {
+			SS = s_pol(*G.ff[ii], *G.ff[jj]); 
+			if ((SS.leading) &&
+					(!zero_on_division(SS, G.len, G.ff))) {
 				G.len++;		
-				if(G.len > maxlength) {
+				if (G.len > maxlength) {
 					printf("Please increase maxlength.\n");
 					free_tail(EEN.leading);
 					free_tail(myf.leading);
@@ -805,179 +824,179 @@ while((m>0) || (check == 1)) {
 					free_tail(myf3.leading);
 					free_tail(myf4.leading);
 					free_tail(SS.leading);
-					for(i=0;i+1+1<=G.len;i++) {
+					for (i = 0; i + 1 + 1 <= G.len; i++) {
 					  free_tail(G.BC[i]->bc1.leading);
 					  free_tail(G.BC[i]->bc2.leading);
 					  free_tail(G.BC[i]->bc3.leading);
 					  free_tail(G.BC[i]->bc4.leading);
 					  free_tail(G.BC[i]->bc5.leading);
 					  free_tail(G.ff[i]->leading);
-					};
-					for(i=0;i+1<=maxlength;i++) {
+					}
+					for (i = 0; i + 1 <= maxlength; i++) {
 					  free(G.BC[i]);
 					  free(G.ff[i]);
 					  free(G.ee[i]);
-					};
+					}
 					free(G.BC);
 					free(G.ff);
 					free(G.ee);
 					return(1);
-				};
-				*G.BC[G.len-1] = s_pol_BC(ii,jj);
+				}
+				*G.BC[G.len - 1] = s_pol_BC(ii, jj);
 				check = 2; /* success. */
 			} else {
 				free_tail(SS.leading);
 				check = 0;
-			};
+			}
 		} else {
 			check = 0;
-		};
-	};
+		}
+	}
 	
 	/* Common code for the two cases of adding a member of G. */
-	if(check == 2) {
+	if (check == 2) {
 		/* Already increased G.len so have to substract one here. */
-		aa = gen_division(&SS,G.len-1,G.ff);
-		*G.ff[G.len-1] = SS;
-		for(i=0;i+1+1<=G.len;i++)  {
-			if((G.BC[i]->bc1.leading) && 
-			(G.BC[G.len-1]->bc1.leading)) {
-				T = pol_mult(*aa[i],G.BC[i]->bc1);
-				merge_add(&(G.BC[G.len-1]->bc1),T);
+		aa = gen_division(&SS, G.len - 1, G.ff);
+		*G.ff[G.len - 1] = SS;
+		for (i = 0; i + 1 + 1 <= G.len; i++)  {
+			if ((G.BC[i]->bc1.leading) && 
+					(G.BC[G.len - 1]->bc1.leading)) {
+				T = pol_mult(*aa[i], G.BC[i]->bc1);
+				merge_add(&(G.BC[G.len-1]->bc1), T);
 			} else if (G.BC[i]->bc1.leading) {
-				G.BC[G.len-1]->bc1 = 
-					pol_mult(*aa[i],G.BC[i]->bc1);
-			};
-			if((G.BC[i]->bc2.leading) && 
-			(G.BC[G.len-1]->bc2.leading)) {
-				T = pol_mult(*aa[i],G.BC[i]->bc2);
-				merge_add(&(G.BC[G.len-1]->bc2),T);
+				G.BC[G.len - 1]->bc1 = 
+					pol_mult(*aa[i], G.BC[i]->bc1);
+			}
+			if ((G.BC[i]->bc2.leading) && 
+					(G.BC[G.len-1]->bc2.leading)) {
+				T = pol_mult(*aa[i], G.BC[i]->bc2);
+				merge_add(&(G.BC[G.len - 1]->bc2), T);
 			} else if (G.BC[i]->bc2.leading) {
-				G.BC[G.len-1]->bc2 = 
-					pol_mult(*aa[i],G.BC[i]->bc2);
-			};
-			if((G.BC[i]->bc3.leading) && 
-					(G.BC[G.len-1]->bc3.leading)) {
-				T = pol_mult(*aa[i],G.BC[i]->bc3);
-				merge_add(&(G.BC[G.len-1]->bc3),T);
+				G.BC[G.len - 1]->bc2 = 
+					pol_mult(*aa[i], G.BC[i]->bc2);
+			}
+			if ((G.BC[i]->bc3.leading) && 
+					(G.BC[G.len - 1]->bc3.leading)) {
+				T = pol_mult(*aa[i], G.BC[i]->bc3);
+				merge_add(&(G.BC[G.len - 1]->bc3), T);
 			} else if (G.BC[i]->bc3.leading) {
-				G.BC[G.len-1]->bc3 = 
-					pol_mult(*aa[i],G.BC[i]->bc3);
-			};
-			if((G.BC[i]->bc4.leading) && 
-					(G.BC[G.len-1]->bc4.leading)) {
-				T = pol_mult(*aa[i],G.BC[i]->bc4);
-				merge_add(&(G.BC[G.len-1]->bc4),T);
+				G.BC[G.len - 1]->bc3 = 
+					pol_mult(*aa[i], G.BC[i]->bc3);
+			}
+			if ((G.BC[i]->bc4.leading) && 
+					(G.BC[G.len - 1]->bc4.leading)) {
+				T = pol_mult(*aa[i], G.BC[i]->bc4);
+				merge_add(&(G.BC[G.len - 1]->bc4), T);
 			} else if (G.BC[i]->bc4.leading) {
-				G.BC[G.len-1]->bc4 = 
-					pol_mult(*aa[i],G.BC[i]->bc4);
-			};
-			if((G.BC[i]->bc5.leading) && 
-					(G.BC[G.len-1]->bc5.leading)) {
-				T = pol_mult(*aa[i],G.BC[i]->bc5);
-				merge_add(&(G.BC[G.len-1]->bc5),T);
+				G.BC[G.len - 1]->bc4 = 
+					pol_mult(*aa[i], G.BC[i]->bc4);
+			}
+			if ((G.BC[i]->bc5.leading) && 
+					(G.BC[G.len - 1]->bc5.leading)) {
+				T = pol_mult(*aa[i], G.BC[i]->bc5);
+				merge_add(&(G.BC[G.len - 1]->bc5), T);
 			} else if (G.BC[i]->bc5.leading) {
-				G.BC[G.len-1]->bc5 = 
-					pol_mult(*aa[i],G.BC[i]->bc5);
-			};
-		};
-		*G.ee[G.len-1] = take_exponents(SS); /* Done updating G. */
+				G.BC[G.len - 1]->bc5 = 
+					pol_mult(*aa[i], G.BC[i]->bc5);
+			}
+		}
+		*G.ee[G.len - 1] = take_exponents(SS); /* Done updating G. */
 
 #ifdef KIJKEN
-		test_base_change(*G.BC[G.len-1],SS);
+		test_base_change(*G.BC[G.len - 1], SS);
 #endif
 
 		/* Frees space allocated for aa. */
-		for(i=0;i+1+1<=G.len;i++) {
+		for (i = 0; i + 1 + 1 <= G.len; i++) {
 			free_tail(aa[i]->leading);
 			free(aa[i]);
-		};
+		}
 		free(aa); 
 
 		/* Update M. */
 
 		/* List the new pairs in order in Mnew. */
 		mnew = 0;
-		for(i=0;i<=(G.len-1)-1;i++) {
-			if(!rel_prime(G.ee[i],G.ee[G.len-1])) {
-				lcm_new = lcm(G.ee[i],G.ee[G.len-1]);
+		for (i = 0; i<= (G.len - 1) - 1; i++) {
+			if (!rel_prime(G.ee[i], G.ee[G.len - 1])) {
+				lcm_new = lcm(G.ee[i], G.ee[G.len - 1]);
 				j = 0;
-				while((j+1 <= mnew) &&
-					(smaller(lcm_new,lcm(G.ee[Mnew[j].i],
+				while ((j + 1 <= mnew) &&
+					(smaller(lcm_new, lcm(G.ee[Mnew[j].i],
 						G.ee[Mnew[j].j])))) j++;
-				if(j == mnew) {
+				if (j == mnew) {
 					mnew = mnew + 1;
-					Mnew[mnew-1].i = i;
-					Mnew[mnew-1].j = G.len-1;
-					V[i][G.len-1] = 1;
+					Mnew[mnew - 1].i = i;
+					Mnew[mnew - 1].j = G.len - 1;
+					V[i][G.len - 1] = 1;
 				} else {
-					for(k=mnew;k>=j+1;k--) {
-						Mnew[k] = Mnew[k-1];
-					};
+					for (k = mnew; k >= j + 1; k--) {
+						Mnew[k] = Mnew[k - 1];
+					}
 					mnew = mnew + 1;
 					Mnew[j].i = i;
-					Mnew[j].j = G.len-1;
-					V[i][G.len-1] = 1;
-				};
-			};
-		};
+					Mnew[j].j = G.len - 1;
+					V[i][G.len - 1] = 1;
+				}
+			}
+		}
 
 		if (mnew > 0) {
 			/* Save the M we have sofar into Mold. */
-			for(i=0;i+1<=m;i++) {
+			for (i = 0; i + 1 <= m; i++) {
 				Mold[i] = M[i];
 			}
 			mold = m;
 
 			/* Merge old and new into M. */
 			old = 0;
-			lcm_old = lcm(G.ee[Mold[old].i],G.ee[Mold[old].j]);
+			lcm_old = lcm(G.ee[Mold[old].i], G.ee[Mold[old].j]);
 			new = 0;
-			lcm_new = lcm(G.ee[Mnew[new].i],G.ee[Mnew[new].j]);
+			lcm_new = lcm(G.ee[Mnew[new].i], G.ee[Mnew[new].j]);
 			m = mold + mnew;
-			i=0;
-			while((new+1 <= mnew) && (old+1 <= mold)) {
-				if(smaller(lcm_new,lcm_old)) {
+			i = 0;
+			while ((new + 1 <= mnew) && (old + 1 <= mold)) {
+				if (smaller(lcm_new, lcm_old)) {
 					M[i] = Mold[old];
 					i = i + 1;
 					old = old + 1;
-					if(old+1 <= mold) lcm_old =
+					if (old + 1 <= mold) lcm_old =
 						lcm(G.ee[Mold[old].i],
 						G.ee[Mold[old].j]);
 				} else {
 					M[i] = Mnew[new];
 					i = i + 1;
 					new = new + 1;
-					if(new+1 <= mnew) lcm_new = 
+					if (new + 1 <= mnew) lcm_new = 
 						lcm(G.ee[Mnew[new].i],
 						G.ee[Mnew[new].j]);
-				};
-			};
-			while(old+1 <= mold) {
+				}
+			}
+			while (old + 1 <= mold) {
 				M[i] = Mold[old];
 				i = i + 1;
 				old = old + 1;
-			};
-			while(new+1 <= mnew) {
+			}
+			while (new + 1 <= mnew) {
 				M[i] = Mnew[new];
 				i = i + 1;
 				new = new + 1;
-			};
+			}
 		}
 
 		/* Do it again for the powers of p times the new one!	*
 		 * This is needed to deal with something like		*
 		 * p*x + y.						*/
-		if(G.ee[G.len-1]->e5 > 0) {
+		if (G.ee[G.len - 1]->e5 > 0) {
 			check = 1;
 		} else {
 			check = 0;
-		};
-	};
-}; /* End loop computing Grobner basis. */
+		}
+	}
+} /* End loop computing Grobner basis. */
 
-	i=test_G();
-	if(i<4) {
+	i = test_G();
+	if (i < 4) {
 		/* These are safe to free. */
 		free_tail(EEN.leading);
 		free_tail(myf.leading);
@@ -985,29 +1004,29 @@ while((m>0) || (check == 1)) {
 		free_tail(myf2.leading);
 		free_tail(myf3.leading);
 		free_tail(myf4.leading);
-		for(i=0;i+1<=G.len;i++) {
+		for (i = 0; i + 1 <= G.len; i++) {
 			free_tail(G.BC[i]->bc1.leading);
 			free_tail(G.BC[i]->bc2.leading);
 			free_tail(G.BC[i]->bc3.leading);
 			free_tail(G.BC[i]->bc4.leading);
 			free_tail(G.BC[i]->bc5.leading);
 			free_tail(G.ff[i]->leading);
-		};
-		for(i=0;i+1<=maxlength;i++) {
+		}
+		for (i = 0; i + 1 <= maxlength; i++) {
 			free(G.BC[i]);
 			free(G.ff[i]);
 			free(G.ee[i]);
-		};
+		}
 		free(G.BC);
 		free(G.ff);
 		free(G.ee);
 		free_scalar(c);
-		printf("Not smooth!\n");
+		if (!silent) printf("Not smooth!\n");
 		return(1);
-	};
+	}
 
 #ifdef KIJKEN
-	printf("The initial length of G is %d.\n",G.len);
+	printf("The initial length of G is %d.\n", G.len);
 	print_G();
 	printf("\n");
 #endif
@@ -1018,104 +1037,122 @@ while((m>0) || (check == 1)) {
 	 * Below we order the elements of G.			*/
 	old = G.len; /* Remember for freeing bb later. */
 	bb = (struct polynomial **)malloc(G.len*sizeof(struct polynomial *));
-	if(!bb) {
+	if (!bb) {
 		perror("Malloc failed!");
 		exit(1);
-	};
-	for(i=0;i+1<=G.len;i++) {
+	}
+	for (i = 0; i + 1 <= G.len; i++) {
 		bb[i] = NULL;
 		make_pol(&bb[i]);
-	};
-	i=0;
-	while(i+1<=G.len) {
-		for(j=0;j+1<=G.len;j++) {
+	}
+	i = 0;
+	while (i + 1 <= G.len) {
+		for (j = 0; j + 1 <= G.len; j++) {
 			if (j != i) {
 				epsilon = (j>i) ? 1 : 0;
 				bb[j-epsilon]->degree = G.ff[j]->degree;
 				bb[j-epsilon]->leading = G.ff[j]->leading;
-			};
-		};
+			}
+		}
 		
-		new = G.len-1; /* Remember for freeing aa later. */
-		aa = gen_division(G.ff[i],G.len-1,bb);
+		new = G.len - 1; /* Remember for freeing aa later. */
+		aa = gen_division(G.ff[i], G.len - 1, bb);
 
 #ifdef KIJKEN
-		if((G.ff[i]->leading) && 
+		if ((G.ff[i]->leading) && 
 		((G.ff[i]->leading->n1 != G.ee[i]->e1) || 
 		 (G.ff[i]->leading->n2 != G.ee[i]->e2) || 
 		 (G.ff[i]->leading->n3 != G.ee[i]->e3))) {
 			printf("The following should have been zero: ");
 			print_pol(*G.ff[i]);
 			exit(1);
-		};
+		}
 #endif
 		
 		/* Either omit G[i] or replace it. */
-		if(!G.ff[i]->leading) {
+		if (!G.ff[i]->leading) {
 			Tff = G.ff[i];
 			Tee = G.ee[i];
 			TBC = G.BC[i];
-			for(j=i;j+1+1<=G.len;j++) {
-				G.ff[j] = G.ff[j+1];
-				G.ee[j] = G.ee[j+1];
-				G.BC[j] = G.BC[j+1];
-			};
-			G.ff[G.len-1] = Tff;
-			G.ee[G.len-1] = Tee;
+			for (j = i; j + 1 + 1 <= G.len; j++) {
+				G.ff[j] = G.ff[j + 1];
+				G.ee[j] = G.ee[j + 1];
+				G.BC[j] = G.BC[j + 1];
+			}
+			G.ff[G.len - 1] = Tff;
+			G.ee[G.len - 1] = Tee;
 			free_tail(TBC->bc1.leading);
 			free_tail(TBC->bc2.leading);
 			free_tail(TBC->bc3.leading);
 			free_tail(TBC->bc4.leading);
 			free_tail(TBC->bc5.leading);
-			G.BC[G.len-1] = TBC;
+			G.BC[G.len - 1] = TBC;
 			G.len--;
 		} else {
 			/* Note that we do not have to update G.len	*
 			 * or G.ff[i] since it has already been		*
 			 * changed.					*/
-			for(j=0;j+1<=G.len;j++)  {
-				/* Do not allow j=i. */
-				if(j != i) {
-					epsilon = (j>i) ? 1 : 0;
-					/* and don't do it when the coefficient is zero. */
-					if(aa[j-epsilon]->leading) {
-						if((G.BC[j]->bc1.leading) && (G.BC[i]->bc1.leading)) {
-							T = pol_mult(*aa[j-epsilon],G.BC[j]->bc1);
-							merge_add(&(G.BC[i]->bc1),T);
-						} else if (G.BC[j]->bc1.leading) {
-							G.BC[i]->bc1 = pol_mult(*aa[j-epsilon],G.BC[j]->bc1);
-						};
-						if((G.BC[j]->bc2.leading) && (G.BC[i]->bc2.leading)) {
-							T = pol_mult(*aa[j-epsilon],G.BC[j]->bc2);
-							merge_add(&(G.BC[i]->bc2),T);
-						} else if (G.BC[j]->bc2.leading) {
-							G.BC[i]->bc2 = pol_mult(*aa[j-epsilon],G.BC[j]->bc2);
-						};
-						if((G.BC[j]->bc3.leading) && (G.BC[i]->bc3.leading)) {
-							T = pol_mult(*aa[j-epsilon],G.BC[j]->bc3);
-							merge_add(&(G.BC[i]->bc3),T);
-						} else if (G.BC[j]->bc3.leading) {
-							G.BC[i]->bc3 = pol_mult(*aa[j-epsilon],G.BC[j]->bc3);
-						};
-						if((G.BC[j]->bc4.leading) && (G.BC[i]->bc4.leading)) {
-							T = pol_mult(*aa[j-epsilon],G.BC[j]->bc4);
-							merge_add(&(G.BC[i]->bc4),T);
-						} else if (G.BC[j]->bc4.leading) {
-							G.BC[i]->bc4 = pol_mult(*aa[j-epsilon],G.BC[j]->bc4);
-						};
-						if((G.BC[j]->bc5.leading) && (G.BC[i]->bc5.leading)) {
-							T = pol_mult(*aa[j-epsilon],G.BC[j]->bc5);
-							merge_add(&(G.BC[i]->bc5),T);
-						} else if (G.BC[j]->bc5.leading) {
-							G.BC[i]->bc5 = pol_mult(*aa[j-epsilon],G.BC[j]->bc5);
-						};	
-					}; /* Endif(( j !=0 ) */
-				}; /* Endif ( aa[j-epsilon]->leading )) */
-			}; /* Endfor(j=0... */
+			for (j = 0; j + 1 <= G.len; j++)  {
+				/* Do not allow j=i, and don't do it
+				 * when the coefficient is zero. */
+				epsilon = (j > i) ? 1 : 0;
+				if ((j != i) && (aa[j - epsilon]->leading)) {
+					if ((G.BC[j]->bc1.leading) &&
+					(G.BC[i]->bc1.leading)) {
+						T = pol_mult(*aa[j - epsilon],
+							G.BC[j]->bc1);
+						merge_add(&(G.BC[i]->bc1), T);
+					} else if (G.BC[j]->bc1.leading) {
+						G.BC[i]->bc1 = pol_mult(
+							*aa[j - epsilon],
+							G.BC[j]->bc1);
+					}
+					if ((G.BC[j]->bc2.leading) &&
+					(G.BC[i]->bc2.leading)) {
+						T = pol_mult(*aa[j - epsilon],
+							G.BC[j]->bc2);
+						merge_add(&(G.BC[i]->bc2), T);
+					} else if (G.BC[j]->bc2.leading) {
+						G.BC[i]->bc2 = pol_mult(
+							*aa[j - epsilon],
+							G.BC[j]->bc2);
+					}
+					if ((G.BC[j]->bc3.leading) &&
+					(G.BC[i]->bc3.leading)) {
+						T = pol_mult(*aa[j - epsilon],
+							G.BC[j]->bc3);
+						merge_add(&(G.BC[i]->bc3), T);
+					} else if (G.BC[j]->bc3.leading) {
+						G.BC[i]->bc3 = pol_mult(
+							*aa[j - epsilon],
+							G.BC[j]->bc3);
+					}
+					if ((G.BC[j]->bc4.leading) &&
+						(G.BC[i]->bc4.leading)) {
+						T = pol_mult(*aa[j - epsilon],
+							G.BC[j]->bc4);
+						merge_add(&(G.BC[i]->bc4), T);
+					} else if (G.BC[j]->bc4.leading) {
+						G.BC[i]->bc4 = pol_mult(
+							*aa[j - epsilon],
+							G.BC[j]->bc4);
+					}
+					if ((G.BC[j]->bc5.leading) &&
+					(G.BC[i]->bc5.leading)) {
+						T = pol_mult(*aa[j - epsilon],
+							G.BC[j]->bc5);
+						merge_add(&(G.BC[i]->bc5), T);
+					} else if (G.BC[j]->bc5.leading) {
+						G.BC[i]->bc5 = pol_mult(
+							*aa[j - epsilon],
+							G.BC[j]->bc5);
+					}
+				}
+			}
 
 #ifdef KIJKEN
 			/* Test.					*/
-			test_base_change(*G.BC[i],*G.ff[i]);
+			test_base_change(*G.BC[i], *G.ff[i]);
 #endif
 
 			/* This should not be necessary. */
@@ -1124,72 +1161,74 @@ while((m>0) || (check == 1)) {
 
 			/* Only in this case do we update i! */
 			i++;
-		};
+		}
 
 		/* Free aa. */
-		for(j=0;j+1<=new;j++) {
+		for (j = 0; j + 1 <= new; j++) {
 			free_tail(aa[j]->leading);
 			free(aa[j]);
-		};
+		}
 		free(aa);
-	};
+	}
 	
 	/* Free bb. */
-	for(j=0;j+1<=old;j++) {
+	for (j = 0; j + 1 <= old; j++) {
 		bb[j]->leading = NULL;
 		free(bb[j]);
-	};
+	}
 	free(bb);
 
 	sort_G();
 
-	printf("The final length of G is %d\n",G.len);
-	print_G();
-	printf("------\n");
+	if (!silent) {
+		printf("The final length of G is %d\n", G.len);
+		print_G();
+		printf("------\n");
+	}
 
 #ifdef KIJKEN
 	/* Sanity Check! Takes some time... */
 	printf("Checking p-powers!\n");
-	for(i=0;i<=G.len-1;i++) {
-		if(G.ee[i]->e5 > 0) {
+	for (i = 0; i <= G.len - 1; i++) {
+		if (G.ee[i]->e5 > 0) {
 			sc_one(c);
-			for(j=1;j<=rr-G.ee[i]->e5;j++)
-				sc_imult_replace(p,c);
+			for (j = 1; j <= rr - G.ee[i]->e5; j++)
+				sc_imult_replace(p, c);
 			T = copy_pol(*G.ff[i]);
-			times_scalar(c,&T);
-			bb = gen_division(&T,G.len,G.ff);
-			if(T.leading) {
+			times_scalar(c, &T);
+			bb = gen_division(&T, G.len, G.ff);
+			if (T.leading) {
 				printf("NOT GOOD.\n");
 				print_pol(T);
 				printf("\n");
 				exit(1);
-			};
-			for(j=0;j+1<=G.len;j++) {
+			}
+			for (j = 0; j + 1 <= G.len; j++) {
 				free_tail(bb[j]->leading);
 				free(bb[j]);
-			};
+			}
 			free(bb);
-		};
-	};
+		}
+	}
 	/* Recheck all S-pols reduce to zero! */
 	printf("Checking S-pols.\n");
-	for(i=0;i<=G.len-1;i++) {
-		for(j=i+1;j<=G.len-1;j++) {
-			SS = s_pol(*G.ff[i],*G.ff[j]);
-			if(zero_on_division(SS,G.len,G.ff)) {
+	for (i = 0; i <= G.len - 1; i++) {
+		for (j = i + 1; j <= G.len - 1; j++) {
+			SS = s_pol(*G.ff[i], *G.ff[j]);
+			if (zero_on_division(SS, G.len, G.ff)) {
 				free_tail(SS.leading);
 			} else {
 				printf("Not OK at the following"
-				" indices: %d and %d\n",i,j);
+				" indices: %d and %d\n", i, j);
 				print_pol(*G.ff[i]);
 				printf("\n");
 				print_pol(*G.ff[j]);
 				printf("\n");
 				print_pol(SS);
 				exit(1);
-			};
-		};
-	};
+			}
+		}
+	}
 #endif /* KIJKEN */
 
 	/* These are not used outside this file... */

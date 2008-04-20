@@ -21,6 +21,7 @@
  *
  *									*/
 
+#include <stddef.h>
 #include <stdlib.h>
 #include <stdio.h>
 
@@ -72,18 +73,19 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	ppp = NULL;
 	make_pol(&ppp);
 	aa = (struct polynomial **)malloc(ss*sizeof(struct polynomial *));
-	if(!aa) {
+	if (!aa) {
 		perror("Malloc failed!");
 		exit(1);
-	};
-	for(i=0;i+1<=ss;i++) {
+	}
+	for (i = 0; i+1 <= ss; i++) {
 		aa[i] = NULL;
 		make_pol(&aa[i]);
-		aa[i]->degree = (pp->degree > vh[i]->degree) ? (pp->degree - vh[i]->degree) : 0;
+		aa[i]->degree = (pp->degree > vh[i]->degree) ?
+					(pp->degree - vh[i]->degree) : 0;
 		vh_rest[i].degree = vh[i]->degree;
 		vh_rest[i].leading = vh[i]->leading->next;
 		ptraa[i] = &(aa[i]->leading);
-	};
+	}
 
 	/* Copy pp into ppp. */
 	ppp->degree = pp->degree;
@@ -93,13 +95,13 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	ptrterm = &pp->leading;
 
 	i = 0;
-	while ((ppp->leading) && (i+1 <= ss)) {
+	while ((ppp->leading) && (i + 1 <= ss)) {
 
 		if (deelbaar(vh[i]->degree, vh[i]->leading, ppp->degree, ppp->leading)) {
 
 			save_the_spot.degree = aa[i]->degree;
 			save_the_spot.leading = ppp->leading;
-			first=1;
+			first = 1;
 
 			do {
 				/* No sign in front of c */
@@ -129,14 +131,18 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 
 				ptraa[i]= &((*ptraa[i])->next);
 
-			} while ((ppp->leading) && deelbaar(vh[i]->degree, vh[i]->leading, ppp->degree, ppp->leading) && ((!vh_rest[i].leading) || (GROTER == kleiner(ppp->leading, &test)))) ;
+			} while ((ppp->leading) &&
+				deelbaar(vh[i]->degree, vh[i]->leading,
+						ppp->degree, ppp->leading) &&
+				((!vh_rest[i].leading) || (GROTER ==
+					kleiner(ppp->leading, &test)))) ;
 
 			uit = pol_mult(save_the_spot, vh_rest[i]);
 			merge_add(ppp, uit);
 
 			i = 0;
 
-		} else if (i+1 == ss) {
+		} else if (i + 1 == ss) {
 			*ptrterm = ppp->leading;
 			ptrterm = &((*ptrterm)->next);
 			/* Move on to the next one. */
@@ -145,9 +151,9 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 			*ptrterm = NULL;
 			i = 0;
 		} else {
-			i = i+1;
+			i = i + 1;
 		}
-	};
+	}
 
 	free(ppp);
 	free_scalar(c);
@@ -229,7 +235,10 @@ struct polynomial *myf_division(struct polynomial *pp)
 
 				ptraa = &((*ptraa)->next);
 
-			} while ((ppp->leading) && deelbaar(myf.degree, myf.leading, ppp->degree, ppp->leading) && (GROTER == kleiner(ppp->leading, &test))) ;
+			} while ((ppp->leading) &&
+				deelbaar(myf.degree, myf.leading,
+						ppp->degree, ppp->leading) &&
+				(GROTER == kleiner(ppp->leading, &test))) ;
 
 			uit = pol_mult(save_the_spot, myf_rest);
 			merge_add(ppp, uit);
@@ -242,7 +251,7 @@ struct polynomial *myf_division(struct polynomial *pp)
 			/* Terminate pp. */
 			*ptrterm = NULL;
 		}
-	};
+	}
 	free(ppp);
 	free_scalar(c);
 	return(aa);
@@ -259,49 +268,53 @@ zero_on_division(struct polynomial ppp, unsigned int ss, struct polynomial **vh)
 	mon = NULL;
 	make_term(&mon);
 	pp.leading = NULL;
-	for(i=0;i+1<=ss;i++) {
+	for (i = 0; i + 1 <= ss; i++) {
 		tmp[i].leading = NULL;
-	};
+	}
 
 	pp.degree = ppp.degree;
 	copy_tail(ppp.leading,&(pp.leading));
-	while(pp.leading) {
+	while (pp.leading) {
 		i = 0;
 		dividing = 1;
-		while((i+1<=ss) && dividing) {
-			if(deelbaar(vh[i]->degree, vh[i]->leading, pp.degree, pp.leading)) {
+		while ((i+1<=ss) && dividing) {
+			if (deelbaar(vh[i]->degree, vh[i]->leading,
+					pp.degree, pp.leading)) {
 				/* No sign in front of ppterm->c */
-				sc_div((mscalar) pp.leading, (mscalar) vh[i]->leading, (mscalar) mon);
+				sc_div((mscalar) pp.leading,
+					(mscalar) vh[i]->leading,
+					(mscalar) mon);
 				/* Change sign mon.c */
 				sc_negate((mscalar) mon);
 				mon->n1 = pp.leading->n1 - vh[i]->leading->n1;
 				mon->n2 = pp.leading->n2 - vh[i]->leading->n2;
 				mon->n3 = pp.leading->n3 - vh[i]->leading->n3;
 				d_t = pp.degree - vh[i]->degree;
-				if(tmp[i].leading) {
-					times_term(d_t, mon, *(vh[i]), &(tmp[i]));
+				if (tmp[i].leading) {
+					times_term(d_t, mon, *(vh[i]),
+							&(tmp[i]));
 				} else {
 					tmp[i] = make_times_term(d_t, mon,
 						*(vh[i]));
-				};
+				}
 				rep_pol_add(&pp, tmp[i]);
 				dividing = 0;
 			} else {
-				i=i+1;
-			};
-		};
-		if(dividing) {
-			for(i=0;i+1<=ss;i++) {
+				i = i + 1;
+			}
+		}
+		if (dividing) {
+			for (i = 0; i + 1 <= ss; i++) {
 				free_tail(tmp[i].leading);
-			};
+			}
 			free_tail(pp.leading);
 			free_term(mon);
 			return(0);
-		};
-	};
-	for(i=0;i+1<=ss;i++) {
+		}
+	}
+	for (i = 0; i + 1 <= ss; i++) {
 		free_tail(tmp[i].leading);
-	};
+	}
 	free_tail(pp.leading);
 	free_term(mon);
 	return(1);

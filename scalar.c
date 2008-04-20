@@ -34,13 +34,13 @@ static mpz_t prime;
 /* Only called once. */
 void setup_scalars(void)
 {
-	int c,i,j,extra;
+	int c, i, j, extra;
 
 	/* Initialize extra. */
-	extra=0;
-	for(i=0;i<=q;i++) {
-		j = (3+i)*p-1;
-		c = -i-3;
+	extra = 0;
+	for (i = 0; i <= q; i++) {
+		j = (3 + i)*p - 1;
+		c = -i - 3;
 		while (j > 0) {
 			c += ivaluation(j);
 			j--;

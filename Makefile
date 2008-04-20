@@ -4,7 +4,7 @@ all:
 
 clean:
 	rm -f tester tijdelijk gmon.out
-	rm -f basis.o  compute.o  delta.o  grobner.o  helper.o  pol.o  reduce.o  scalar.o test_scalars.o
+	rm -f basis.o  compute.o  delta.o  grobner.o  helper.o  pol.o  reduce.o  scalar.o test_scalars.o make_list.o
 
 debug:
 	gcc -g -DKIJKEN -Wall -pedantic -std=c99 -c basis.c  compute.c  delta.c  grobner.c  helper.c  pol.c  reduce.c  scalar.c
@@ -19,8 +19,8 @@ test:
 	gcc -g -lgmp -Wall -o tester test_scalars.o pol.o helper.o scalar.o
 
 make_list:
-	gcc -DLIST_F -Wall -c make_list.c silent_compute.c  delta.c  grobner.c  helper.c  pol.c  reduce.c  scalar.c
-	gcc -lgmp -Wall -o tester make_list.o silent_compute.o  delta.o  grobner.o  helper.o  pol.o  reduce.o  scalar.o
+	gcc -DLIST_F -Wall -c make_list.c compute.c  delta.c  grobner.c  helper.c  pol.c  reduce.c  scalar.c
+	gcc -lgmp -Wall -o tester make_list.o compute.o  delta.o  grobner.o  helper.o  pol.o  reduce.o  scalar.o
 
 input_pol:
 	gcc -DINPUT_F -Wall -O3 -march=nocona -c basis.c  compute.c  delta.c  grobner.c  helper.c  pol.c  reduce.c  scalar.c
