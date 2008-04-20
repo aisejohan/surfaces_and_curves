@@ -30,7 +30,7 @@
 #include "pol.h"
 #include "grobner.h"
 #include "helper.h"
-#include "silent_compute.h"
+#include "compute.h"
 #include "delta.h"
 #include "reduce.h"
 
@@ -253,7 +253,7 @@ int main()
 					tt = tt->next;
 				}
 				clean_pol(&myf);
-				retry = setup();
+				retry = setup(1);
 			}
 		}
 

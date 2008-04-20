@@ -500,7 +500,7 @@ static unsigned int test_skip(struct pair try, struct exponents least)
 	return(0);
 }
 
-int setup(void)
+int setup(int silent)
 {
 	int i, j, k, ii, jj, old, new, check, epsilon;
 	mscalar c;
@@ -533,29 +533,31 @@ int setup(void)
 	NIKS.degree = 0;
 
 	/* Initialize myf,myf1,myf2,myf3,myf4 */
-	printf("\n\n");
-	myf = make_random(d, 1);
-	printf("\n");
-	printf("Here is the polynomial we're using this time:\n");
-	printf("\n");
-	print_pol(myf);
+	if (!silent) {
+		printf("\n\n");
+		myf = make_random(d, 1);
+		printf("\n");
+		printf("Here is the polynomial we're using this time:\n");
+		printf("\n");
+		print_pol(myf);
+	}
 	if (!myf.leading) {
-		printf("Polynomial is zero!\n");
+		if (!silent) printf("Polynomial is zero!\n");
 		free_tail(EEN.leading);
 		return(1);
 	}
-	printf("\n");
+	if (!silent) printf("\n");
 	
 	myf1 = deriv(myf, 1);
 	if (!myf1.leading) {
-		printf("Polynomial does not depend on x!\n");
+		if (!silent) printf("Polynomial does not depend on x!\n");
 		free_tail(EEN.leading);
 		free_tail(myf.leading);
 		return(1);
 	}
 	myf2 = deriv(myf, 2);
 	if (!myf2.leading) {
-		printf("Polynomial does not depend on y!\n");
+		if (!silent) printf("Polynomial does not depend on y!\n");
 		free_tail(EEN.leading);
 		free_tail(myf.leading);
 		free_tail(myf1.leading);
@@ -563,7 +565,7 @@ int setup(void)
 	}
 	myf3 = deriv(myf, 3);
 	if (!myf3.leading) {
-		printf("Polynomial does not depend on z!\n");
+		if (!silent) printf("Polynomial does not depend on z!\n");
 		free_tail(EEN.leading);
 		free_tail(myf.leading);
 		free_tail(myf1.leading);
@@ -572,7 +574,7 @@ int setup(void)
 	}
 	myf4 = deriv(myf, 4);
 	if (!myf4.leading) {
-		printf("Polynomial does not depend on w!\n");
+		if (!silent) printf("Polynomial does not depend on w!\n");
 		free_tail(EEN.leading);
 		free_tail(myf.leading);
 		free_tail(myf1.leading);
@@ -580,7 +582,7 @@ int setup(void)
 		free_tail(myf3.leading);
 		return(1);
 	}
-	printf("\n");
+	if (!silent) printf("\n");
 	
 	/* Allocate memory for G */
 	G.BC = (struct base_change **)
@@ -1011,7 +1013,7 @@ while ((m > 0) || (check == 1)) {
 		free(G.ff);
 		free(G.ee);
 		free_scalar(c);
-		printf("Not smooth!\n");
+		if (!silent) printf("Not smooth!\n");
 		return(1);
 	}
 
@@ -1171,9 +1173,11 @@ while ((m > 0) || (check == 1)) {
 
 	sort_G();
 
-	printf("The final length of G is %d\n", G.len);
-	print_G();
-	printf("------\n");
+	if (!silent) {
+		printf("The final length of G is %d\n", G.len);
+		print_G();
+		printf("------\n");
+	}
 
 #ifdef KIJKEN
 	/* Sanity Check! Takes some time... */

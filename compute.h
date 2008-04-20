@@ -50,4 +50,4 @@ extern struct lijst G;
 extern struct polynomial myf;
 
 /* Functions used in other files. */
-int setup(void);
+int setup(int silent);

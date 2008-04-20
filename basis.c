@@ -144,7 +144,7 @@ int main(void )
 	retry = 1;
 	while (retry == 1) {
 		while (retry == 1) {
-			retry = setup();
+			retry = setup(0);
 		}
 
 		if (d >= d1 + d2 + d3 + d4) {
