@@ -51,7 +51,7 @@ static int gcd(int a, int b)
  * The resulting polynomial of degree deg(f)-d is returned.	*/
 static struct polynomial one_step_down(struct polynomial *f)
 {
-	int i,j,k,g;
+	int i, j, k, g;
 	mscalar c;
 	struct polynomial T;
 	struct polynomial **aa;
@@ -81,8 +81,8 @@ static struct polynomial one_step_down(struct polynomial *f)
 	
 	aa = gen_division(f, G.len, G.ff);
 	
-	for (i = 0; i+1 <= G.len; i++) {
-		times_int(-1,aa[i]); /* Sign! */
+	for (i = 0; i + 1 <= G.len; i++) {
+		times_int(-1, aa[i]); /* Sign! */
 		if (fBC.bc1.leading) {
 			T = pol_mult(*aa[i], G.BC[i]->bc1);
 			merge_add(&(fBC.bc1), T);
@@ -116,7 +116,7 @@ static struct polynomial one_step_down(struct polynomial *f)
 	}
 	
 	/* Free aa up. */
-	for (i = 0; i+1 <= G.len; i++) {
+	for (i = 0; i + 1 <= G.len; i++) {
 		free_tail(aa[i]->leading);
 		free(aa[i]);
 	}
@@ -161,71 +161,12 @@ static struct polynomial one_step_down(struct polynomial *f)
 	return(fBC.bc5);
 }
 
-#if 0
-/* This returns the complete reduction and destroys f.		*/
-struct polynomial **all_the_way(struct polynomial *f)
-{
-	struct polynomial tmp;
-	struct polynomial *g;
-	struct polynomial **uit;
-	tmp.leading=NULL;
-	
-	while(f->degree + d1+d2+d3+d4 > 3*d) {
-		tmp = one_step_down(f);
-#ifdef KIJKEN
-		if(f->leading) {
-			printf("Error: f did not reduce to zero!");
-			exit(1);
-		};
-#endif
-		f->degree = tmp.degree;
-		f->leading = tmp.leading;
-		tmp.degree = 0;
-		tmp.leading = NULL;
-	};
-	uit=(struct polynomial **)malloc(3*sizeof(struct polynomial *));
-	if(!uit) {
-		perror("Malloc failed!");
-		exit(1);
-	};
-	uit[0] = NULL;
-	uit[1] = NULL;
-	uit[2] = NULL;
-	make_pol(&uit[0]);
-	make_pol(&uit[1]);
-	make_pol(&uit[2]);
-	
-	uit[0]->degree = 3*d - (d1+d2+d3+d4);
-	uit[1]->degree = 2*d - (d1+d2+d3+d4);
-	uit[2]->degree = d - (d1+d2+d3+d4);
-
-	if(f->degree + d1+d2+d3+d4 == 3*d) {
-		g = NULL;
-		make_pol(&g);
-		*g = one_step_down(f);
-		uit[0] = f;
-		*uit[2] = one_step_down(g);
-		uit[1] = g;
-	} else if(f->degree + d1+d2+d3+d4 == 2*d) {
-		*uit[2] = one_step_down(f);
-		uit[1] = f;
-	} else if(f->degree + d1+d2+d3+d4 == d) {
-		uit[2] = f;
-	} else {
-		printf("Wrong degree again!");
-		exit(1);
-	};
-	
-	return(uit);
-}
-#endif
-
 /* Deals with a split up polynomial and reduces all the		*
  * way down. Destroys bb. 					*
  * ALTERNATIVE VERSION.						*/
 struct polynomial **all_the_way_split(struct polynomial **bb)
 {
-	int j,ii,jj,tel;
+	int j, ii, jj, tel;
 	struct polynomial T;
 	struct polynomial **aa,**cc;
 	
@@ -245,35 +186,35 @@ struct polynomial **all_the_way_split(struct polynomial **bb)
 	make_pol(&aa[1]);
 	make_pol(&aa[2]);
 
-	aa[0]->degree = 3*d-d1-d2-d3-d4;
-	aa[1]->degree = 2*d-d1-d2-d3-d4;
-	aa[2]->degree = d-d1-d2-d3-d4;
+	aa[0]->degree = 3*d - d1 - d2 - d3 - d4;
+	aa[1]->degree = 2*d - d1 - d2 - d3 - d4;
+	aa[2]->degree = d - d1 - d2 - d3 - d4;
 	
-	for (ii = 0; ii+1 <= jj; ii++) {
+	for (ii = 0; ii + 1 <= jj; ii++) {
 		
 		/* bb[ii] has degree 	*
 		 * (jj-ii)d-s = jd-s,	*
 		 * so j=jj-ii 		*/
-		j = (bb[ii]->degree+d1+d2+d3+d4)/d;
+		j = (bb[ii]->degree + d1 + d2 + d3 + d4)/d;
 
-		if (j>1) {
+		if (j > 1) {
 			/* This will have degree (j-1)d - s	*/
 			T = one_step_down(bb[ii]);
 			cc = split_up(&T);
-			for (tel = 1; tel+ii+1 <= jj; tel++){
-				merge_add(bb[ii+tel], *cc[tel-1]);
-				free(cc[tel-1]);
+			for (tel = 1; tel + ii + 1 <= jj; tel++){
+				merge_add(bb[ii + tel], *cc[tel - 1]);
+				free(cc[tel - 1]);
 			}
 			free(cc);
 		}
 	}
 
-	merge_add(aa[0], *bb[jj-3]);
-	free(bb[jj-3]);
-	merge_add(aa[1], *bb[jj-2]);
-	free(bb[jj-2]);
-	merge_add(aa[2], *bb[jj-1]);
-	free(bb[jj-1]);
+	merge_add(aa[0], *bb[jj - 3]);
+	free(bb[jj - 3]);
+	merge_add(aa[1], *bb[jj - 2]);
+	free(bb[jj - 2]);
+	merge_add(aa[2], *bb[jj - 1]);
+	free(bb[jj - 1]);
 	free(bb);
 	
 	return(aa);
