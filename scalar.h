@@ -21,9 +21,9 @@
  *
  *									*/
 
-mpz_t modulus;
-mpz_t prime;
-mpz_t temp;
+extern mpz_t modulus;
+extern mpz_t prime;
+extern mpz_t temp;
 
 void setup_scalars(void);
 
