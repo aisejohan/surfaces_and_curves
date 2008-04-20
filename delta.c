@@ -25,12 +25,6 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-void perror(const char *s);
-void free(void *ptr);
-int printf(const char *format, ...);
-void exit(int status);
-void *malloc(size_t size);
-
 #include "data.h"
 #include "scalar.h"
 #include "pol.h"

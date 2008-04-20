@@ -29,15 +29,6 @@
 #include <unistd.h>
 #include <stdlib.h>
 
-typedef long int ssize_t;
-int printf(const char *format, ...);
-void exit(int status);
-void srand(unsigned int seed);
-int close(int fd);
-int open(const char *pathname, int flags, ...);
-ssize_t read(int fd, void *buf, size_t count);
-int rand(void);
-
 #include "data.h"
 #include "scalar.h"
 #include "pol.h"
