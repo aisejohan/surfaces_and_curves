@@ -21,16 +21,22 @@
  *
  *									*/
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+void perror(const char *s);
+void free(void *ptr);
+int printf(const char *format, ...);
+void exit(int status);
+void *malloc(size_t size);
 
 #include "data.h"
 #include "scalar.h"
 #include "pol.h"
 #include "grobner.h"
 #include "helper.h"
-
 #include "compute.h"
 #include "delta.h"
 #include "reduce.h"
@@ -43,9 +49,13 @@ struct pair {
 	unsigned short int j;
 };
 
-/* Extern variables only used in this file.			*/	
-unsigned char V[maxlength][maxlength];
-struct polynomial myf1,myf2,myf3,myf4;
+/* Variable used outside this file as well. */
+struct lijst G;
+struct polynomial myf;
+
+/* Variables only used in this file.			*/	
+static unsigned char V[maxlength][maxlength];
+static struct polynomial myf1,myf2,myf3,myf4;
 
 /* Note that this produces a segfault or hangs if either	*
  * f.leading is NULL or if f.leading->c == 0.			*/

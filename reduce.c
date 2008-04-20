@@ -21,8 +21,15 @@
  *
  *									*/
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+
+void perror(const char *s);
+void free(void *ptr);
+int printf(const char *format, ...);
+void exit(int status);
+void *malloc(size_t size);
 
 #include "data.h"
 #include "scalar.h"
@@ -31,8 +38,9 @@
 #include "grobner.h"
 #include "delta.h"
 #include "compute.h"
+#include "reduce.h"
 
-int gcd(int a, int b)
+static int gcd(int a, int b)
 {
         int t;
 
@@ -47,7 +55,7 @@ int gcd(int a, int b)
 /* Here f is replaced by its grobner reduction.			*
  * Works for any degree of f.					*
  * The resulting polynomial of degree deg(f)-d is returned.	*/
-struct polynomial one_step_down(struct polynomial *f)
+static struct polynomial one_step_down(struct polynomial *f)
 {
 	int i,j,k,g;
 	mscalar c;

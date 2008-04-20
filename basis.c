@@ -21,9 +21,20 @@
  *
  *									*/
 
+#include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
+
+typedef struct _IO_FILE FILE;
+extern FILE *stdout;
+void *malloc(size_t size);
+void perror(const char *s);
+void free(void *ptr);
+unsigned int sleep(unsigned int seconds);
+int printf(const char *format, ...);
+void exit(int status);
+int fflush(FILE *stream);
 
 #include "data.h"
 #include "scalar.h"
@@ -34,10 +45,10 @@
 #include "delta.h"
 #include "reduce.h"
 
-/* External variables. */
-int blen1,blen2,blen3;
-struct term **basis1,**basis2,**basis3;
-mscalar **fmatrix;
+/* Variables used globally in this file. */
+static int blen1, blen2, blen3;
+static struct term **basis1,**basis2,**basis3;
+static mscalar **fmatrix;
 
 
 /* Takes the coefficients and frees aa. */
@@ -115,7 +126,7 @@ static void print_fmatrix(void)
 	return;
 }
 
-int main() 
+int main(void )
 {
 	int i,j,k,retry,extra;
 	int c;
