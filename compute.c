@@ -53,7 +53,7 @@ struct pair {
 struct lijst G;
 struct polynomial myf;
 
-/* Variables only used in this file.			*/	
+/* Variables only used in this file.			*/
 static unsigned char V[maxlength][maxlength];
 static struct polynomial myf1,myf2,myf3,myf4;
 
