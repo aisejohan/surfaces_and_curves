@@ -34,13 +34,13 @@ static mpz_t prime;
 /* Only called once. */
 void setup_scalars(void)
 {
-	int c,i,j,extra;
+	int c, i, j, extra;
 
 	/* Initialize extra. */
-	extra=0;
-	for(i=0;i<=q;i++) {
-		j = (3+i)*p-1;
-		c = -i-3;
+	extra = 0;
+	for (i = 0; i <= q; i++) {
+		j = (3 + i)*p - 1;
+		c = -i - 3;
 		while (j > 0) {
 			c += ivaluation(j);
 			j--;
@@ -108,7 +108,7 @@ void printmscalar(mscalar a)
 #ifdef KIJKEN
 	test_scalar(a);
 #endif
-	mpz_t s,t;
+	mpz_t s, t;
 
 	mpz_init(s);
 	mpz_init(t);
@@ -122,7 +122,7 @@ void printmscalar(mscalar a)
 
 	mpz_set(s, modulus[a->e]);
 	mpz_cdiv_q_ui(t, s, 2);
-	if (mpz_cmp(a->i, t)>0) {
+	if (mpz_cmp(a->i, t) > 0) {
 		mpz_sub(t, a->i, s);
 		mpz_out_str(stdout, 10, t);
 	} else {

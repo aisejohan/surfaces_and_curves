@@ -32,8 +32,8 @@
 
 int main()
 {
-	mscalar ma,mb,mc,md,me;
-	struct polynomial A,B,C,D,E,F,G,H;
+	mscalar ma, mb, mc, md, me;
+	struct polynomial A, B, C, D, E, F, G, H;
 	setup_scalars();
 	make_scalar(ma);
 	make_scalar(mb);
@@ -49,8 +49,8 @@ int main()
 	G.leading = NULL;
 	H.leading = NULL;
 
-	printf("The prime is: %d.\n",p);
-	printf("The power is: %d.\n",r);
+	printf("The prime is: %d.\n", p);
+	printf("The power is: %d.\n", r);
 	set_seed(0);
 
 	sc_zero(ma);
@@ -61,43 +61,43 @@ int main()
 	printf("The number 1 is: ");
 	printmscalar(mb);
 	printf(".\n");
-	ito_sc(541,mc);
+	ito_sc(541, mc);
 	printf("The number 541 is: ");
 	printmscalar(mc);
 	printf(".\n");
-	sc_inv(mc,md);
+	sc_inv(mc, md);
 	printf("The inverse of 541 is: ");
 	printmscalar(md);
 	printf(".\n");
-	sc_mult(md,mc,me);
+	sc_mult(md, mc, me);
 	printf("The number 1 is: ");
 	printmscalar(me);
 	printf(".\n");
 
-	A = make_random(100,0);
+	A = make_random(100, 0);
 	F = copy_pol(A);
 	print_pol(A);
 	printf("\n");
-	B = make_random(100,0);
+	B = make_random(100, 0);
 	H = copy_pol(B);
 	print_pol(B);
 	printf("\n");
-	C = pol_mult(A,B);
+	C = pol_mult(A, B);
 	print_pol(C);
 	printf("\n");
-	D = pol_mult(B,A);
+	D = pol_mult(B, A);
 /*	print_pol(D);
 	printf("\n"); */
-	times_int(-1,&D);
-	E = pol_add(C,D);
+	times_int(-1, &D);
+	E = pol_add(C, D);
 	print_pol(E);
 	printf("\n");
-	times_int(-1,&F);
-	G = pol_add(A,F);
+	times_int(-1, &F);
+	G = pol_add(A, F);
 	print_pol(G);
 	printf("\n");
-	times_int(-1,&H);
-	G = pol_add(B,H);
+	times_int(-1, &H);
+	G = pol_add(B, H);
 	print_pol(G);
 	exit(0);
 }
