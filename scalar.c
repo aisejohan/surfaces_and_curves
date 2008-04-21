@@ -34,13 +34,13 @@ static mpz_t prime;
 /* Only called once. */
 void setup_scalars(void)
 {
-	int c,i,j,extra;
+	int c, i, j, extra;
 
 	/* Initialize extra. */
-	extra=0;
-	for(i=0;i<=q;i++) {
-		j = (3+i)*p-1;
-		c = -i-3;
+	extra = 0;
+	for (i = 0; i <= q; i++) {
+		j = (3 + i)*p - 1;
+		c = -i - 3;
 		while (j > 0) {
 			c += ivaluation(j);
 			j--;
@@ -54,7 +54,7 @@ void setup_scalars(void)
 	mpz_init(temp);
 	
 	modulus = (mpz_t *)malloc(rr*sizeof(mpz_t));
-	i=0;
+	i = 0;
 	while (i < rr) {
 		mpz_init(modulus[i]);
 		j = rr - i;

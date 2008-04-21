@@ -44,8 +44,8 @@ struct lijst {
 };
 
 /* Global variables used in other files */
-struct lijst G;
-struct polynomial myf;
+extern struct lijst G;
+extern struct polynomial myf;
 
 /* Functions used in other files. */
-int setup(void);
+int setup(int silent);

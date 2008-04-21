@@ -32,9 +32,14 @@
 
 int main()
 {
+<<<<<<< HEAD:test_scalars.c
 	mscalar ma,mb,mc,md,me;
 	struct polynomial A,B,C,D,E,F,G,H;
 	setup_scalars();
+=======
+	mscalar ma, mb, mc, md, me;
+	struct polynomial A, B, C, D, E, F, G, H;
+>>>>>>> double:test_scalars.c
 	make_scalar(ma);
 	make_scalar(mb);
 	make_scalar(mc);
@@ -49,8 +54,14 @@ int main()
 	G.leading = NULL;
 	H.leading = NULL;
 
+<<<<<<< HEAD:test_scalars.c
 	printf("The prime is: %d.\n",p);
 	printf("The power is: %d.\n",r);
+=======
+	printf("The prime is: %d.\n", p);
+	printf("The power is: %d.\n", r);
+	setup_scalars();
+>>>>>>> double:test_scalars.c
 	set_seed(0);
 
 	sc_zero(ma);
@@ -61,43 +72,62 @@ int main()
 	printf("The number 1 is: ");
 	printmscalar(mb);
 	printf(".\n");
-	ito_sc(541,mc);
+	ito_sc(541, mc);
 	printf("The number 541 is: ");
 	printmscalar(mc);
 	printf(".\n");
-	sc_inv(mc,md);
+	sc_inv(mc, md);
 	printf("The inverse of 541 is: ");
 	printmscalar(md);
 	printf(".\n");
-	sc_mult(md,mc,me);
+	sc_mult(md, mc, me);
 	printf("The number 1 is: ");
 	printmscalar(me);
 	printf(".\n");
 
+<<<<<<< HEAD:test_scalars.c
 	A = make_random(100,0);
+=======
+	A = make_random(10, 0);
+>>>>>>> double:test_scalars.c
 	F = copy_pol(A);
+<<<<<<< HEAD:test_scalars.c
 	print_pol(A);
 	printf("\n");
 	B = make_random(100,0);
+=======
+/*	print_pol(A);
+	printf("\n"); */
+	B = make_random(11, 0);
+>>>>>>> double:test_scalars.c
 	H = copy_pol(B);
+<<<<<<< HEAD:test_scalars.c
 	print_pol(B);
 	printf("\n");
 	C = pol_mult(A,B);
 	print_pol(C);
 	printf("\n");
 	D = pol_mult(B,A);
+=======
+/*	print_pol(B);
+	printf("\n"); */
+	C = pol_mult(A, B);
+/*	print_pol(C);
+	printf("\n"); */
+	D = pol_mult(B, A);
+>>>>>>> double:test_scalars.c
 /*	print_pol(D);
 	printf("\n"); */
-	times_int(-1,&D);
-	E = pol_add(C,D);
+	times_int(-1, &D);
+	E = pol_add(C, D);
 	print_pol(E);
 	printf("\n");
-	times_int(-1,&F);
-	G = pol_add(A,F);
+	times_int(-1, &F);
+	G = pol_add(A, F);
 	print_pol(G);
 	printf("\n");
-	times_int(-1,&H);
-	G = pol_add(B,H);
+	times_int(-1, &H);
+	G = pol_add(B, H);
 	print_pol(G);
 	exit(0);
 }

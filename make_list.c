@@ -30,36 +30,36 @@
 #include "pol.h"
 #include "grobner.h"
 #include "helper.h"
-#include "silent_compute.h"
+#include "compute.h"
 #include "delta.h"
 #include "reduce.h"
 
 /* External variables. */
-int blen1,blen2,blen3;
+static int blen1, blen2, blen3;
 
 
 /* Makes a random polynomial of degree degree.		*
  * The result may be the zero polynomial!		*/
-struct polynomial make_initial_pol(unsigned int degree, int print)
+static struct polynomial make_initial_pol(unsigned int degree, int print)
 {
-	unsigned int a1,a2,a3;
+	unsigned int a1, a2, a3;
 	int c;
 	struct polynomial uit;
 	struct term *uitterm;
 	struct term **ptrterm;
-	uitterm=NULL;
+	uitterm = NULL;
 	uit.degree = degree;
 	uit.leading = NULL;
 
-	if(!count_sum(degree)) {
-		printf("No monomials of degree %d! Stop.\n",degree);
+	if (!count_sum(degree)) {
+		printf("No monomials of degree %d! Stop.\n", degree);
 		exit(1);
-	};
+	}
 
-	for(a1=0;(d1*a1 <= degree);a1++) {
-	  for(a2=0;(d1*a1+d2*a2 <= degree);a2++) {
-	      if((degree - (a1*d1+a2*d2)) % d3 == 0) {
-		a3 = (degree - (a1*d1+a2*d2))/d3;
+	for (a1 = 0; (d1*a1 <= degree);a1++) {
+	  for (a2 = 0; (d1*a1 + d2*a2 <= degree);a2++) {
+	      if ((degree - (a1*d1 + a2*d2)) % d3 == 0) {
+		a3 = (degree - (a1*d1 + a2*d2))/d3;
 		/* Dummy input at first. */
 		c = 1;
 		/* Create the new term to be put in. */
@@ -69,13 +69,13 @@ struct polynomial make_initial_pol(unsigned int degree, int print)
 		uitterm->n3 = a3;
 		ito_sc(c,uitterm->c);
 		ptrterm = &(uit.leading);
-		while((*ptrterm) && (kleiner(uitterm, *ptrterm) == KLEINER)) {
+		while ((*ptrterm) && (kleiner(uitterm, *ptrterm) == KLEINER)) {
 			ptrterm = &((*ptrterm)->next);
-		};
+		}
 		uitterm->next = *ptrterm;
 		*ptrterm = uitterm;
-		uitterm=NULL;
-	    }
+		uitterm = NULL;
+	      }
 	  }
 	}
 	if (print) {
@@ -84,14 +84,32 @@ struct polynomial make_initial_pol(unsigned int degree, int print)
 			a1 = uitterm->n1;
 			a2 = uitterm->n2;
 			a3 = uitterm->n3;
-			c=0;
+			c = 0;
 			printf("Coefficient of   ");
-			if(a1) {printf("x^%d",a1); c++;};
-			if((a1) && (a2+a3)) {printf(" * "); c++;};
-			if(a2) {printf("y^%d",a2); c++;};
-			if((a2) && (a3)) {printf(" * "); c++;};
-			if(a3) {printf("z^%d",a3); c++;};
-			while(8-c) {printf("   ");c++;};
+			if (a1) {
+				printf("x^%d", a1);
+				c++;
+			}
+			if ((a1) && (a2 + a3)) {
+				printf(" * ");
+				c++;
+			}
+			if (a2) {
+				printf("y^%d", a2);
+				c++;
+			}
+			if ((a2) && (a3)) {
+				printf(" * ");
+				c++;
+			}
+			if (a3) {
+				printf("z^%d", a3);
+				c++;
+			}
+			while (8 - c) {
+				printf("   ");
+				c++;
+			}
 			printf("= ");
 			printmscalar(uitterm->c);
 			printf("\n");
@@ -108,7 +126,10 @@ void next_one(unsigned int nr, int *coeff)
 	while ((coeff[i] == p-1) && (i < nr)) i++;
 	if (i == nr) exit(0);
 	coeff[i]++;
-	while (i > 0) {	i--; coeff[i] = 0; }
+	while (i > 0) {
+		i--;
+		coeff[i] = 0;
+	}
 }
 
 int __mm(int e, int i, int c)
@@ -146,7 +167,7 @@ int is_square(int c)
 
 int is_min(unsigned int nr, int *coeff, struct polynomial f)
 {
-	int c,i,i1,i2,i3,t,different;
+	int c, i, i1, i2, i3, t, different;
 	struct term *tt;
 
 	c = 1;
@@ -161,8 +182,8 @@ int is_min(unsigned int nr, int *coeff, struct polynomial f)
 				different = 0;
 				i = 0;
 				do {
-					t = mm(tt->n1,tt->n2,tt->n3,
-						i1,i2,i3,coeff[i]);
+					t = mm(tt->n1, tt->n2, tt->n3,
+						i1, i2, i3, coeff[i]);
 					t = (c*t) % p;
 					if (t != coeff[i]) {
 					 	different = (t < coeff[i])
@@ -187,7 +208,7 @@ int is_min(unsigned int nr, int *coeff, struct polynomial f)
 int main()
 {
 	unsigned int nr;
-	int i,retry;
+	int i, retry;
 	int *coeff;
 	struct term *tt;
 	struct polynomial uit;
@@ -200,15 +221,15 @@ int main()
 	/* Setup the scalars. */
 	setup_scalars();
 
-	uit = make_initial_pol(d,1);
+	uit = make_initial_pol(d, 1);
 	nr = number_terms(uit);
 	coeff = (int *)malloc(nr*sizeof(int));
-	for(i=0;i+1<=nr;i++) {
+	for (i = 0; i + 1 <= nr; i++) {
 		coeff[i] = 0;
 	}
 	retry = 1;
-	while(retry == 1) {
-		while(retry == 1) {
+	while (retry == 1) {
+		while (retry == 1) {
 			next_one(nr, coeff);
 			if (is_min(nr, coeff, uit)) {
 				myf = copy_pol(uit);
@@ -220,23 +241,23 @@ int main()
 					tt = tt->next;
 				}
 				clean_pol(&myf);
-				retry = setup();
+				retry = setup(1);
 			}
 		}
 
-		blen1=check_flatness(d/2-d1-d2-d3);
-		if(blen1<=0) {
+		blen1 = check_flatness(d/2 - d1 - d2 - d3);
+		if (blen1 <= 0) {
 			retry = 1;
 			/* Free up G and myf. */
 			free_tail(myf.leading);
-			for(i=0;i+1<=G.len;i++) {
+			for (i = 0; i + 1 <= G.len; i++) {
 				free_tail(G.BC[i]->bc1.leading);
 				free_tail(G.BC[i]->bc2.leading);
 				free_tail(G.BC[i]->bc3.leading);
 				free_tail(G.BC[i]->bc4.leading);
 				free_tail(G.ff[i]->leading);
 			}
-			for(i=0;i+1<=maxlength;i++) {
+			for (i = 0; i + 1 <= maxlength; i++) {
 				free(G.BC[i]);
 				free(G.ff[i]);
 				free(G.ee[i]);
@@ -247,23 +268,23 @@ int main()
 		}
 
 		if (retry == 0) {
-			blen2=check_flatness(3*d/2-d1-d2-d3);
-			if(blen2<=0) {
+			blen2 = check_flatness(3*d/2 - d1 - d2 - d3);
+			if (blen2 <= 0) {
 				retry = 1;
 				/* Free up G and myf. */
 				free_tail(myf.leading);
-				for(i=0;i+1<=G.len;i++) {
+				for (i = 0; i + 1 <= G.len; i++) {
 					free_tail(G.BC[i]->bc1.leading);
 					free_tail(G.BC[i]->bc2.leading);
 					free_tail(G.BC[i]->bc3.leading);
 					free_tail(G.BC[i]->bc4.leading);
 					free_tail(G.ff[i]->leading);
 				}
-				for(i=0;i+1<=maxlength;i++) {
+				for (i = 0; i + 1 <= maxlength; i++) {
 					free(G.BC[i]);
 					free(G.ff[i]);
 					free(G.ee[i]);
-				};
+				}
 				free(G.BC);
 				free(G.ff);
 				free(G.ee);
@@ -271,26 +292,26 @@ int main()
 		}
 
 		if (retry == 0) {
-			blen3=check_flatness(5*d/2-d1-d2-d3);
-			if(blen3 > 0) {
-				for(i=0;i+1<=nr;i++) {
-					printf("%d ",coeff[i]);
+			blen3 = check_flatness(5*d/2 - d1 - d2 - d3);
+			if (blen3 > 0) {
+				for (i = 0; i + 1 <= nr; i++) {
+					printf("%d ", coeff[i]);
 				}
-				printf("  %d",G.len);
+				printf("  %d", G.len);
 				printf("\n");
 			}
 
 			retry = 1;
 			/* Free up G and myf. */
 			free_tail(myf.leading);
-			for(i=0;i+1<=G.len;i++) {
+			for (i = 0; i + 1 <= G.len; i++) {
 				free_tail(G.BC[i]->bc1.leading);
 				free_tail(G.BC[i]->bc2.leading);
 				free_tail(G.BC[i]->bc3.leading);
 				free_tail(G.BC[i]->bc4.leading);
 				free_tail(G.ff[i]->leading);
 			}
-			for(i=0;i+1<=maxlength;i++) {
+			for (i = 0; i + 1 <= maxlength; i++) {
 				free(G.BC[i]);
 				free(G.ff[i]);
 				free(G.ee[i]);
