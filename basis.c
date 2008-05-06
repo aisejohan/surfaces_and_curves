@@ -36,93 +36,20 @@
 #include "reduce.h"
 #include "char_p_0.h"
 
-/* Variables used globally in this file. */
-static int blen1, blen2, blen3;
-static struct term **basis1, **basis2, **basis3;
-static mscalar **fmatrix;
-
-
-/* Takes the coefficients and frees aa. */
-static void add_coefficients(struct polynomial **aa, int column)
-{
-	int row;
-	struct term *aaterm;
-	row = 0;
-	aaterm = aa[0]->leading;
-	while (aaterm) {
-		if (
-		(aaterm->n1 == basis3[row]->n1) &&
-		(aaterm->n2 == basis3[row]->n2) &&
-		(aaterm->n3 == basis3[row]->n3) &&
-		(aaterm->n4 == basis3[row]->n4)) {
-			sc_add_replace(aaterm->c, fmatrix[row][column]);
-			row++;
-			aaterm = aaterm->next;
-		} else {
-			row++;
-		}
-	}
-	free_tail(aa[0]->leading);
-	free(aa[0]);
-	row = blen3;
-	aaterm = aa[1]->leading;
-	while (aaterm) {
-		if (
-		(aaterm->n1 == basis2[row-blen3]->n1) &&
-		(aaterm->n2 == basis2[row-blen3]->n2) &&
-		(aaterm->n3 == basis2[row-blen3]->n3) &&
-		(aaterm->n4 == basis2[row-blen3]->n4)) {
-			sc_add_replace(aaterm->c, fmatrix[row][column]);
-			row++;
-			aaterm = aaterm->next;
-		} else {
-			row++;
-		}
-	}
-	free_tail(aa[1]->leading);
-	free(aa[1]);
-	row = blen3+blen2;
-	aaterm = aa[2]->leading;
-	while (aaterm) {
-		if (
-		(aaterm->n1 == basis1[row-blen3-blen2]->n1) &&
-		(aaterm->n2 == basis1[row-blen3-blen2]->n2) &&
-		(aaterm->n3 == basis1[row-blen3-blen2]->n3) &&
-		(aaterm->n4 == basis1[row-blen3-blen2]->n4)) {
-			sc_add_replace(aaterm->c, fmatrix[row][column]);
-			row++;
-			aaterm = aaterm->next;
-		} else {
-			row++;
-		}
-	}
-	free_tail(aa[2]->leading);
-	free(aa[2]);
-	free(aa);
-	return;
-}
-
-static void print_fmatrix(void)
-{
-	int i, j;
-	printf("[");
-	for (i = 0; i + 1 <= blen1 + blen2 + blen3; i++) {
-		for (j = 0; j + 1 <= blen1 + blen2 + blen3; j++) {
-			printmscalar(fmatrix[i][j]);
-			if (j + 1 < blen1 + blen2 + blen3) printf(",");
-		}
-		if (i + 1 < blen1 + blen2 + blen3) printf(";\\\n");
-	}
-	printf("]\n");
-	return;
-}
 
 int main(void )
 {
 	int i, j, k, retry, extra;
 	int c;
-	int *gap;
 	mscalar cc;
+	int *gap;
+	int e;
+	int blen1, blen2, blen3;
+	struct term **basis1, **basis2, **basis3;
+	int glen1, glen2, glen3;
+	struct term **gens1, **gens2, **gens3;
+	mscalar **matrix, **fmatrix, **Fmatrix;
+	mscalar *column;
 	struct term *aaterm;
 	struct polynomial Delta;
 	struct polynomial T;
@@ -148,140 +75,45 @@ int main(void )
 		while (retry == 1) {
 			retry = setup(0);
 		}
-		gap = find_gap();
 
-		if (d >= d1 + d2 + d3 + d4) {
-			blen1 = char_0(d - d1 - d2 - d3 - d4, gap);
-			blen1 = check_flatness(d - d1 - d2 - d3 - d4);
-			printf("For %d = d-d1-d2-d3-d4 you get %d\n",
-					d - d1 - d2 - d3 - d4, blen1);
-			if (blen1 <= 0) {
-				retry = 1;
-				sleep(10);
-				/* Free up G and myf. */
-				free_tail(myf.leading);
-				for (i = 0; i + 1 <= G.len; i++) {
-					free_tail(G.BC[i]->bc1.leading);
-					free_tail(G.BC[i]->bc2.leading);
-					free_tail(G.BC[i]->bc3.leading);
-					free_tail(G.BC[i]->bc4.leading);
-					free_tail(G.BC[i]->bc5.leading);
-					free_tail(G.ff[i]->leading);
-				}
-				for (i = 0; i + 1 <= maxlength; i++) {
-					free(G.BC[i]);
-					free(G.ff[i]);
-					free(G.ee[i]);
-				}
-				free(G.BC);
-				free(G.ff);
-				free(G.ee);
-			} else {
-				basis1 = find_basis(d - d1 - d2 - d3 - d4,
-						blen1);
-				for (i = 0; i + 1 <= blen1; i++) {
-					T.degree = d - d1 - d2 - d3 - d4;
-					T.leading = basis1[i];
-					print_pol(T);
-					T.leading = NULL;
-				}
-				printf("\n");
-			}
+		gap = find_gap();
+		blen1 = char_0(d - d1 - d2 - d3 - d4, gap);
+		blen2 = char_0(2*d - d1 - d2 - d3 - d4, gap);
+		blen3 = char_0(3*d - d1 - d2 - d3 - d4, gap);
+		glen1 = char_p(d - d1 - d2 - d3 - d4);
+		glen2 = char_p(2*d - d1 - d2 - d3 - d4);
+		glen3 = char_p(3*d - d1 - d2 - d3 - d4);
+		printf("Lengths: %d %d %d %d %d %d.\n",
+			blen1, glen1, blen2, glen2, blen3, glen3);
+		basis1 = char_0_basis(d - d1 - d2 - d3 - d4, blen1, gap);
+		print_terms(basis1, blen1);
+		basis2 = char_0_basis(2*d - d1 - d2 - d3 - d4, blen2, gap);
+		print_terms(basis2, blen2);
+		basis3 = char_0_basis(3*d - d1 - d2 - d3 - d4, blen3, gap);
+		print_terms(basis3, blen3);
+		gens1 = char_p_generators(d - d1 - d2 - d3 - d4, glen1);
+		print_terms(gens1, glen1);
+		gens2 = char_p_generators(2*d - d1 - d2 - d3 - d4, glen2);
+		print_terms(gens2, glen2);
+		gens3 = char_p_generators(3*d - d1 - d2 - d3 - d4, glen3);
+		print_terms(gens3, glen3);
+
+		if (p == 2) {
+			e = __extra(3*d - d1 - d2 - d3 - d4, gap);
+		} else {
+			e = 0;
 		}
-		if ((retry == 0) && (2*d >= d1 + d2 + d3 + d4)) {
-			blen2 = char_0(2*d - d1 - d2 - d3 - d4, gap);
-			blen2 = check_flatness(2*d - d1 - d2 - d3 - d4);
-			printf("For %d = 2*d-d1-d2-d3-d4 you get %d\n",
-					2*d - d1 - d2 - d3 - d4, blen2);
-			if (blen2 <= 0) {
-				retry = 1;
-				/* Free up G and myf. */
-				free_tail(myf.leading);
-				for (i = 0; i + 1 <= G.len; i++) {
-					free_tail(G.BC[i]->bc1.leading);
-					free_tail(G.BC[i]->bc2.leading);
-					free_tail(G.BC[i]->bc3.leading);
-					free_tail(G.BC[i]->bc4.leading);
-					free_tail(G.BC[i]->bc5.leading);
-					free_tail(G.ff[i]->leading);
-				}
-				for (i = 0; i + 1 <= maxlength; i++) {
-					free(G.BC[i]);
-					free(G.ff[i]);
-					free(G.ee[i]);
-				}
-				free(G.BC);
-				free(G.ff);
-				free(G.ee);
-				/* Free up basis1. */
-				for (i = 0; i + 1 <= blen1; i++) {
-					free_term(basis1[i]);
-				}
-				free(basis1);
-			} else {
-				basis2 = find_basis(2*d - d1 - d2 - d3 - d4,
-						blen2);
-				for (i = 0; i + 1 <= blen2; i++) {
-					T.degree = 2*d - d1 - d2 - d3 - d4;
-					T.leading = basis2[i];
-					print_pol(T);
-					T.leading = NULL;
-				}
-				printf("\n");
-			}
-		}
-		if ((retry == 0) && (3*d >= d1 + d2 + d3 + d4)) {
-			blen3 = char_0(3*d - d1 - d2 - d3 - d4, gap);
-			blen3 = check_flatness(3*d - d1 - d2 - d3 - d4);
-			printf("For %d = 3*d-d1-d2-d3-d4 you get %d\n",
-					3*d - d1 - d2 - d3 - d4, blen3);
-			if (blen3 <= 0) {
-				retry = 1;
-				/* Free up G and myf. */
-				free_tail(myf.leading);
-				for (i = 0; i+1 <= G.len; i++) {
-					free_tail(G.BC[i]->bc1.leading);
-					free_tail(G.BC[i]->bc2.leading);
-					free_tail(G.BC[i]->bc3.leading);
-					free_tail(G.BC[i]->bc4.leading);
-					free_tail(G.BC[i]->bc5.leading);
-					free_tail(G.ff[i]->leading);
-				}
-				for (i = 0; i + 1 <= maxlength; i++) {
-					free(G.BC[i]);
-					free(G.ff[i]);
-					free(G.ee[i]);
-				}
-				free(G.BC);
-				free(G.ff);
-				free(G.ee);
-				/* Free up basis1. */
-				for (i = 0; i + 1 <= blen1; i++) {
-					free_term(basis1[i]);
-				}
-				free(basis1);
-				/* Free up basis2. */
-				for (i = 0; i + 1 <= blen2; i++) {
-					free_term(basis2[i]);
-				}
-				free(basis2);
-			} else {
-				basis3 = find_basis(3*d - d1 - d2 - d3 - d4,
-						blen3);
-				for (i = 0; i + 1 <= blen3; i++) {
-					T.degree = 3*d - d1 - d2 - d3 - d4;
-					T.leading = basis3[i];
-					print_pol(T);
-					T.leading = NULL;
-				}
-				printf("\n");
-			}
-		}
-	}
-	
-	if (d < d1 + d2 + d3 + d4) {
-		printf("Degree too small and p_g=0!\n");
-		exit(0);
+		matrix = gens_to_basis(blen1, basis1, blen2, basis2, blen3,
+			basis3, glen1, gens1, glen2, gens2, glen3, gens3, &e);
+		printf("Extra powers of p used %d.\n", e);
+		print_matrix(glen1 + glen2 + glen3,
+					blen1 + blen2 + blen3, matrix);
+		e -= clean_matrix(glen1 + glen2 + glen3,
+					blen1 + blen2 + blen3, matrix);
+		printf("Extra powers of p used %d.\n", e);
+		print_matrix(glen1 + glen2 + glen3,
+					blen1 + blen2 + blen3, matrix);
+
 	}
 
 	/* Initialize fmatrix */
@@ -291,21 +123,7 @@ int main(void )
 		perror("Malloc failed!");
 		exit(1);
 	}
-	for (i = 0; i + 1 <= blen1 + blen2 + blen3; i++) {
-		fmatrix[i] = (mscalar *)
-			malloc((blen1 + blen2 + blen3)*sizeof(mscalar));
-		if (!fmatrix[i]) {
-			perror("Malloc failed!");
-			exit(1);
-		}
-	}
-	for (i = 0; i + 1 <= blen1 + blen2 + blen3; i++) {
-		for (j = 0; j + 1 <= blen1 + blen2 + blen3; j++) {
-			make_scalar(fmatrix[i][j]);
-			sc_zero(fmatrix[i][j]);
-		}
-	}
-
+	
 	/* Initialize fbasis. */
 	fbasis = (struct polynomial ***)
 		malloc((blen1 + blen2 + blen3)*sizeof(struct polynomial **));
@@ -462,29 +280,35 @@ int main(void )
 		printf(" ");
 		fflush(stdout);
 		aa = all_the_way_split(hh);
-		add_coefficients(aa, j);
+		column = coefficients(aa, glen1, gens1, glen2, gens2,
+								glen3, gens3);
+		if (!column) {
+			printf("FIXME!\n");
+			exit(1);
+		} else {
+			fmatrix[j] = column;
+			column = NULL;
+		}
 	}
 	printf("\n");
 
-	k = extra + 1;
-	for (i = 0; i + 1 <= blen1 + blen2 + blen3; i++) {
-		for (j = 0; j + 1 <= blen1 + blen2 + blen3; j++) {
-			c = valuation(fmatrix[i][j]);
-			if (!sc_is_zero(fmatrix[i][j]) && (c < k)) k = c;
-		}
-	}
-	for (i = 0; i + 1 <= blen1 + blen2 + blen3; i++) {
-		for (j = 0; j + 1 <= blen1 + blen2 + blen3; j++) {
-			for (c = 1; c <= k; c++) div_p(fmatrix[i][j]);
-		}
-	}
+	extra -= clean_matrix(blen1 + blen2 + blen3,
+					glen1 + glen2 + glen3, fmatrix);
+	
+	Fmatrix = prod_matrix(blen1 + blen2 + blen3, glen1 + glen2 + glen3,
+		blen1 + blen2 + blen3, fmatrix, matrix);
 
-	print_fmatrix();
-	if (k == extra + 1 ) {
+	k = extra + e + 1;
+	k -= clean_matrix(blen1 + blen2 + blen3,
+					blen1 + blen2 + blen3, Fmatrix);
+	print_matrix(blen1 + blen2 + blen3,
+					blen1 + blen2 + blen3, Fmatrix);
+
+	if (k == 0) {
 		printf("This should be the matrix of frobenius!\n");
 	} else {
 		printf("This matrix times %d^(-%d)"
-		" should be the matrix of frobenius.\n", p, extra + 1 - k);
+		" should be the matrix of frobenius.\n", p, k);
 	}
 
 	/************************************************
