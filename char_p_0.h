@@ -1,5 +1,5 @@
 /*
- *	helper.h
+ *	delta.h
  *
  * 	Copyright 2006 Johan de Jong
  *
@@ -20,13 +20,5 @@
  *	Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *									*/
-
-unsigned int ivaluation(int a);
-void set_seed(unsigned int zaadje);
-unsigned int count_sum(int degree);
-int hilbert(int degree);
-struct polynomial make_random(unsigned int degree, int print);
-void rep_deriv(struct polynomial *f, unsigned int i);
-struct polynomial deriv(struct polynomial f, unsigned int i);
-unsigned int number_terms(struct polynomial f);
-struct polynomial frobenius(struct polynomial f);
+int *find_gap(void );
+int char_0(unsigned int degree, int *gap);

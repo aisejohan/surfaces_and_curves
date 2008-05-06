@@ -34,6 +34,7 @@
 #include "compute.h"
 #include "delta.h"
 #include "reduce.h"
+#include "char_p_0.h"
 
 /* Variables used globally in this file. */
 static int blen1, blen2, blen3;
@@ -120,6 +121,7 @@ int main(void )
 {
 	int i, j, k, retry, extra;
 	int c;
+	int *gap;
 	mscalar cc;
 	struct term *aaterm;
 	struct polynomial Delta;
@@ -146,8 +148,10 @@ int main(void )
 		while (retry == 1) {
 			retry = setup(0);
 		}
+		gap = find_gap();
 
 		if (d >= d1 + d2 + d3 + d4) {
+			blen1 = char_0(d - d1 - d2 - d3 - d4, gap);
 			blen1 = check_flatness(d - d1 - d2 - d3 - d4);
 			printf("For %d = d-d1-d2-d3-d4 you get %d\n",
 					d - d1 - d2 - d3 - d4, blen1);
@@ -185,6 +189,7 @@ int main(void )
 			}
 		}
 		if ((retry == 0) && (2*d >= d1 + d2 + d3 + d4)) {
+			blen2 = char_0(2*d - d1 - d2 - d3 - d4, gap);
 			blen2 = check_flatness(2*d - d1 - d2 - d3 - d4);
 			printf("For %d = 2*d-d1-d2-d3-d4 you get %d\n",
 					2*d - d1 - d2 - d3 - d4, blen2);
@@ -226,6 +231,7 @@ int main(void )
 			}
 		}
 		if ((retry == 0) && (3*d >= d1 + d2 + d3 + d4)) {
+			blen3 = char_0(3*d - d1 - d2 - d3 - d4, gap);
 			blen3 = check_flatness(3*d - d1 - d2 - d3 - d4);
 			printf("For %d = 3*d-d1-d2-d3-d4 you get %d\n",
 					3*d - d1 - d2 - d3 - d4, blen3);
