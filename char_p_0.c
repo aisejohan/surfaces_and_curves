@@ -105,7 +105,7 @@ int char_0(unsigned int degree, int *gap)
 /* Order the list so the largest is first.	*
  * This is stupid sorting so hopefully		*
  * the list is not too long!			*/
-void sort_terms(struct term **tt, int blen)
+static void sort_terms(struct term **tt, int blen)
 {
 	int i, j;
 	struct term *tmp;
@@ -135,6 +135,15 @@ void print_terms(struct term **tt, int blen, int degree)
 	printf("\n");
 }
 
+void free_list_terms(struct term **tt, int blen)
+{
+	int i;
+
+	for (i = 0; i < blen; i++) {
+		free_term(tt[i]);
+	}
+	free(tt);
+}
 
 /* Finds the char 0 basis of terms in degree degree.		*
  * This function assumes the function char_0 has been run	*
@@ -412,7 +421,7 @@ mscalar *coefficients(
 	return(column);
 }
 
-struct polynomial **split_up_term(struct term *tt, int degree)
+static struct polynomial **split_up_term(struct term *tt, int degree)
 {
 	struct polynomial **aa;
 
@@ -525,6 +534,10 @@ mscalar **prod_matrix(int n, int m, int l, mscalar **A, mscalar **B)
 	}
 	for (i = 0; i < n; i++) {
 		C[i] = (mscalar *)malloc(l*sizeof(mscalar));
+		if (!C[i]) {
+			perror("Malloc failed!\n");
+			exit(1);
+		}
 	}
 	for (i = 0; i < n; i++) {
 		for (j = 0; j < l; j++) {
@@ -536,6 +549,7 @@ mscalar **prod_matrix(int n, int m, int l, mscalar **A, mscalar **B)
 			}
 		}
 	}
+	free_scalar(c);
 	return(C);
 }			
 
@@ -544,12 +558,12 @@ void print_matrix(int rows, int columns, mscalar **matrix)
 	int i, j;
 
 	printf("[");
-	for (i = 0; i < rows; i++) {
-		for (j = 0; j < columns; j++) {
-			printmscalar(matrix[i][j]);
-			if (j + 1 < columns) printf(",");
+	for (i = 0; i < columns; i++) {
+		for (j = 0; j < rows; j++) {
+			printmscalar(matrix[j][i]);
+			if (j + 1 < rows) printf(",");
 		}
-		if (i + 1 < rows) printf(";\\\n");
+		if (i + 1 < columns) printf(";\\\n");
 	}
 	printf("]\n");
 	return;
@@ -579,7 +593,22 @@ int clean_matrix(int rows, int columns, mscalar **matrix)
 	return(e);
 }
 
-void test_function(void)
+void free_matrix(int rows, int columns, mscalar **matrix)
+{
+	int i, j;
+
+	for (i = 0; i < rows; i++) {
+		for (j = 0; j < columns; j++) {
+			free_scalar(matrix[i][j]);
+		}
+		free(matrix[i]);
+	}
+	free(matrix);
+	return;
+}
+
+
+static void test_function(void)
 {
 	int *gap;
 	int e;

@@ -85,17 +85,20 @@ int main(void )
 		printf("Lengths: %d %d %d %d %d %d.\n",
 			blen1, glen1, blen2, glen2, blen3, glen3);
 		basis1 = char_0_basis(d - d1 - d2 - d3 - d4, blen1, gap);
-		print_terms(basis1, blen1, d - d1 - d2 - d3 - d4);
 		basis2 = char_0_basis(2*d - d1 - d2 - d3 - d4, blen2, gap);
-		print_terms(basis2, blen2, 2*d - d1 - d2 - d3 - d4);
 		basis3 = char_0_basis(3*d - d1 - d2 - d3 - d4, blen3, gap);
-		print_terms(basis3, blen3, 3*d - d1 - d2 - d3 - d4);
 		gens1 = char_p_generators(d - d1 - d2 - d3 - d4, glen1);
-		print_terms(gens1, glen1, d - d1 - d2 - d3 - d4);
 		gens2 = char_p_generators(2*d - d1 - d2 - d3 - d4, glen2);
-		print_terms(gens2, glen2, 2*d - d1 - d2 - d3 - d4);
 		gens3 = char_p_generators(3*d - d1 - d2 - d3 - d4, glen3);
-		print_terms(gens3, glen3, 3*d - d1 - d2 - d3 - d4);
+		printf("For %d = 3*d-d1-d2-d3-d4 you get %d in char 0.\n",
+					3*d - d1 - d2 - d3 - d4, blen3);
+		print_terms(basis3, blen3, 3*d - d1 - d2 - d3 - d4);
+		printf("For %d = 2*d-d1-d2-d3-d4 you get %d in char 0.\n",
+					2*d - d1 - d2 - d3 - d4, blen3);
+		print_terms(basis2, blen2, 2*d - d1 - d2 - d3 - d4);
+		printf("For %d = d-d1-d2-d3-d4 you get %d in char 0.\n",
+					d - d1 - d2 - d3 - d4, blen3);
+		print_terms(basis1, blen1, d - d1 - d2 - d3 - d4);
 
 		if (p == 2) {
 			e = __extra(3*d - d1 - d2 - d3 - d4, gap);
@@ -104,14 +107,9 @@ int main(void )
 		}
 		matrix = gens_to_basis(blen1, basis1, blen2, basis2, blen3,
 			basis3, glen1, gens1, glen2, gens2, glen3, gens3, &e);
-		printf("Extra powers of p used %d.\n", e);
-		print_matrix(glen1 + glen2 + glen3,
-					blen1 + blen2 + blen3, matrix);
 		e -= clean_matrix(glen1 + glen2 + glen3,
 					blen1 + blen2 + blen3, matrix);
 		printf("Extra powers of p used %d.\n", e);
-		print_matrix(glen1 + glen2 + glen3,
-					blen1 + blen2 + blen3, matrix);
 
 	}
 
@@ -327,41 +325,24 @@ int main(void )
 	free(G.BC);
 	free(G.ff);
 	free(G.ee);
-	/* Free basis1. */
-	for (i = 0; i + 1 <= blen1; i++) {
-		free_term(basis1[i]);
-	}
-	free(basis1);
-	/* Free basis2. */
-	for (i = 0; i + 1 <= blen2; i++) {
-		free_term(basis2[i]);
-	}
-	free(basis2);
-	/* Free basis3. */
-	for (i = 0; i + 1 <= blen3; i++) {
-		free_term(basis3[i]);
-	}
-	free(basis3);
+	free(gap);
+	free_list_terms(basis1, blen1);
+	free_list_terms(basis2, blen2);
+	free_list_terms(basis3, blen3);
+	free_list_terms(gens1, glen1);
+	free_list_terms(gens2, glen2);
+	free_list_terms(gens3, glen3);
+
 	/* Free fbasis. */
 	for (i = 0; i + 1 <= blen1 + blen2 + blen3; i++) {
-		k = 1 + fbasis[i][0]->degree/d;
-		for (j = 0; j + 1 <= k; j++) {
-			free_tail(fbasis[i][j]->leading);
-			free(fbasis[i][j]);
-		}
+		free_star(fbasis[i]);
 		free(fbasis[i]);
 	}
 	free(fbasis);
-	/* Free fmatrix */
-	for (i = 0; i + 1 <= blen1 + blen2 + blen3; i++) {
-		for (j = 0; j + 1 <= blen1 + blen2 + blen3; j++) {
-			free_scalar(fmatrix[i][j]);
-		}
-	}
-	for (i = 0; i + 1 <= blen1 + blen2 + blen3; i++) {
-		free(fmatrix[i]);
-	}
-	free(fmatrix);
+	/* Free matrices */
+	free_matrix(glen1 + glen2 + glen3, blen1 + blen2 + blen3, matrix);
+	free_matrix(blen1 + blen2 + blen3, glen1 + glen2 + glen3, fmatrix);
+	free_matrix(blen1 + blen2 + blen3, blen1 + blen2 + blen3, Fmatrix);
 	free_scalar(cc);
 	/********************************************************
 	 * End Neurotic freeing. 				*
