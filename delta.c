@@ -112,38 +112,7 @@ int check_flatness(unsigned int degree)
 	count = 0;
 	count1 = 0;
 	count2 = 0;
-	goodcount = count_sum(degree);
-	
-	if (degree >= d - d1) 
-		goodcount -= count_sum(degree - d + d1);
-	if (degree >= d - d2) 
-		goodcount -= count_sum(degree - d + d2);
-	if (degree >= d - d3) 
-		goodcount -= count_sum(degree - d + d3);
-	if (degree >= d - d4) 
-		goodcount -= count_sum(degree - d + d4);
-	if (degree >= 2*d - (d1 + d2)) 
-		goodcount += count_sum(degree - 2*d + (d1 + d2));
-	if (degree >= 2*d - (d1 + d3)) 
-		goodcount += count_sum(degree - 2*d + (d1 + d3));
-	if (degree >= 2*d - (d1 + d4)) 
-		goodcount += count_sum(degree - 2*d + (d1 + d4));
-	if (degree >= 2*d - (d2 + d3)) 
-		goodcount += count_sum(degree - 2*d + (d2 + d3));
-	if (degree >= 2*d - (d2 + d4)) 
-		goodcount += count_sum(degree - 2*d + (d2 + d4));
-	if (degree >= 2*d - (d3 + d4)) 
-		goodcount += count_sum(degree - 2*d + (d3 + d4));
-	if (degree >= 3*d - (d1 + d2 + d3)) 
-		goodcount -= count_sum(degree - 3*d + (d1 + d2 + d3));
-	if (degree >= 3*d - (d1 + d2 + d4)) 
-		goodcount -= count_sum(degree - 3*d + (d1 + d2 + d4));
-	if (degree >= 3*d - (d1 + d3 + d4)) 
-		goodcount -= count_sum(degree - 3*d + (d1 + d3 + d4));
-	if (degree >= 3*d - (d2 + d3 + d4)) 
-		goodcount -= count_sum(degree - 3*d + (d2 + d3 + d4));
-	if (degree >= 4*d - (d1 + d2 + d3 + d4))
-		goodcount += count_sum(degree - 4*d + (d1 + d2 + d3 + d4));
+	goodcount = hilbert(degree);
 	
 	for (a1 = 0; (d1*a1 <= degree); a1++) {
 	  for (a2 = 0; (d1*a1 + d2*a2 <= degree); a2++) {

@@ -68,9 +68,12 @@ void set_seed(unsigned int zaadje)
 	return;
 }
 
-unsigned int count_sum(unsigned int degree)
+unsigned int count_sum(int degree)
 {
 	unsigned int count, a1, a2, a3;
+
+	if (degree < 0) return(0);
+
 	count = 0;
 	for (a1 = 0; (d1*a1 <= degree); a1++) {
 		for (a2 = 0; (d1*a1 + d2*a2 <= degree); a2++) {
@@ -83,6 +86,30 @@ unsigned int count_sum(unsigned int degree)
 		}
 	}
 	return(count);
+}
+
+int hilbert(int degree)
+{
+	int goodcount;
+
+	goodcount = count_sum(degree);
+	goodcount -= count_sum(degree - d + d1);
+	goodcount -= count_sum(degree - d + d2);
+	goodcount -= count_sum(degree - d + d3);
+	goodcount -= count_sum(degree - d + d4);
+	goodcount += count_sum(degree - 2*d + (d1 + d2));
+	goodcount += count_sum(degree - 2*d + (d1 + d3));
+	goodcount += count_sum(degree - 2*d + (d1 + d4));
+	goodcount += count_sum(degree - 2*d + (d2 + d3));
+	goodcount += count_sum(degree - 2*d + (d2 + d4));
+	goodcount += count_sum(degree - 2*d + (d3 + d4));
+	goodcount -= count_sum(degree - 3*d + (d1 + d2 + d3));
+	goodcount -= count_sum(degree - 3*d + (d1 + d2 + d4));
+	goodcount -= count_sum(degree - 3*d + (d1 + d3 + d4));
+	goodcount -= count_sum(degree - 3*d + (d2 + d3 + d4));
+	goodcount += count_sum(degree - 4*d + (d1 + d2 + d3 + d4));
+
+	return(goodcount);
 }
 
 void print_sum(unsigned int degree)
