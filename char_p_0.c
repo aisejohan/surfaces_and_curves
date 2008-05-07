@@ -69,6 +69,10 @@ int *find_gap(void )
 			b[1] = a[1];
 		}
 	}
+	if (b[0] == 0) {
+		printf("No gap found! You need to increase the integer r.\n");
+		exit(1);
+	}
 	printf("The gap is between %d and %d.\n", b[0], b[1]);
 	return(b);
 }
