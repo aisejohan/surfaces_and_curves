@@ -11,8 +11,8 @@ debug:
 	gcc -lgmp -g -Wall -o tester basis.o  compute.o  delta.o  grobner.o  helper.o  pol.o  reduce.o  scalar.o  char_p_0.o
 
 profiler:
-	gcc -pg -DPROFILER -O2 -march=nocona -Wall -c basis.c  compute.c  delta.c  grobner.c  helper.c  pol.c  reduce.c  scalar.c
-	gcc -pg -Wall -lgmp -O2 -march=nocona -o tester basis.o  compute.o  delta.o  grobner.o  helper.o  pol.o  reduce.o  scalar.o
+	gcc -pg -DPROFILER -O2 -march=nocona -Wall -c basis.c  compute.c  delta.c  grobner.c  helper.c  pol.c  reduce.c  scalar.c  char_p_0.c
+	gcc -pg -Wall -lgmp -O2 -march=nocona -o tester basis.o  compute.o  delta.o  grobner.o  helper.o  pol.o  reduce.o  scalar.o  char_p_0.o
 
 test:
 	gcc -O3 -Wall -c scalar.c pol.c helper.c test_scalars.c

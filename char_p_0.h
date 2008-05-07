@@ -25,6 +25,7 @@
 int *find_gap(void );
 int char_0(unsigned int degree, int *gap);
 void print_terms(struct term **tt, int blen);
+void free_list_terms(struct term **tt, int blen);
 struct term **char_0_basis(unsigned int degree, int blen, int *gap);
 int char_p(unsigned int degree);
 
@@ -47,4 +48,5 @@ mscalar **gens_to_basis(
 	int *e);
 void print_matrix(int rows, int columns, mscalar **matrix);
 int clean_matrix(int rows, int columns, mscalar **matrix);
+void free_matrix(int rows, int columns, mscalar **matrix);
 mscalar **prod_matrix(int n, int m, int l, mscalar **A, mscalar **B);
