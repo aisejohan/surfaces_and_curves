@@ -180,6 +180,7 @@ void merge_add_split(struct polynomial ***f, struct polynomial **g)
 		merge_add((*f)[i + flen - glen], *g[i]);
 		free(g[i]);
 	}
+	free(g);
 
 	return;
 }
