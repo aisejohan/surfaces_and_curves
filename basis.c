@@ -86,17 +86,20 @@ int main(void )
 		printf("Lengths: %d %d %d %d %d %d.\n",
 			blen1, glen1, blen2, glen2, blen3, glen3);
 		basis1 = char_0_basis(d - d1 - d2 - d3 - d4, blen1, gap);
-		print_terms(basis1, blen1);
 		basis2 = char_0_basis(2*d - d1 - d2 - d3 - d4, blen2, gap);
-		print_terms(basis2, blen2);
 		basis3 = char_0_basis(3*d - d1 - d2 - d3 - d4, blen3, gap);
-		print_terms(basis3, blen3);
 		gens1 = char_p_generators(d - d1 - d2 - d3 - d4, glen1);
-		print_terms(gens1, glen1);
 		gens2 = char_p_generators(2*d - d1 - d2 - d3 - d4, glen2);
-		print_terms(gens2, glen2);
 		gens3 = char_p_generators(3*d - d1 - d2 - d3 - d4, glen3);
-		print_terms(gens3, glen3);
+		printf("For %d = 3*d-d1-d2-d3-d4 you get %d in char 0.\n",
+					3*d - d1 - d2 - d3 - d4, blen3);
+		print_terms(basis3, blen3);
+		printf("For %d = 2*d-d1-d2-d3-d4 you get %d in char 0.\n",
+					2*d - d1 - d2 - d3 - d4, blen3);
+		print_terms(basis2, blen2);
+		printf("For %d = d-d1-d2-d3-d4 you get %d in char 0.\n",
+					d - d1 - d2 - d3 - d4, blen3);
+		print_terms(basis1, blen1);
 
 		if (p == 2) {
 			e = __extra(3*d - d1 - d2 - d3 - d4, gap);
@@ -105,14 +108,9 @@ int main(void )
 		}
 		matrix = gens_to_basis(blen1, basis1, blen2, basis2, blen3,
 			basis3, glen1, gens1, glen2, gens2, glen3, gens3, &e);
-		printf("Extra powers of p used %d.\n", e);
-		print_matrix(glen1 + glen2 + glen3,
-					blen1 + blen2 + blen3, matrix);
 		e -= clean_matrix(glen1 + glen2 + glen3,
 					blen1 + blen2 + blen3, matrix);
 		printf("Extra powers of p used %d.\n", e);
-		print_matrix(glen1 + glen2 + glen3,
-					blen1 + blen2 + blen3, matrix);
 
 	}
 

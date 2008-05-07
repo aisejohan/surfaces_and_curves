@@ -564,12 +564,12 @@ void print_matrix(int rows, int columns, mscalar **matrix)
 	int i, j;
 
 	printf("[");
-	for (i = 0; i < rows; i++) {
-		for (j = 0; j < columns; j++) {
-			printmscalar(matrix[i][j]);
-			if (j + 1 < columns) printf(",");
+	for (i = 0; i < columns; i++) {
+		for (j = 0; j < rows; j++) {
+			printmscalar(matrix[j][i]);
+			if (j + 1 < rows) printf(",");
 		}
-		if (i + 1 < rows) printf(";\\\n");
+		if (i + 1 < columns) printf(";\\\n");
 	}
 	printf("]\n");
 	return;
