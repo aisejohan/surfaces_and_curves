@@ -52,14 +52,14 @@ int *find_gap(void )
 	}
 	b[0] = 0;
 	b[1] = 0;
-	for (i = 0; i + 2 <= r; i++) {
+	for (i = 0; i + 2 <= rr; i++) {
 		if ((powers[i] == 1) && (powers[i + 1] == 0)) {
 			a[0] = i + 1;
 			ma = 0;
 		}
 		if (powers[i] == 0) ma++;
 		if ((powers[i] == 0) && (powers[i + 1] == 1)) a[1] = i;
-		if ((i + 2 == r) && (powers[i] == 0) && (powers[i + 1] == 0)) {
+		if ((i + 2 == rr) && (powers[i] == 0) && (powers[i + 1] == 0)) {
 			a[1] = i + 1;
 			ma++;
 		}
@@ -479,7 +479,7 @@ mscalar **gens_to_basis(
 		if (i < glen3) {
 			sc_copy(c, (mscalar) gens3[i]);
 			aa = split_up_term(gens3[i],
-						3*d - d1 - d2 - d3);
+						3*d - d1 - d2 - d3 - d4);
 		} else if (i < glen3 + glen2) {
 			sc_copy(c, (mscalar) gens2[i - glen3]);
 			aa = split_up_term(gens2[i - glen3],
