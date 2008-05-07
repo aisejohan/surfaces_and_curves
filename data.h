@@ -46,11 +46,11 @@
 #define d2	1
 #define d3	1
 #define d	4
-#define p	5
-#define r	40		/* Exponent. */
-#define q	6		/* Largest power of Delta. */
+#define p	2
+#define r	100		/* Exponent. */
+#define q	20		/* Largest power of Delta. */
 
-#define maxlength	256
+#define maxlength	512
 
 /* This type will be used for our scalars. */
 #include <gmp.h>
