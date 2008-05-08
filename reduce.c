@@ -80,31 +80,33 @@ static struct polynomial one_step_down(struct polynomial *f)
 	aa = gen_division(f, G.len, G.ff);
 	
 	for (i = 0; i + 1 <= G.len; i++) {
+	    if (aa[i]->leading) {
 		times_int(-1, aa[i]); /* Sign! */
 		if (fBC.bc1.leading) {
 			T = pol_mult(*aa[i], G.BC[i]->bc1);
 			merge_add(&(fBC.bc1), T);
-		} else {
+		} else if (G.BC[i]->bc1.leading) {
 			fBC.bc1 = pol_mult(*aa[i], G.BC[i]->bc1);
 		}
 		if (fBC.bc2.leading) {
 			T = pol_mult(*aa[i], G.BC[i]->bc2);
 			merge_add(&(fBC.bc2), T);
-		} else {
+		} else if (G.BC[i]->bc2.leading) {
 			fBC.bc2 = pol_mult(*aa[i], G.BC[i]->bc2);
 		}
 		if (fBC.bc3.leading) {
 			T = pol_mult(*aa[i], G.BC[i]->bc3);
 			merge_add(&(fBC.bc3), T);
-		} else {
+		} else if (G.BC[i]->bc3.leading) {
 			fBC.bc3 = pol_mult(*aa[i], G.BC[i]->bc3);
 		}
 		if (fBC.bc4.leading) {
 			T = pol_mult(*aa[i], G.BC[i]->bc4);
 			merge_add(&(fBC.bc4), T);
-		} else {
+		} else if (G.BC[i]->bc4.leading) {
 			fBC.bc4 = pol_mult(*aa[i], G.BC[i]->bc4);
 		}
+	    }
 	}
 	
 	/* Free aa up. */
@@ -200,6 +202,7 @@ struct polynomial **all_the_way_split(struct polynomial **bb)
 	free(bb[jj - 2]);
 	merge_add(aa[1], *bb[jj - 1]);
 	free(bb[jj - 1]);
+	for (ii = 0; ii < jj - 3; ii++) free(bb[ii]);
 	free(bb);
 	
 	return(aa);
