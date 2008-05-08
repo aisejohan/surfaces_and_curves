@@ -222,13 +222,7 @@ struct polynomial pol_add(struct polynomial f, struct polynomial g)
 
 #ifdef KIJKEN
 	if (f.degree != g.degree) {
-		printf("pol_add: Can't add these!\n");
-		printf("Degree f is %d and degree g is %d\n",
-				f.degree, g.degree);
-		print_pol(f);
-		printf("\n");
-		print_pol(g);
-
+		printf("Can't add these! Wrong degrees in pol_add.\n");
 		exit(1);
 	}
 #endif
@@ -292,7 +286,12 @@ void merge_add(struct polynomial *f, struct polynomial g)
 {
 	struct term *fterm, *gterm;
 	struct term **ptrterm;
-
+#ifdef KIJKEN
+	if ((f->degree != g.degree) && (g.leading)) {
+		printf("Can't add these! Wrong degrees in merge_add.\n");
+		exit(1);
+	}
+#endif
 	ptrterm = &(f->leading);
 	fterm = f->leading;
 	*ptrterm = NULL;
@@ -373,7 +372,7 @@ void rep_pol_add(struct polynomial *f, struct polynomial g)
 
 #ifdef KIJKEN
 	if (f->degree != g.degree) {
-		printf("rep_pol_add: Can't add these!\n");
+		printf("Can't add these! Wrong degrees in rep_pol_add.\n");
 		printf("Degree f is %d and degree g is %d\n",
 				f->degree, g.degree);
 		print_pol(*f);
@@ -578,8 +577,8 @@ static void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 	struct term **ptrterm;
 
 #ifdef KIJKEN
-	if(f->degree != g.degree) {
-		printf("rep_pol_add_variant: Can't add these!\n");
+	if (f->degree != g.degree) {
+		printf("Can't add these! In rep_pol_add_variant.\n");
 		printf("Degree f is %d and degree g is %d\n",
 				f->degree, g.degree);
 		print_pol(*f);
