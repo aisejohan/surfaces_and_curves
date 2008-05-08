@@ -202,7 +202,7 @@ struct polynomial **all_the_way_split(struct polynomial **bb)
 	free(bb[jj - 2]);
 	merge_add(aa[1], *bb[jj - 1]);
 	free(bb[jj - 1]);
-	for (ii = 0; ii < jj - 3; ii++) free(bb[ii]);
+	for (ii = 0; ii < jj - 2; ii++) free(bb[ii]);
 	free(bb);
 	
 	return(aa);
