@@ -166,7 +166,7 @@ struct polynomial **all_the_way_split(struct polynomial **bb)
 	jj = 1 + bb[0]->degree/d;
 	/* This means we have bb[0],...,bb[jj-1] */
 	
-	aa = (struct polynomial **)malloc(2*sizeof(struct polynomial *));
+	aa = (struct polynomial **)malloc(3*sizeof(struct polynomial *));
 	if (!aa) {
 		perror("Malloc failed!");
 		exit(1);

@@ -110,13 +110,13 @@ void printmscalar(mscalar a)
 #endif
 	mpz_t s,t;
 
-	mpz_init(s);
-	mpz_init(t);
 
 	if (a->e == rr) {
 		printf("0");
 		return;
 	}
+	mpz_init(s);
+	mpz_init(t);
 
 	if (a->e) printf("p^%d * ", a->e);
 
