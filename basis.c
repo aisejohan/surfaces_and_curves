@@ -354,14 +354,6 @@ int main(void )
 		free_tail(G.BC[i]->bc4.leading);
 		free_tail(G.ff[i]->leading);
 	}
-	for (i = 0; i + 1 <= maxlength; i++) {
-		free(G.BC[i]);
-		free(G.ff[i]);
-		free(G.ee[i]);
-	}
-	free(G.BC);
-	free(G.ff);
-	free(G.ee);
 	free(gap);
 	free_list_terms(basis1, blen1);
 	free_list_terms(basis2, blen2);
@@ -371,22 +363,21 @@ int main(void )
 	free_list_terms(gens3, glen3);
 
 	/* Free fbasis. */
-	for (i = 0; i + 1 <= blen1 + blen2; i++) {
+	for (i = 0; i + 1 <= blen1 + blen2 + blen3; i++) {
 		free_star(fbasis[i]);
 		free(fbasis[i]);
 	}
 	free(fbasis);
 	/* Free matrices */
-	free_matrix(glen1 + glen2, blen1 + blen2, matrix);
-	free_matrix(blen1 + blen2, glen1 + glen2, fmatrix);
-	free_matrix(blen1 + blen2, blen1 + blen2, Fmatrix);
+	free_matrix(glen1 + glen2 + glen3, blen1 + blen2 + blen3, matrix);
+	free_matrix(blen1 + blen2 + blen3, glen1 + glen2 + glen3, fmatrix);
+	free_matrix(blen1 + blen2 + blen3, blen1 + blen2 + blen3, Fmatrix);
 	free_scalar(cc);
 	free_scalar(cc1);
 	free_scalar(cc2);
 	/********************************************************
 	 * End Neurotic freeing. 				*
 	 ********************************************************/
-
 
 	return(0);
 }
