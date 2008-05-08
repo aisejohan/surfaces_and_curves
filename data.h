@@ -50,7 +50,7 @@
 #define r	100		/* Exponent. */
 #define q	20		/* Largest power of Delta. */
 
-#define maxlength	512
+#define maxlength	20
 
 /* This type will be used for our scalars. */
 #include <gmp.h>
