@@ -37,9 +37,9 @@
 int *find_gap(void )
 {
 	int i, ma, a[2], mb, *b;
-	int powers[r];
+	int powers[rr];
 	
-	for (i = 0; i + 1 <= r; i++) powers[i] = 0;
+	for (i = 0; i + 1 <= rr; i++) powers[i] = 0;
 	for (i = 0; i + 1 <= G.len; i++) powers[G.ee[i]->e4] = 1;
 	ma = 0;
 	a[0] = 0;
@@ -52,14 +52,14 @@ int *find_gap(void )
 	}
 	b[0] = 0;
 	b[1] = 0;
-	for (i = 0; i + 2 <= r; i++) {
+	for (i = 0; i + 2 <= rr; i++) {
 		if ((powers[i] == 1) && (powers[i + 1] == 0)) {
 			a[0] = i + 1;
 			ma = 0;
 		}
 		if (powers[i] == 0) ma++;
 		if ((powers[i] == 0) && (powers[i + 1] == 1)) a[1] = i;
-		if ((i + 2 == r) && (powers[i] == 0) && (powers[i + 1] == 0)) {
+		if ((i + 2 == rr) && (powers[i] == 0) && (powers[i + 1] == 0)) {
 			a[1] = i + 1;
 			ma++;
 		}
