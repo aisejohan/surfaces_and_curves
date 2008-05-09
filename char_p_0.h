@@ -1,5 +1,5 @@
 /*
- *	delta.h
+ *	char_p_0.h
  *
  * 	Copyright 2006 Johan de Jong
  *
