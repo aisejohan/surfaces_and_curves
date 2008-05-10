@@ -55,7 +55,7 @@ static struct pair *Mnew;
 static int M_len = 0;
 static int G_len = 0;
 
-void allocate_GVMnew(int at_least)
+static void allocate_GVMnew(int at_least)
 {
 	int old, i;
 
@@ -129,7 +129,7 @@ void allocate_GVMnew(int at_least)
 	Mnew = (struct pair *) realloc(Mnew, G_len*sizeof(struct pair));
 }
 
-void allocate_MMold(int at_least)
+static void allocate_MMold(int at_least)
 {
 	if (M_len > at_least) return;
 
@@ -581,8 +581,6 @@ int setup(int silent)
 
 	/* Initialize myf,myf1,myf2,myf3,myf4 */
 	if (!silent) {
-		printf("\n\n");
-		myf = make_random(d, 1);
 		printf("\n");
 		printf("Here is the polynomial we're using this time:\n");
 		printf("\n");

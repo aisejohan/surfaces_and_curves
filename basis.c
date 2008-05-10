@@ -89,6 +89,7 @@ int main(void )
 	retry = 1;
 	while (retry == 1) {
 		while (retry == 1) {
+			myf = get_f();
 			retry = setup(0);
 		}
 
