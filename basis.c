@@ -72,6 +72,7 @@ int main(void )
 	retry = 1;
 	while (retry == 1) {
 		while (retry == 1) {
+			myf = get_f();
 			retry = setup(0);
 		}
 
@@ -94,10 +95,10 @@ int main(void )
 					3*d - d1 - d2 - d3 - d4, blen3);
 		print_terms(basis3, blen3, 3*d - d1 - d2 - d3 - d4);
 		printf("For %d = 2*d-d1-d2-d3-d4 you get %d in char 0.\n",
-					2*d - d1 - d2 - d3 - d4, blen3);
+					2*d - d1 - d2 - d3 - d4, blen2);
 		print_terms(basis2, blen2, 2*d - d1 - d2 - d3 - d4);
 		printf("For %d = d-d1-d2-d3-d4 you get %d in char 0.\n",
-					d - d1 - d2 - d3 - d4, blen3);
+					d - d1 - d2 - d3 - d4, blen1);
 		print_terms(basis1, blen1, d - d1 - d2 - d3 - d4);
 
 		if (p == 2) {

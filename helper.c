@@ -112,7 +112,7 @@ int hilbert(int degree)
 	return(goodcount);
 }
 
-void print_sum(unsigned int degree)
+static void print_sum(unsigned int degree)
 {
 	unsigned int a1, a2, a3;
 	for (a1 = 0; (d1*a1 <= degree); a1++) {
@@ -128,12 +128,11 @@ void print_sum(unsigned int degree)
 	return;
 }
 
-/* Makes a random polynomial of degree degree.		*
- * The result may be the zero polynomial!		*/
-struct polynomial make_random(unsigned int degree, int print)
+/* Makes a polynomial of degree degree with all terms		*
+ * having coefficient 1.					*/
+static struct polynomial make_full(unsigned int degree)
 {
 	unsigned int a1, a2, a3, a4;
-	int c;
 	struct polynomial uit;
 	struct term *uitterm;
 	struct term **ptrterm;
@@ -141,38 +140,16 @@ struct polynomial make_random(unsigned int degree, int print)
 	uit.degree = degree;
 	uit.leading = NULL;
 
-	if (!count_sum(degree)) {
-		printf("No monomials of degree %d! Stop.\n", degree);
-		exit(1);
-	}
-#ifdef INPUT_F
- #ifndef OUTPUT_LIST
-	printf("\n");
-	printf("Please input coefficients below.\n");
- #endif
-#endif
 	for (a1 = 0; (d1*a1 <= degree); a1++) {
 	  for (a2 = 0; (d1*a1 + d2*a2 <= degree); a2++) {
 	    for (a3 = 0; (d1*a1 + d2*a2 + d3*a3 <= degree); a3++) {
 	      if ((degree - (a1*d1 + a2*d2 + a3*d3)) % d4 == 0) {
 		a4 = (degree - (a1*d1 + a2*d2 + a3*d3))/d4;
-#ifdef INPUT_F
-		/* Dummy input at first. */
-		c = 1;
-#else
-		/* Stupid lift. */
-		c = rand() % p;
-		/* Change for compatibility with previous version.	*
-		 * This does not make any difference to the pol mod p.	*/
-		if (c < -(p - 1)/2) c += p; /* OK, this never happens. */
-		if (c > (p - 1)/2) c -= p; /* This does happen. */
-#endif
-		/* Create the new term to be put in. */
 		make_term(&uitterm);
 		uitterm->n1 = a1;
 		uitterm->n2 = a2;
 		uitterm->n3 = a3;
-		ito_sc(c, (mscalar) uitterm);
+		ito_sc(1, (mscalar) uitterm);
 		ptrterm = &(uit.leading);
 		while ((*ptrterm) && (kleiner(uitterm, *ptrterm) == KLEINER)) {
 			ptrterm = &((*ptrterm)->next);
@@ -184,70 +161,120 @@ struct polynomial make_random(unsigned int degree, int print)
 	    }
 	  }
 	}
+	return(uit);
+}
+
+/* Makes a random polynomial of degree degree.			*
+ * The result may terms which have coefficient zero.		*/
+struct polynomial make_random(unsigned int degree)
+{
+	int c;
+	struct polynomial uit;
+	struct term *uitterm;
+	uitterm = NULL;
+
+	uit = make_full(degree);
+
 	uitterm = uit.leading;
+
+	while (uitterm) {
+		c = rand() % p;
+		/* Change for compatibility with previous version.	*
+		 * This does not make any difference to the pol mod p.	*/
+		if (c < -(p - 1)/2) c += p; /* OK, this never happens. */
+		if (c > (p - 1)/2) c -= p; /* This does happen. */
+		ito_sc(c, (mscalar) uitterm);
+		uitterm = uitterm->next;
+	}
+	return(uit);
+}
+
+static void list_print(struct polynomial f)
+{
+	int c;
+	unsigned int a1, a2, a3, a4;
+	struct term *uitterm;
+
+	uitterm = f.leading;
 	while (uitterm) {
 		a1 = uitterm->n1;
 		a2 = uitterm->n2;
 		a3 = uitterm->n3;
-		a4 = (degree - (a1*d1+a2*d2+a3*d3))/d4;
+		a4 = (f.degree - (a1*d1+a2*d2+a3*d3))/d4;
 		c = 0;
-		if (print) {
-			printf("Coefficient of   ");
-			if (a1) {
-				printf("x^%d", a1);
-				c++;
-			}
-			if ((a1) && (a2+a3+a4)) {
-				printf(" * ");
-				c++;
-			}
-			if (a2) {
-				printf("y^%d", a2);
-				c++;
-			}
-			if ((a2) && (a3 + a4)) {
-				printf(" * ");
-				c++;
-			}
-			if (a3) {
-				printf("z^%d", a3);
-				c++;
-			}
-			if ((a3) && (a4)) {
-				printf(" * ");
-				c++;
-			}
-			if (a4) {
-				printf("w^%d", a4);
-				c++;
-			}
-			while (8 - c) {
-				printf("   ");
-				c++;
-			}
-			printf("= ");
+		printf("Coefficient of   ");
+		if (a1) {
+			printf("x^%d", a1);
+			c++;
 		}
-#ifndef INPUT_F
-		if (print) {
-			printmscalar((mscalar) uitterm);
- 			printf("\n");
+		if ((a1) && (a2+a3+a4)) {
+			printf(" * ");
+			c++;
 		}
+		if (a2) {
+			printf("y^%d", a2);
+			c++;
+		}
+		if ((a2) && (a3 + a4)) {
+			printf(" * ");
+			c++;
+		}
+		if (a3) {
+			printf("z^%d", a3);
+			c++;
+		}
+		if ((a3) && (a4)) {
+			printf(" * ");
+			c++;
+		}
+		if (a4) {
+			printf("w^%d", a4);
+			c++;
+		}
+		while (8 - c) {
+			printf("   ");
+			c++;
+		}
+		printf("= ");
+#ifdef OUTPUT_LIST
+	 	printf("\n");
 #else
- #ifdef OUTPUT_LIST
- 		printf("\n");
- #else
+ #ifdef INPUT_F
 		scanf("%d", &c);
- #endif
 		ito_sc(c, (mscalar) uitterm);
+ #else
+		printmscalar((mscalar) uitterm);
+ 		printf("\n");
+ #endif
 #endif
 		uitterm = uitterm->next;
 	}
-	clean_pol(&uit);
-#ifdef OUTPUT_LIST
-	exit(0);
-#endif
-	return(uit);
 }
+
+struct polynomial get_f(void )
+{
+	struct polynomial uit;
+#ifdef OUTPUT_LIST
+	uit = make_full(d);
+	list_print(uit);
+	exit(0);
+#else
+ #ifdef INPUT_F
+	uit = make_full(d);
+	printf("\n");
+	printf("Please input coefficients below.\n");
+	list_print(uit);
+	clean_pol(&uit);
+	return(uit);
+ #else
+	uit = make_random(d);
+	list_print(uit);
+	clean_pol(&uit);
+	return(uit);
+ #endif
+#endif
+}
+
 
 /* Counts the number of terms and verifies f is a polynomial.	*
  * Allows f to be the zero polynomial, warns if degree not 0.	*/
