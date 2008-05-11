@@ -212,7 +212,6 @@ static void list_print(struct polynomial f)
 			c++;
 		}
 		printf("= ");
-		printf("= ");
 #ifdef OUTPUT_LIST
  		printf("\n");
 #else
