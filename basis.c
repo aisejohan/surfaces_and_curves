@@ -35,11 +35,11 @@
 #include "delta.h"
 #include "reduce.h"
 #include "char_p_0.h"
+#include "basis.h"
 
-
-int main(void )
+int compute_frobenius_matrix(void )
 {
-	int i, j, k, retry, extra;
+	int i, j, k, extra;
 	int c;
 	mscalar cc;
 	int *gap;
@@ -61,21 +61,6 @@ int main(void )
 	aaterm = NULL;
 	make_scalar(cc);
 	
-#ifdef KIJKEN
-	printf("Debug is set! To unset do not define KIJKEN.\n");
-#endif
-	/* Setup the scalars. */
-	setup_scalars();
-
-	/* Seed the randomness. */
-	set_seed(0);
-
-	retry = 1;
-	while (retry == 1) {
-		myf = get_f();
-		retry = setup(0);
-	}
-
 	gap = find_gap();
 	blen1 = char_0(d - d1 - d2 - d3 - d4, gap);
 	blen2 = char_0(2*d - d1 - d2 - d3 - d4, gap);
@@ -319,16 +304,6 @@ int main(void )
 	free_star(hhh[2]);
 	free(hhh[2]);
 	free(hhh);
-	/* Free G and myf. */
-	free_tail(myf.leading);
-	for (i = 0; i + 1 <= G.len; i++) {
-		free_tail(G.BC[i]->bc1.leading);
-		free_tail(G.BC[i]->bc2.leading);
-		free_tail(G.BC[i]->bc3.leading);
-		free_tail(G.BC[i]->bc4.leading);
-		free_tail(G.BC[i]->bc5.leading);
-		free_tail(G.ff[i]->leading);
-	}
 	free(gap);
 	free_list_terms(basis1, blen1);
 	free_list_terms(basis2, blen2);
