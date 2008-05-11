@@ -35,10 +35,11 @@
 #include "delta.h"
 #include "reduce.h"
 #include "char_p_0.h"
+#include "basis.h"
 
-int main(void )
+int compute_frobenius_matrix(void )
 {
-	int i, j, k, retry, extra;
+	int i, j, k, extra;
 	int c;
 	mscalar cc;
 	int *gap;
@@ -61,58 +62,41 @@ int main(void )
 	setup_scalars();
 	make_scalar(&cc);
 	
-#ifdef KIJKEN
-	printf("Debug is set! To unset do not define KIJKEN.\n");
-#endif
-	/* Setup the scalars. */
-
-	/* Seed the randomness. */
-	set_seed(0);
-
-	retry = 1;
-	while (retry == 1) {
-		while (retry == 1) {
-			myf = get_f();
-			retry = setup(0);
-		}
-
-		gap = find_gap();
-		blen1 = char_0(d - d1 - d2 - d3 - d4, gap);
-		blen2 = char_0(2*d - d1 - d2 - d3 - d4, gap);
-		blen3 = char_0(3*d - d1 - d2 - d3 - d4, gap);
-		glen1 = char_p(d - d1 - d2 - d3 - d4);
-		glen2 = char_p(2*d - d1 - d2 - d3 - d4);
-		glen3 = char_p(3*d - d1 - d2 - d3 - d4);
-		printf("Lengths: %d %d %d %d %d %d.\n",
-			blen1, glen1, blen2, glen2, blen3, glen3);
-		basis1 = char_0_basis(d - d1 - d2 - d3 - d4, blen1, gap);
-		basis2 = char_0_basis(2*d - d1 - d2 - d3 - d4, blen2, gap);
-		basis3 = char_0_basis(3*d - d1 - d2 - d3 - d4, blen3, gap);
-		gens1 = char_p_generators(d - d1 - d2 - d3 - d4, glen1);
-		gens2 = char_p_generators(2*d - d1 - d2 - d3 - d4, glen2);
-		gens3 = char_p_generators(3*d - d1 - d2 - d3 - d4, glen3);
-		printf("For %d = 3*d-d1-d2-d3-d4 you get %d in char 0.\n",
+	gap = find_gap();
+	blen1 = char_0(d - d1 - d2 - d3 - d4, gap);
+	blen2 = char_0(2*d - d1 - d2 - d3 - d4, gap);
+	blen3 = char_0(3*d - d1 - d2 - d3 - d4, gap);
+	glen1 = char_p(d - d1 - d2 - d3 - d4);
+	glen2 = char_p(2*d - d1 - d2 - d3 - d4);
+	glen3 = char_p(3*d - d1 - d2 - d3 - d4);
+	printf("Lengths: %d %d %d %d %d %d.\n",
+				blen1, glen1, blen2, glen2, blen3, glen3);
+	basis1 = char_0_basis(d - d1 - d2 - d3 - d4, blen1, gap);
+	basis2 = char_0_basis(2*d - d1 - d2 - d3 - d4, blen2, gap);
+	basis3 = char_0_basis(3*d - d1 - d2 - d3 - d4, blen3, gap);
+	gens1 = char_p_generators(d - d1 - d2 - d3 - d4, glen1);
+	gens2 = char_p_generators(2*d - d1 - d2 - d3 - d4, glen2);
+	gens3 = char_p_generators(3*d - d1 - d2 - d3 - d4, glen3);
+	printf("For %d = 3*d-d1-d2-d3-d4 you get %d in char 0.\n",
 					3*d - d1 - d2 - d3 - d4, blen3);
-		print_terms(basis3, blen3, 3*d - d1 - d2 - d3 - d4);
-		printf("For %d = 2*d-d1-d2-d3-d4 you get %d in char 0.\n",
+	print_terms(basis3, blen3, 3*d - d1 - d2 - d3 - d4);
+	printf("For %d = 2*d-d1-d2-d3-d4 you get %d in char 0.\n",
 					2*d - d1 - d2 - d3 - d4, blen2);
-		print_terms(basis2, blen2, 2*d - d1 - d2 - d3 - d4);
-		printf("For %d = d-d1-d2-d3-d4 you get %d in char 0.\n",
+	print_terms(basis2, blen2, 2*d - d1 - d2 - d3 - d4);
+	printf("For %d = d-d1-d2-d3-d4 you get %d in char 0.\n",
 					d - d1 - d2 - d3 - d4, blen1);
-		print_terms(basis1, blen1, d - d1 - d2 - d3 - d4);
+	print_terms(basis1, blen1, d - d1 - d2 - d3 - d4);
 
-		if (p == 2) {
-			e = __extra(3*d - d1 - d2 - d3 - d4, gap);
-		} else {
-			e = 0;
-		}
-		matrix = gens_to_basis(blen1, basis1, blen2, basis2, blen3,
-			basis3, glen1, gens1, glen2, gens2, glen3, gens3, &e);
-		e -= clean_matrix(glen1 + glen2 + glen3,
-					blen1 + blen2 + blen3, matrix);
-		printf("Extra powers of p used %d.\n", e);
-
+	if (p == 2) {
+		e = __extra(3*d - d1 - d2 - d3 - d4, gap);
+	} else {
+		e = 0;
 	}
+	matrix = gens_to_basis(blen1, basis1, blen2, basis2, blen3,
+			basis3, glen1, gens1, glen2, gens2, glen3, gens3, &e);
+	e -= clean_matrix(glen1 + glen2 + glen3,
+					blen1 + blen2 + blen3, matrix);
+	printf("Extra powers of p used %d.\n", e);
 
 	/* Initialize fmatrix */
 	fmatrix = (mscalar **)
@@ -308,16 +292,6 @@ int main(void )
 	free_star(hhh[2]);
 	free(hhh[2]);
 	free(hhh);
-	/* Free G and myf. */
-	free_tail(myf.leading);
-	for (i = 0; i + 1 <= G.len; i++) {
-		free_tail(G.BC[i]->bc1.leading);
-		free_tail(G.BC[i]->bc2.leading);
-		free_tail(G.BC[i]->bc3.leading);
-		free_tail(G.BC[i]->bc4.leading);
-		free_tail(G.BC[i]->bc5.leading);
-		free_tail(G.ff[i]->leading);
-	}
 	free(gap);
 	free_list_terms(basis1, blen1);
 	free_list_terms(basis2, blen2);

@@ -48,4 +48,4 @@ polynomial, it is called post.gp
 4. Implement the algorithm for estimating precision from math.NT/0601508
 
 5. Make the program work in cases where the function check_flatness 
-returns -1.
+returns -1. Done: It now works for any quasi-smooth hypersurface.
