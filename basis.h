@@ -1,5 +1,5 @@
 /*
- *	delta.h
+ *	basis.h
  *
  * 	Copyright 2006 Johan de Jong
  *
@@ -20,11 +20,5 @@
  *	Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
  *
  *									*/
-struct polynomial compute_delta(void);
-struct polynomial **split_up(struct polynomial *f);
-void test_split(struct polynomial **aa, struct polynomial orig);
-void merge_add_split(struct polynomial ***f, struct polynomial **g);
-struct polynomial **mult_split(struct polynomial **f, struct polynomial **g);
-struct term **find_basis(unsigned int degree, int blen);
-void free_star(struct polynomial **bb);
-struct polynomial **copy_pol_star(mscalar c, struct polynomial **bb);
+
+int compute_frobenius_matrix(void );
