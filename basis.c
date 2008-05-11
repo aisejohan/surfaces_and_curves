@@ -59,7 +59,6 @@ int compute_frobenius_matrix(void )
 	T.leading = NULL;
 	Delta.leading = NULL;
 	aaterm = NULL;
-	setup_scalars();
 	make_scalar(&cc);
 	
 	gap = find_gap();
