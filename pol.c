@@ -29,6 +29,9 @@
 #include "scalar.h"
 #include "pol.h"
 
+#define NR_RESERVE	1024
+static struct term *reserve = NULL;
+
 /* Makes a term.				*/
 void make_term(struct term **mon)
 {
@@ -38,14 +41,28 @@ void make_term(struct term **mon)
 		exit(1);
 	}
 #endif
-	*mon = (struct term *) malloc (sizeof (struct term));
-	if (!*mon) {
-		perror("Malloc failed.");
-		exit(1);
+	if (!reserve) {
+		int i;
+		struct term *list;
+
+		list = (struct term *) malloc(NR_RESERVE*sizeof (struct term));
+		if (!list) {
+			perror("Malloc failed.");
+			exit(1);
+		}
+		reserve = &(list[0]);
+		for (i = 0; i < NR_RESERVE - 1; i++) {
+			mpz_init(list[i].i);
+			list[i].next = &(list[i+1]);
+		}
+		mpz_init(list[NR_RESERVE - 1].i);
+		list[NR_RESERVE - 1].next = NULL;
 	}
+	*mon = reserve;
+	reserve = reserve->next;
 	(*mon)->e = rr;
-	mpz_init_set_ui((*mon)->i,0);
-	(*mon)->next=NULL;
+	mpz_set_ui((*mon)->i, 0);
+	(*mon)->next = NULL;
 }
 
 void make_pol(struct polynomial **f)
@@ -74,9 +91,9 @@ void free_term(struct term *mon)
 		exit(1);
 	}
 #endif
-	mpz_clear(mon->i);
-	free(mon);
-	mon=NULL;
+	mon->next = reserve;
+	reserve = mon;
+	mon = NULL;
 }
 
 /* Copies data not pointer.						*/
