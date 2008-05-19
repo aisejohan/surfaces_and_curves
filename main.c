@@ -39,22 +39,36 @@
 
 int main(void )
 {
-	int i, retry;
+	int i, retry, random;
 
 #ifdef KIJKEN
 	printf("Debug is set! To unset do not define KIJKEN.\n");
 #endif
+	printf("----------------------------------------------------------\n");
+	printf("This is a limited version. Download the source code"
+	" and compile it for full\nfunctionality and optimization for"
+	" your system.\n");
+	printf("----------------------------------------------------------\n");
+
+	retry = 0;
+	while (!retry) {
+		retry = set_data();
+	}
 
 	/* Setup the scalars. */
 	setup_scalars();
 
 	/* Seed the randomness. */
-	set_seed(0);
+	random = 0;
+	if (set_random()) {
+		random = 1;
+		set_seed(0);
+	}
 
 	/* Get myf. */
 	retry = 1;
 	while (retry == 1) {
-		myf = get_f();
+		myf = get_f(random);
 		retry = setup(0);
 	}
 
