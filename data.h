@@ -42,13 +42,13 @@
  * can be much faster. */
 #define NEW_GROBNER
 
-#define d1	1
-#define d2	1
-#define d3	1
-#define d	4
-#define p	2
-#define r	100		/* Exponent. */
-#define q	20		/* Largest power of Delta. */
+int d1;
+int d2;
+int d3;
+int d;
+int p;
+int q;
+int r;
 
 #define maxlength	20
 
@@ -68,3 +68,6 @@ struct polynomial {
 	unsigned int degree;
 	struct term *leading;
 };
+
+int set_data(void );
+int set_random(void );

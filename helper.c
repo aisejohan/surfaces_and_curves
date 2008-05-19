@@ -174,7 +174,7 @@ struct polynomial make_random(unsigned int degree)
 	return(uit);
 }
 
-static void list_print(struct polynomial f)
+static void list_print(struct polynomial f, int random)
 {
 	int c;
 	unsigned int a1, a2, a3;
@@ -212,43 +212,34 @@ static void list_print(struct polynomial f)
 			c++;
 		}
 		printf("= ");
-#ifdef OUTPUT_LIST
- 		printf("\n");
-#else
- #ifdef INPUT_F
-		scanf("%d", &c);
-		ito_sc(c, uitterm->c);
- #else
-		printmscalar(uitterm->c);
- 		printf("\n");
- #endif
-#endif
+ 		if (!random) {
+			scanf("%d", &c);
+			ito_sc(c, uitterm->c);
+		} else {
+			printmscalar(uitterm->c);
+ 			printf("\n");
+		}
 		uitterm = uitterm->next;
 	}
 }
 
-struct polynomial get_f(void )
+struct polynomial get_f(int random)
 {
 	struct polynomial uit;
-#ifdef OUTPUT_LIST
-	uit = make_full(d);
-	list_print(uit);
-	exit(0);
-#else
- #ifdef INPUT_F
-	uit = make_full(d);
-	printf("\n");
-	printf("Please input coefficients below.\n");
-	list_print(uit);
-	clean_pol(&uit);
-	return(uit);
- #else
-	uit = make_random(d);
-	list_print(uit);
-	clean_pol(&uit);
-	return(uit);
- #endif
-#endif
+
+ 	if (!random) {
+		uit = make_full(d);
+		printf("\n");
+		printf("Please input coefficients below.\n");
+		list_print(uit, random);
+		clean_pol(&uit);
+		return(uit);
+	} else {
+		uit = make_random(d);
+		list_print(uit, random);
+		clean_pol(&uit);
+		return(uit);
+	}
 }
 
 
