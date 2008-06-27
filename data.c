@@ -57,7 +57,7 @@ int set_data(void )
 		}
 	}
 	printf("Please enter the three weights you want to use\n");
-	printf("(enter four integers separated by spaces):\t ");
+	printf("(enter three integers separated by spaces):\t ");
 	success = 0;
 	while (!success) {
 		scanf("%d %d %d", &d1, &d2, &d3);
@@ -71,7 +71,7 @@ int set_data(void )
 			success = 1;
 		}
 	}
-	printf("Please enter the degree of the hypersurface:\t ");
+	printf("Please enter the degree of the branch curve:\t ");
 	success = 0;
 	while (!success) {
 		scanf("%d", &d);
@@ -82,7 +82,7 @@ int set_data(void )
 			(hilbert(d/2 - d1 - d2 - d3) == 0)) {
 				printf("Degree too large (>2000),"
 				" or not even,\n"
-				"or no hypersurfaces of that degree,\n"
+				"or no curves of that degree,\n"
 				"or p_g = 0. Try again:\t\t\t\t ");
 		} else {
 			success = 1;
@@ -102,11 +102,11 @@ int set_data(void )
 	}
 	extra = 0;
 	for (i = 0; i <= q; i++) {
-		j = (3 + i)*p - 1;
-		c = - i - 3;
+		j = (5 + 2*i)*p - 2;
+		c = -i - 2;
 		while (j > 0) {
 			c += ivaluation(j);
-			j--;
+			j -= 2;
 		}
 		if (c > extra) extra = c;
 	}
