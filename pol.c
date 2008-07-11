@@ -480,9 +480,7 @@ void div_p_pol(int k, struct polynomial *f)
 	aaterm = f->leading;
 	while (aaterm) {
 		if (valuation(aaterm->c) >= k) {
-			for (i = 1; i <= k; i++) {
-				div_p(aaterm->c);
-			}
+			div_p(aaterm->c, k);
 			aaterm = aaterm->next;
 		} else {
 			printf("FIXME!\n");

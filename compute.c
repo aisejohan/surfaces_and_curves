@@ -253,8 +253,8 @@ static void s_pol_terms(struct term *a, struct term *b, struct term *fterm, stru
 	/* Note sign. */
 	sc_negate(b->c);
 	while ((valuation(a->c) > 0) && (valuation(b->c) > 0)) {
-		div_p(a->c);
-		div_p(b->c);
+		div_p(a->c, 1);
+		div_p(b->c, 1);
 	}
 	return;
 }

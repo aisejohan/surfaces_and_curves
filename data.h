@@ -50,7 +50,7 @@
 #define d	64
 #define p	2
 #define r	256		/* Exponent. */
-#define q	10		/* Largest power of Delta. */
+#define q	15		/* Largest power of Delta. */
 
 #define maxlength	20
 

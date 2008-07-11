@@ -26,8 +26,6 @@
 #include "data.h"
 #include "scalar.h"
 
-extern unsigned long TT[4];
-extern unsigned long SSS[4];
 
 #ifdef KIJKEN
 void empty_function(void)
@@ -42,50 +40,14 @@ void setup_scalars(void)
 	printf("No set up needed.\n");
 }
 
-/*
-unsigned long int valuation(mscalar x)
-{
-	return(mpz_remove(temp,x,prime));
-}
-*/
-
-/*
-void sc_add(mscalar a, mscalar b, mscalar c)
-{
-	mpz_add(c,a,b);
-	mpz_mod(c,c,modulus);
-}
-*/
-
-/*
-void sc_mult(mscalar a, mscalar b, mscalar c)
-{
-	mpz_mul(c,a,b);
-	mpz_mod(c,c,modulus);
-}
-*/
-
-/*
-void sc_imult(int a, mscalar b, mscalar c)
-{
-	mpz_mul_si(c,b,(long) a);
-	mpz_mod(c,c,modulus);
-}
-*/
-
-/*
-void sc_inv(mscalar a, mscalar b)
-{
-	mpz_invert(b,a,modulus);
-}
-*/
-
 /* Divides a by b. If b is not a unit then this assumes 	*
  * valuation(a) >= valuation(b), and the result is lifted	*
  * to an integer mod p^r.					*/
 /* Does not destroy a and b.					*/
 void sc_div(mscalar a, mscalar b, mscalar c)
 {
+	unsigned long TT[4];
+	unsigned long SSS[4];
 	int e;
 
 	e = VAL4(b);
@@ -107,76 +69,3 @@ void sc_div(mscalar a, mscalar b, mscalar c)
 	INV4(TT);
 	MUL4(c, SSS, TT);
 }
-
-/* Divides a by p. The assumption is that this can be done. */
-/*
-void div_p(mscalar a)
-{
-	mpz_divexact_ui(a,a,(unsigned long) p);
-}
-*/
-
-/*
-void sc_add_replace(mscalar a, mscalar b)
-{
-	sc_add(a,b,b);
-}
-*/
-
-/*
-void sc_mult_replace(mscalar a, mscalar b)
-{
-	sc_mult(a,b,b);
-}
-*/
-
-/*
-void sc_imult_replace(int a, mscalar b)
-{
-	sc_imult(a,b,b);
-}
-*/
-
-/*
-void sc_zero(mscalar a)
-{
-	mpz_set_ui(a,(unsigned long) 0);
-}
-*/
-
-/*
-void sc_one(mscalar a)
-{
-	mpz_set_ui(a,(unsigned long) 1);
-}
-*/
-
-/*
-void sc_copy(mscalar a, mscalar b)
-{
-	mpz_set(b,a);
-}
-*/
-
-/*
-void sc_negate(mscalar a)
-{
-	mpz_neg(a,a);
-	mpz_mod(a,a,modulus);
-}
-*/
-
-/*
-void ito_sc(int a, mscalar b)
-{
-	mpz_set_si(b,(long) a);
-	mpz_mod(b,b,modulus);
-}
-*/
-
-/*
-int sc_is_zero(mscalar a)
-{
-	return(mpz_divisible_p(a,modulus));
-}
-*/

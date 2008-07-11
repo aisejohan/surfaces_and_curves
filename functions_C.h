@@ -21,23 +21,18 @@
  *
  *									*/
 
-#define DIV4(a,b)	div4(a,b)
-#define ADD4(a,b,c)	add4(a,b,c)
-#define MUL4(a,b,c)	mul4(a,b,c)
-#define NEG4(a)		neg4(a)
+#define DIV4(a,b)	div4_inline_asm_C(a,b)
+#define ADD4(a,b,c)	add4_inline_asm_C(a,b,c)
+#define MUL4(a,b,c)	mul4_inline_asm_C(a,b,c)
+#define NEG4(a)		neg4_inline_asm_C(a)
 #define VAL4(a)		val4(a)
-#define	SET4(a,b)	set4_C(a,b)
-#define	EQUAL4(a,b)	equal4_C(a,b)
-#define ISZERO4(a)	is_zero4_C(a)
+#define	SET4(a,b)	{a[0]=b[0];a[1]=b[1];a[2]=b[2];a[3]=b[3];}
+#define	EQUAL4(a,b)	((a[0]==b[0])&&(a[1]==b[1])&&(a[2]==b[2])&&(a[3]==b[3]))
+#define ISZERO4(a)	((a[0]==0)&&(a[1]==0)&&(a[2]==0)&&(a[3]==0))
 #define INV4(a)		inv4_C(a)
-#define PRINT4(a)	print4_C(a)
 #define	I_TO_4(a,k)	i_to_4_C(a,k)
-
-static inline void print4_C(unsigned long *A)
-{
-	printf("%lu + %lu*2^64 + %lu*2^128 + %lu*2^192",
-						A[0], A[1], A[2], A[3]);
-}
+#define	PRINT4(a)	printf("%lu + %lu*2^64 + %lu*2^128 + %lu*2^192",\
+							a[0],a[1],a[2],a[3])
 
 static inline int equal4_C(unsigned long *A, unsigned long *B)
 {
@@ -85,7 +80,7 @@ static inline void add4_C(unsigned long *S, unsigned long *A, unsigned long *B)
 	unsigned long couple[2];
 	unsigned long triple[3];
 	unsigned long s[8];
-	
+
 	add_C(triple, A[0], B[0]);
 	s[0] = triple[0];
 	s[1] = triple[1];

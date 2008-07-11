@@ -25,9 +25,6 @@
 #include "functions_inline_asm.h"
 #include "functions_C.h"
 
-unsigned long TT[4];
-unsigned long SSS[4];
-
 void setup_scalars(void);
 
 #define printmscalar(a)		PRINT4(a)
@@ -38,19 +35,51 @@ void setup_scalars(void);
 
 #define sc_mult(a,b,c)		MUL4(c,b,a)
 
-#define sc_imult(a,b,c)		{I_TO_4(TT,a);MUL4(c,b,TT);}
+static inline void sc_imult(int a, mscalar b, mscalar c)
+{
+	unsigned long TTTT[4];
+	I_TO_4(TTTT, a);
+	MUL4(c, b, TTTT);
+}
 
 #define sc_inv(a,b)		{SET4(b,a);INV4(b);}
 
-void sc_div(mscalar a, mscalar b, mscalar c);	
+void sc_div(mscalar a, mscalar b, mscalar c);
 
-#define div_p(a)		DIV4(a,1)
+static inline void div_p(mscalar a, int k)
+{
+	int eeee = k;
+	while (eeee >= 64) {
+		a[0] = a[1];
+		a[1] = a[2];
+		a[2] = a[3];
+		a[3] = 0;
+		eeee = eeee - 64;
+	}
+	DIV4(a,eeee);
+}
 
-#define sc_add_replace(a,b)	{ADD4(TT,a,b);SET4(b,TT);}
+static inline void sc_add_replace(mscalar a, mscalar b)
+{
+	unsigned long TTTT[4];
+	ADD4(TTTT, a, b);
+	SET4(b, TTTT);
+}
 
-#define sc_mult_replace(a,b)	{MUL4(TT,a,b);SET4(b,TT);}
+static inline void sc_mult_replace(mscalar a, mscalar b)
+{
+	unsigned long TTTT[4];
+	MUL4(TTTT, a, b);
+	SET4(b, TTTT);
+}
 
-#define sc_imult_replace(a,b)	{I_TO_4(TT,a);MUL4(SSS,TT,b);SET4(b,SSS);}
+static inline void sc_imult_replace(int a, mscalar b)
+{
+	unsigned long TTTT[4], SSSS[4];
+	I_TO_4(TTTT, a);
+	MUL4(SSSS, TTTT, b);
+	SET4(b, SSSS);
+}
 
 #define sc_zero(a)		{a[0]=0;a[1]=0;a[2]=0;a[3]=0;}
 

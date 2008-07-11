@@ -582,9 +582,7 @@ int clean_matrix(int rows, int columns, mscalar **matrix)
 	if ((e == 0) || (e < 0)) return(0);
 	for (i = 0; i < rows; i++) {
 		for (j = 0; j < columns; j++) {
-			for (v = 1; v <= e; v++) {
-				div_p(matrix[i][j]);
-			}
+			div_p(matrix[i][j], e);
 		}
 	}
 	return(e);
