@@ -1,6 +1,6 @@
 all:
 	gcc -Wall -O3 -march=nocona -c main.c  basis.c  compute.c  delta.c  grobner.c  helper.c  pol.c  reduce.c  scalar.c  char_p_0.c
-	gcc -lgmp -O3 -march=nocona -o tester main.o  basis.o  compute.o  delta.o  grobner.o  helper.o  pol.o  reduce.o  scalar.o  char_p_0.o
+	gcc -O3 -march=nocona -o tester main.o  basis.o  compute.o  delta.o  grobner.o  helper.o  pol.o  reduce.o  scalar.o  char_p_0.o add.o  div.o  mul.o  neg.o  val.o
 
 clean:
 	rm -f tester tijdelijk gmon.out

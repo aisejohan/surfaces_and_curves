@@ -264,8 +264,6 @@ static struct polynomial s_pol(struct polynomial f, struct polynomial g)
 {
 	struct term a, b;
 	struct polynomial A, B;
-	make_scalar(a.c);
-	make_scalar(b.c);
 	A.leading = NULL;
 	B.leading = NULL;
 
@@ -274,8 +272,6 @@ static struct polynomial s_pol(struct polynomial f, struct polynomial g)
 	clean_pol(&A);
 	B = make_times_term(b, g);
 	merge_add(&A, B);
-	free_scalar(a.c);
-	free_scalar(b.c);
 	return(A);
 }
 
@@ -286,8 +282,6 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 	struct base_change uit;
 	struct polynomial A, B;
 	struct term a, b;
-	make_scalar(a.c);
-	make_scalar(b.c);
 	A.leading = NULL;
 	B.leading = NULL;
 
@@ -384,8 +378,6 @@ static struct base_change s_pol_BC(unsigned int i, unsigned int j)
 		uit.bc5.leading = NULL;
 	}
 		
-	free_scalar(a.c);
-	free_scalar(b.c);
 	return(uit);
 }
 
@@ -729,7 +721,6 @@ int setup(int silent)
 	G.len = 5;
 
 	/* Deal with leading coefficients being divisible by p! */
-	make_scalar(c);
 	i = 0;
 	while (i + 1 <= G.len) {
 		if (G.ee[i]->e5 > 0) {
@@ -1025,7 +1016,6 @@ while ((m > 0) || (check == 1)) {
 			free_tail(G.BC[i]->bc5.leading);
 			free_tail(G.ff[i]->leading);
 		}
-		free_scalar(c);
 		if (!silent) printf("Not smooth!\n");
 		return(1);
 	}
@@ -1239,7 +1229,6 @@ while ((m > 0) || (check == 1)) {
 #endif /* KIJKEN */
 
 	/* These are not used outside this file... */
-	free_scalar(c);
 	free_tail(EEN.leading);
 	free_tail(myf1.leading);
 	free_tail(myf2.leading);

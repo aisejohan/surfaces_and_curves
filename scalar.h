@@ -21,50 +21,45 @@
  *
  *									*/
 
-extern mpz_t modulus;
-extern mpz_t prime;
-extern mpz_t temp;
+#include "functions_asm.h"
+#include "functions_inline_asm.h"
+#include "functions_C.h"
+
+unsigned long TT[4];
+unsigned long SSS[4];
 
 void setup_scalars(void);
 
-void printmscalar(mscalar a);
+#define printmscalar(a)		PRINT4(a)
 
-#ifndef PROFILER
-#define make_scalar(a)		mpz_init(a)
-#define free_scalar(a)		mpz_clear(a)
-#else
-void make_scalar(mscalar a);
-void free_scalar(mscalar a);
-#endif
+#define valuation(x)		VAL4(x)
 
-#define valuation(x)		mpz_remove(temp,x,prime)
+#define sc_add(a,b,c)		ADD4(c,b,a)
 
-#define sc_add(a,b,c)		{mpz_add(temp,a,b);mpz_mod(c,temp,modulus);}
+#define sc_mult(a,b,c)		MUL4(c,b,a)
 
-#define sc_mult(a,b,c)		{mpz_mul(temp,a,b);mpz_mod(c,temp,modulus);}
+#define sc_imult(a,b,c)		{I_TO_4(TT,a);MUL4(c,b,TT);}
 
-#define sc_imult(a,b,c)		{mpz_mul_si(temp,b,(long)a);mpz_mod(c,temp,modulus);}
-
-#define sc_inv(a,b)		mpz_invert(b,a,modulus)
+#define sc_inv(a,b)		{SET4(b,a);INV4(b);}
 
 void sc_div(mscalar a, mscalar b, mscalar c);	
 
-#define div_p(a)		mpz_divexact_ui(a,a,(unsigned long)p)
+#define div_p(a)		DIV4(a,1)
 
-#define sc_add_replace(a,b)	{mpz_add(temp,a,b);mpz_mod(b,temp,modulus);}
+#define sc_add_replace(a,b)	{ADD4(TT,a,b);SET4(b,TT);}
 
-#define sc_mult_replace(a,b)	{mpz_mul(temp,a,b);mpz_mod(b,temp,modulus);}
+#define sc_mult_replace(a,b)	{MUL4(TT,a,b);SET4(b,TT);}
 
-#define sc_imult_replace(a,b)	{mpz_mul_si(temp,b,(long)a);mpz_mod(b,temp,modulus);}
+#define sc_imult_replace(a,b)	{I_TO_4(TT,a);MUL4(SSS,TT,b);SET4(b,SSS);}
 
-#define sc_zero(a)		mpz_set_ui(a,0)
+#define sc_zero(a)		{a[0]=0;a[1]=0;a[2]=0;a[3]=0;}
 
-#define sc_one(a)		mpz_set_ui(a,1)
+#define sc_one(a)		{a[0]=1;a[1]=0;a[2]=0;a[3]=0;}
 
-#define sc_copy(a,b)		mpz_set(b,a)
+#define sc_copy(a,b)		SET4(b,a)
 
-#define sc_negate(a)		{mpz_neg(temp,a);mpz_mod(a,temp,modulus);}
+#define sc_negate(a)		NEG4(a);
 
-#define ito_sc(a,b)		{mpz_set_si(temp,(long)a);mpz_mod(b,temp,modulus);}
+#define ito_sc(a,b)		I_TO_4(b,a)
 
-#define sc_is_zero(a)		mpz_divisible_p(a,modulus)
+#define sc_is_zero(a)		ISZERO4(a)

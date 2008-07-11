@@ -59,7 +59,6 @@ int compute_frobenius_matrix(void )
 	T.leading = NULL;
 	Delta.leading = NULL;
 	aaterm = NULL;
-	make_scalar(cc);
 	
 	gap = find_gap();
 	blen1 = char_0(d - d1 - d2 - d3 - d4, gap);
@@ -141,7 +140,7 @@ int compute_frobenius_matrix(void )
 	make_term(&T.leading);
 	sc_one(T.leading->c);
 	for (k = 1; k <= extra + 3 + 0; k++) { /* Note extra powers of p. */
-		sc_imult_replace(p, T.leading->c);
+		sc_imult_replace(2, T.leading->c);
 	}
 	T.leading->n1 = p - 1;
 	T.leading->n2 = p - 1;
@@ -322,7 +321,6 @@ int compute_frobenius_matrix(void )
 	free_matrix(glen1 + glen2 + glen3, blen1 + blen2 + blen3, matrix);
 	free_matrix(blen1 + blen2 + blen3, glen1 + glen2 + glen3, fmatrix);
 	free_matrix(blen1 + blen2 + blen3, blen1 + blen2 + blen3, Fmatrix);
-	free_scalar(cc);
 	/********************************************************
 	 * End Neurotic freeing. 				*
 	 ********************************************************/

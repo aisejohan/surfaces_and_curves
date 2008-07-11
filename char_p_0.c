@@ -113,7 +113,6 @@ static void sort_terms(struct term **tt, int blen)
 {
 	int i, j;
 	struct term tmp;
-	make_scalar(tmp.c);
 
 	for (i = 0; i < blen; i++) {
 		for (j = i + 1; j < blen; j++) {
@@ -124,7 +123,6 @@ static void sort_terms(struct term **tt, int blen)
 			}
 		}
 	}
-	free_scalar(tmp.c);
 }
 
 void print_terms(struct term **tt, int blen)
@@ -160,7 +158,6 @@ struct term **char_0_basis(unsigned int degree, int blen, int *gap)
 	int i, a1, a2, a3, a4, count, test;
 	struct term tmp;
 	struct term **tt;
-	make_scalar(tmp.c);
 
 	tt = (struct term **)malloc(blen*sizeof(struct term *));
 	if (!tt) {
@@ -213,7 +210,6 @@ struct term **char_0_basis(unsigned int degree, int blen, int *gap)
 
 	sort_terms(tt, blen);
 
-	free_scalar(tmp.c);
 	return(tt);
 }
 
@@ -285,7 +281,6 @@ struct term **char_p_generators(unsigned int degree, int blen)
 	int i, a1, a2, a3, a4, count, test;
 	struct term tmp;
 	struct term **tt;
-	make_scalar(tmp.c);
 
 	tt = (struct term **)malloc(blen*sizeof(struct term *));
 	if (!tt) {
@@ -338,7 +333,6 @@ struct term **char_p_generators(unsigned int degree, int blen)
 
 	sort_terms(tt, blen);
 
-	free_scalar(tmp.c);
 	return(tt);
 }
 
@@ -362,7 +356,6 @@ mscalar *coefficients(
 	}
 
 	for (row = 0; row < blen1 + blen2 + blen3; row++) {
-		make_scalar(column[row]);
 		sc_zero(column[row]);
 	}
 
@@ -416,9 +409,6 @@ mscalar *coefficients(
 	}
 	if (aaterm) fail = 1;
 	if (fail) {
-		for (row = 0; row < blen1 + blen2 + blen3; row++) {
-			free_scalar(column[row]);
-		}
 		free(column);
 		column = NULL;
 	}
@@ -486,7 +476,6 @@ mscalar **gens_to_basis(
 	struct polynomial **aa;
 	int i, j, k;
 	mscalar c;
-	make_scalar(c);
 
 	matrix = (mscalar **)malloc((glen1 + glen2 + glen3)*sizeof(mscalar *));
 	if (!matrix) {
@@ -526,7 +515,6 @@ mscalar **gens_to_basis(
 		}
 	}
 
-	free_scalar(c);
 	return(matrix);
 }
 
@@ -535,7 +523,6 @@ mscalar **prod_matrix(int n, int m, int l, mscalar **A, mscalar **B)
 	int i, j, k;
 	mscalar c;
 	mscalar **C;
-	make_scalar(c);
 
 	C = (mscalar **)malloc(n*sizeof(mscalar *));
 	if (!C) {
@@ -551,7 +538,6 @@ mscalar **prod_matrix(int n, int m, int l, mscalar **A, mscalar **B)
 	}
 	for (i = 0; i < n; i++) {
 		for (j = 0; j < l; j++) {
-			make_scalar(C[i][j]);
 			sc_zero(C[i][j]);
 			for (k = 0; k < m; k++) {
 				sc_mult(A[i][k], B[k][j], c);
@@ -559,7 +545,6 @@ mscalar **prod_matrix(int n, int m, int l, mscalar **A, mscalar **B)
 			}
 		}
 	}
-	free_scalar(c);
 	return(C);
 }			
 
@@ -610,9 +595,6 @@ void free_matrix(int rows, int columns, mscalar **matrix)
 	int i, j;
 
 	for (i = 0; i < rows; i++) {
-		for (j = 0; j < columns; j++) {
-			free_scalar(matrix[i][j]);
-		}
 		free(matrix[i]);
 	}
 	free(matrix);

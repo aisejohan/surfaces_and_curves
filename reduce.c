@@ -56,7 +56,6 @@ static struct polynomial one_step_down(struct polynomial *f)
 	struct polynomial T;
 	struct polynomial **aa;
 	struct base_change fBC;
-	make_scalar(c);
 	
 	if (f->degree < d) {
 		printf("one_step_down: Incorrect degree. Stop.");
@@ -159,7 +158,6 @@ static struct polynomial one_step_down(struct polynomial *f)
 
 	if (k > 0) div_p_pol(k, &fBC.bc5);
 
-	free_scalar(c);
 	return(fBC.bc5);
 }
 

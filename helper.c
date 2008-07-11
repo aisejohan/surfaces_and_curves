@@ -334,7 +334,6 @@ struct polynomial deriv(struct polynomial f, unsigned int i)
 	struct term **ptrterm;
 	uit.leading = NULL;
 	ptrterm = NULL;
-	make_scalar(c);
 
 	fterm = f.leading;
 	switch (i) {
@@ -354,7 +353,6 @@ struct polynomial deriv(struct polynomial f, unsigned int i)
 			}
 			fterm = fterm->next;
 		}
-		free_scalar(c);
 		return(uit);
 
 		case 2: 
@@ -373,7 +371,6 @@ struct polynomial deriv(struct polynomial f, unsigned int i)
 			}
 			fterm = fterm->next;
 		}
-		free_scalar(c);
 		return(uit);
 
 		case 3:
@@ -392,7 +389,6 @@ struct polynomial deriv(struct polynomial f, unsigned int i)
 			}
 			fterm = fterm->next;
 		}
-		free_scalar(c);
 		return(uit);
 		
 		case 4:
@@ -411,7 +407,6 @@ struct polynomial deriv(struct polynomial f, unsigned int i)
 			}
 			fterm = fterm->next;
 		}
-		free_scalar(c);
 		return(uit);
 		
 		default:

@@ -26,9 +26,8 @@
 #include "data.h"
 #include "scalar.h"
 
-mpz_t modulus;
-mpz_t prime;
-mpz_t temp;
+extern unsigned long TT[4];
+extern unsigned long SSS[4];
 
 #ifdef KIJKEN
 void empty_function(void)
@@ -40,34 +39,8 @@ void empty_function(void)
 /* Only called once. */
 void setup_scalars(void)
 {
-	mpz_init_set_ui(prime, (unsigned long) p);
-	mpz_init(modulus);
-	mpz_init(temp);
-	mpz_ui_pow_ui(modulus, (unsigned long) p, (unsigned long) r);
+	printf("No set up needed.\n");
 }
-
-void printmscalar(mscalar a)
-{
-	mpz_cdiv_q_ui(temp, modulus, 2);
-	if (mpz_cmp(a, temp)>0) {
-		mpz_sub(temp, a, modulus);
-		mpz_out_str(stdout, (int) 10, temp);
-	} else {
-		mpz_out_str(stdout, (int) 10, a);
-	}
-}
-
-#ifdef PROFILER
-void make_scalar(mscalar a)
-{
-	mpz_init(a);
-}
-
-void free_scalar(mscalar a)
-{
-	mpz_clear(a);
-}
-#endif
 
 /*
 unsigned long int valuation(mscalar x)
@@ -113,15 +86,26 @@ void sc_inv(mscalar a, mscalar b)
 /* Does not destroy a and b.					*/
 void sc_div(mscalar a, mscalar b, mscalar c)
 {
-	unsigned long e;
-	e = mpz_remove(temp, b, prime);
-	mpz_invert(temp, temp, modulus);
-	mpz_mul(temp, temp, a);
-	mpz_mod(c, temp, modulus);
-	while (e) {
-		mpz_divexact_ui(c, c, (unsigned long) p);
-		e--;
+	int e;
+
+	e = VAL4(b);
+	SET4(TT, b);
+	SET4(SSS, a);
+	while (e >= 64) {
+		TT[0] = TT[1];
+		TT[1] = TT[2];
+		TT[2] = TT[3];
+		TT[3] = 0;
+		SSS[0] = SSS[1];
+		SSS[1] = SSS[2];
+		SSS[2] = SSS[3];
+		SSS[3] = 0;
+		e = e - 64;
 	}
+	DIV4(TT, e);
+	DIV4(SSS, e);
+	INV4(TT);
+	MUL4(c, SSS, TT);
 }
 
 /* Divides a by p. The assumption is that this can be done. */

@@ -52,10 +52,8 @@ void make_term(struct term **mon)
 		}
 		reserve = &(list[0]);
 		for (i = 0; i < NR_RESERVE - 1; i++) {
-			make_scalar(list[i].c);
 			list[i].next = &(list[i+1]);
 		}
-		make_scalar(list[NR_RESERVE - 1].c);
 		list[NR_RESERVE - 1].next = NULL;
 	}
 	*mon = reserve;
@@ -130,7 +128,6 @@ void clean_pol(struct polynomial *pol)
 
 	ptrterm = &(pol->leading);
 	while (*ptrterm) {
-		mpz_mod((*ptrterm)->c, (*ptrterm)->c, modulus);
 		if (sc_is_zero((*ptrterm)->c)) {
 			tmp = *ptrterm;
 			*ptrterm = (*ptrterm)->next;
@@ -207,7 +204,6 @@ struct polynomial pol_add(struct polynomial f, struct polynomial g)
 	struct term *fterm, *gterm;
 	struct term **ptrterm;
 	uit.leading = NULL;
-	make_scalar(c);
 
 #ifdef KIJKEN
 	if (f.degree != g.degree) {
@@ -224,12 +220,10 @@ struct polynomial pol_add(struct polynomial f, struct polynomial g)
 		if (!fterm) {
 			*ptrterm = NULL;
 			copy_tail(gterm, ptrterm);
-			free_scalar(c);
 			return(uit);
 		}
 		if (!gterm) {
 			copy_tail(fterm, ptrterm);
-			free_scalar(c);
 			return(uit);
 		}
 
@@ -558,7 +552,7 @@ static void times_term_variant(struct term t, struct polynomial f, struct polyno
 	gterm = g->leading;
 	fterm = f.leading;
 	while (fterm) {
-		mpz_mul(gterm->c, t.c, fterm->c);
+		MUL4(gterm->c, t.c, fterm->c);
 		gterm->n1 = t.n1 + fterm->n1;
 		gterm->n2 = t.n2 + fterm->n2;
 		gterm->n3 = t.n3 + fterm->n3;
@@ -625,7 +619,7 @@ static void rep_pol_add_variant(struct polynomial *f, struct polynomial g)
 
 			default:
 			/* GELIJK */
-			mpz_add(fterm->c, gterm->c, fterm->c);
+			ADD4(fterm->c, gterm->c, fterm->c);
 			*ptrterm = fterm;
 			ptrterm = &(fterm->next);
 			fterm = fterm->next;
@@ -649,7 +643,7 @@ make_times_term_variant(struct term t, struct polynomial f)
 	fterm = f.leading;
 	while (fterm) {
 		make_term(ptrterm);
-		mpz_mul((*ptrterm)->c, t.c, fterm->c);
+		MUL4((*ptrterm)->c, t.c, fterm->c);
 		(*ptrterm)->n1 = t.n1 + fterm->n1;
 		(*ptrterm)->n2 = t.n2 + fterm->n2;
 		(*ptrterm)->n3 = t.n3 + fterm->n3;

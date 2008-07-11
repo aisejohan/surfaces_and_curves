@@ -69,7 +69,6 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	struct term mon;
 	unsigned int i, dividing;
 
-	make_scalar(mon.c);
 	ppp = NULL;
 	make_pol(&ppp);
 	aa = (struct polynomial **)malloc(ss*sizeof(struct polynomial *));
@@ -150,7 +149,6 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 		free_tail(tmp[i].leading);
 	}
 	free(ppp);
-	free_scalar(mon.c);
 	return(aa);
 }
 #endif
@@ -170,7 +168,6 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	unsigned int i, first;
 	mscalar c;
 
-	make_scalar(c);
 	ppp = NULL;
 	make_pol(&ppp);
 	aa = (struct polynomial **)malloc(ss*sizeof(struct polynomial *));
@@ -259,7 +256,6 @@ gen_division(struct polynomial *pp, unsigned int ss, struct polynomial **vh)
 	}
 
 	free(ppp);
-	free_scalar(c);
 	return(aa);
 }
 #endif
@@ -281,7 +277,6 @@ struct polynomial *myf_division(struct polynomial *pp)
 	myf_rest.degree = myf.degree;
 	myf_rest.leading = myf.leading->next;
 
-	make_scalar(c);
 	sc_inv(myf.leading->c, c);
 
 	ppp = NULL;
@@ -354,7 +349,6 @@ struct polynomial *myf_division(struct polynomial *pp)
 		}
 	}
 	free(ppp);
-	free_scalar(c);
 	return(aa);
 }
 #endif
@@ -367,7 +361,6 @@ zero_on_division(struct polynomial ppp, unsigned int ss, struct polynomial **vh)
 	struct term mon;
 	struct polynomial pp;
 	unsigned int i, dividing, uit;
-	make_scalar(mon.c);
 	pp.leading = NULL;
 	for (i = 0; i + 1 <= ss; i++) {
 		tmp[i].leading = NULL;
@@ -411,6 +404,5 @@ out:
 		free_tail(tmp[i].leading);
 	}
 	free_tail(pp.leading);
-	free_scalar(mon.c);
 	return(uit);
 }
