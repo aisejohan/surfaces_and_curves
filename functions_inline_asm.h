@@ -58,19 +58,6 @@ static inline void div4_inline_asm_C(unsigned long *A, unsigned int k)
 	return;
 }
 
-static inline unsigned long my_rdtsc_inline_asm_C(void )
-{
-	unsigned long uit;
-
-	__asm__  __volatile__  ("rdtsc			\n\t"	\
-				"shl	$32, %%rdx	\n\t"	\
-				"or	%%rdx, %%rax	\n\t"	\
-				: "=a" (uit)			\
-				:				\
-				: "rdx");
-	return(uit);
-}
-
 static inline void neg4_inline_asm_C(unsigned long *A)
 {
 	__asm__("notq	(%0)		\n\t"	\

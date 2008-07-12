@@ -50,12 +50,11 @@
 #define d	64
 #define p	2
 #define r	256		/* Exponent. */
-#define q	15		/* Largest power of Delta. */
+#define q	50		/* Largest power of Delta. */
 
 #define maxlength	20
 
 /* This type will be used for our scalars. */
-#include <gmp.h>
 typedef unsigned long mscalar[4];
 
 struct term {

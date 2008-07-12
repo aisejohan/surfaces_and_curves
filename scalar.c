@@ -26,7 +26,6 @@
 #include "data.h"
 #include "scalar.h"
 
-
 #ifdef KIJKEN
 void empty_function(void)
 {

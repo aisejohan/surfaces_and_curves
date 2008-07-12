@@ -21,7 +21,6 @@
  *
  *									*/
 
-#include "functions_asm.h"
 #include "functions_inline_asm.h"
 #include "functions_C.h"
 
@@ -56,7 +55,7 @@ static inline void div_p(mscalar a, int k)
 		a[3] = 0;
 		eeee = eeee - 64;
 	}
-	DIV4(a,eeee);
+	DIV4(a, eeee);
 }
 
 static inline void sc_add_replace(mscalar a, mscalar b)
