@@ -8,7 +8,7 @@ twist that you can do surfaces in weigthed projected spaces.
 Requirements
 ------------
 
-You will need a compiler and the gmp library installed.
+You will need gcc and make.
 
 Usage
 -----
@@ -21,8 +21,9 @@ space and the degree of the surface d. Choose the prime p and the prime power r
 expansion to compute. It is best to choose
 	d1 <= d2 <= d3 <= d4
 
-Makefile: change --march=nocona to --march=<your-cpu-type> or just 
-remove the --march= option entirely.
+Makefile: If you compile does not recognize the option --march=native, then
+change it to --march=<your-cpu-type> or just remove the --march= option
+entirely.
 
 Step 2: Compile with the command ``make''.
 
