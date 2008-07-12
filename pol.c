@@ -725,20 +725,24 @@ static struct polynomial __pol_mult(unsigned int d_t, struct term *tt, struct po
 struct polynomial pol_mult(struct polynomial f, struct polynomial g)
 {
 	struct term *tf, *tg;
+	struct polynomial uit;
 
 	if ((!f.leading) || (!g.leading)) {
-		struct polynomial uit;
 		uit.leading = NULL;
 		uit.degree = f.degree + g.degree;
 		return uit;
 	}
 
 	if (!f.leading->next) {
-		return make_times_term(f.degree, f.leading, g);
+		uit = make_times_term(f.degree, f.leading, g);
+		clean_pol(&uit);
+		return uit;
 	}
 
 	if (!g.leading->next) {
-		return make_times_term(g.degree, g.leading, f);
+		uit = make_times_term(g.degree, g.leading, f);
+		clean_pol(&uit);
+		return uit;
 	}
 	
 	tf = f.leading->next;
