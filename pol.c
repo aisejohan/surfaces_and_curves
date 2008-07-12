@@ -474,7 +474,6 @@ void times_scalar(mscalar c, struct polynomial *f)
 /* Divides by p^k if possible. */
 void div_p_pol(int k, struct polynomial *f)
 {
-	int i;
 	struct term *aaterm;
 
 	aaterm = f->leading;

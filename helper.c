@@ -112,6 +112,7 @@ int hilbert(int degree)
 	return(goodcount);
 }
 
+#if 0
 static void print_sum(unsigned int degree)
 {
 	unsigned int a1, a2, a3;
@@ -127,6 +128,7 @@ static void print_sum(unsigned int degree)
 	}
 	return;
 }
+#endif
 
 /* Makes a polynomial of degree degree with all terms		*
  * having coefficient 1.					*/
