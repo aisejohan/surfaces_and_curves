@@ -75,10 +75,12 @@ int main()
 	printf(".\n");
 
 	A = make_random(10);
+	clean_pol(&A);
 	F = copy_pol(A);
 /*	print_pol(A);
 	printf("\n"); */
 	B = make_random(11);
+	clean_pol(&B);
 	H = copy_pol(B);
 	print_pol(B);
 	printf("\n");
