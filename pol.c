@@ -31,6 +31,7 @@
 
 #define NR_RESERVE	1024
 static struct term *reserve = NULL;
+static struct term *lists = NULL;
 
 /* Makes a term.				*/
 void make_term(struct term **mon)
@@ -45,7 +46,8 @@ void make_term(struct term **mon)
 		int i;
 		struct term *list;
 
-		list = (struct term *) malloc(NR_RESERVE*sizeof (struct term));
+		list = (struct term *)
+				malloc((NR_RESERVE + 1)*sizeof(struct term));
 		if (!list) {
 			perror("Malloc failed.");
 			exit(1);
@@ -57,6 +59,8 @@ void make_term(struct term **mon)
 		}
 		mpz_init(list[NR_RESERVE - 1].i);
 		list[NR_RESERVE - 1].next = NULL;
+		list[NR_RESERVE].next = lists;
+		lists = list;
 	}
 	*mon = reserve;
 	reserve = reserve->next;
@@ -94,6 +98,24 @@ void free_term(struct term *mon)
 	mon->next = reserve;
 	reserve = mon;
 	mon = NULL;
+}
+
+void free_reserves(void )
+{
+	int i, nr;
+	struct term *list;
+
+	nr = 0;
+	while (lists) {
+		nr++;
+		list = lists;
+		lists = list[NR_RESERVE].next;
+		for (i = NR_RESERVE - 1; i >= 0; i--) {
+			mpz_clear(list[i].i);
+		}
+		free(list);
+	}
+	printf("Freed %d lists.\n", nr);
 }
 
 /* Copies data not pointer.						*/
@@ -175,7 +197,7 @@ struct polynomial copy_pol(struct polynomial f)
 	return(uit);
 }
 
-inline unsigned int
+static inline unsigned int
 i_n4(unsigned int degree, unsigned int n1, unsigned int n2, unsigned int n3)
 {
 #ifdef KIJKEN
@@ -188,7 +210,7 @@ i_n4(unsigned int degree, unsigned int n1, unsigned int n2, unsigned int n3)
 	return((degree - (n1*d1 + n2*d2 + n3*d3))/d4);
 }
 
-inline unsigned int t_n4(unsigned int degree, struct term *tt)
+static inline unsigned int t_n4(unsigned int degree, struct term *tt)
 {
 	return(i_n4(degree, tt->n1, tt->n2, tt->n3));
 }

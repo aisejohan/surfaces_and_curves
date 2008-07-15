@@ -27,6 +27,7 @@ void clean_pol(struct polynomial *pol);
 void make_term(struct term **mon);
 void make_pol(struct polynomial **f);
 void free_term(struct term *mon);
+void free_reserves(void );
 
 /* This function assumes terms of the same degree. 	*
  * It compares the monomials not the coefficients.	*

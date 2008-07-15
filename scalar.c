@@ -64,6 +64,20 @@ void setup_scalars(void)
 	return;
 }
 
+void close_scalars(void )
+{
+	int i;
+
+	i = rr - 1;
+	while (i >= 0) {
+		mpz_clear(modulus[i]);
+		i--;
+	}
+	free(modulus);
+	mpz_clear(temp);
+	mpz_clear(prime);
+}
+
 #ifdef KIJKEN
 void test_scalar(mscalar a)
 {
