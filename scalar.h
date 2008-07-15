@@ -26,6 +26,7 @@ extern mpz_t prime;
 extern mpz_t temp;
 
 void setup_scalars(void);
+void close_scalars(void);
 
 void printmscalar(mscalar a);
 

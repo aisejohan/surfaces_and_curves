@@ -70,6 +70,9 @@ int main(void )
 		free_tail(G.BC[i]->bc4.leading);
 		free_tail(G.ff[i]->leading);
 	}
+	deallocate_GVMnewMMold();
+	free_reserves();
+	close_scalars();
 
 	return(0);
 }
