@@ -151,8 +151,7 @@ void printmscalar(mscalar a)
 void make_scalar(mscalar *a)
 {
 	*a = (struct scalar *) malloc(sizeof(struct scalar));
-	(*a)->e = rr;
-	mpz_init_set_ui((*a)->i, 0);
+	mpz_init((*a)->i);
 	return;
 }
 
@@ -163,18 +162,17 @@ void free_scalar(mscalar a)
 	return;
 }
 
+#ifdef KIJKEN
 unsigned int valuation(mscalar x)
 {
-#ifdef KIJKEN
 	test_scalar(x);
 	if (x->e == rr) {
 		printf("Valuation of zero!");
 		exit(1);
 	}
-#endif
-
 	return(x->e);
 }
+#endif
 
 static unsigned int my_p_remove(mpz_t b)
 {
@@ -200,7 +198,6 @@ void sc_add(mscalar a, mscalar b, mscalar c)
 #ifdef KIJKEN
 	test_scalar(a);
 	test_scalar(b);
-	test_scalar(c);
 #endif
 
 	if (a->e < b->e) {
@@ -281,7 +278,6 @@ void sc_mult(mscalar a, mscalar b, mscalar c)
 #ifdef KIJKEN
 	test_scalar(a);
 	test_scalar(b);
-	test_scalar(c);
 #endif
 
 	c->e = a->e + b->e;
@@ -299,7 +295,6 @@ void sc_imult(int a, mscalar b, mscalar c)
 {
 #ifdef KIJKEN
 	test_scalar(b);
-	test_scalar(c);
 #endif
 
 	mpz_mul_si(temp, b->i, a);
@@ -317,7 +312,6 @@ void sc_inv(mscalar a, mscalar b)
 {
 #ifdef KIJKEN
 	test_scalar(a);
-	test_scalar(b);
 	if (a->e != 0) {
 		printf("Not a unit!");
 		exit(1);
@@ -338,7 +332,6 @@ void sc_div(mscalar a, mscalar b, mscalar c)
 #ifdef KIJKEN
 	test_scalar(a);
 	test_scalar(b);
-	test_scalar(c);
 	if (a->e < b->e) {
 		printf("Not divisible in sc_div.\n");
 		exit(1);
@@ -349,7 +342,7 @@ void sc_div(mscalar a, mscalar b, mscalar c)
 	}
 #endif
 
-	mpz_invert(temp, b->i , modulus[b->e]);
+	mpz_invert(temp, b->i, modulus[b->e]);
 	mpz_mul(temp, temp, a->i);
 	c->e = a->e - b->e;
 	mpz_mod(c->i, temp, modulus[c->e]);
@@ -373,29 +366,8 @@ void div_p(int k, mscalar a)
 	return;
 }
 
-/*
-void sc_add_replace(mscalar a, mscalar b)
-{
-	sc_add(a,b,b);
-}
-
-void sc_mult_replace(mscalar a, mscalar b)
-{
-	sc_mult(a,b,b);
-}
-
-void sc_imult_replace(int a, mscalar b)
-{
-	sc_imult(a,b,b);
-}
-*/
-
 void sc_zero(mscalar a)
 {
-#ifdef KIJKEN
-	test_scalar(a);
-#endif
-
 	a->e = rr;
 	mpz_set_ui(a->i, 0);
 	return;
@@ -403,26 +375,20 @@ void sc_zero(mscalar a)
 
 void sc_one(mscalar a)
 {
-#ifdef KIJKEN
-	test_scalar(a);
-#endif
-
 	a->e = 0;
 	mpz_set_ui(a->i, 1);
 	return;
 }
 
+#ifdef KIJKEN
 void sc_copy(mscalar a, mscalar b)
 {
-#ifdef KIJKEN
 	test_scalar(a);
-	test_scalar(b);
-#endif
-
 	b->e = a->e;
 	mpz_set(b->i, a->i);
 	return;
 }
+#endif
 
 void sc_negate(mscalar a)
 {
@@ -437,10 +403,6 @@ void sc_negate(mscalar a)
 
 void ito_sc(int a, mscalar b)
 {
-#ifdef KIJKEN
-	test_scalar(b);
-#endif
-
 	mpz_set_si(temp, a);
 	b->e = my_p_remove(temp);
 	if (b->e < rr) {
@@ -452,11 +414,11 @@ void ito_sc(int a, mscalar b)
 	return;
 }
 
+
+#ifdef KIJKEN
 int sc_is_zero(mscalar a)
 {
-#ifdef KIJKEN
 	test_scalar(a);
-#endif
-
 	return((a->e == rr));
 }
+#endif

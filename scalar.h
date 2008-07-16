@@ -32,7 +32,11 @@ void make_scalar(mscalar *a);
 
 void free_scalar(mscalar a);
 
+#ifdef KIJKEN
 unsigned int valuation(mscalar x);
+#else
+#define valuation(x)		(x)->e
+#endif
 
 void sc_add(mscalar a, mscalar b, mscalar c);
 void sc_add_variant(mscalar a, mscalar b, mscalar c);
@@ -58,10 +62,18 @@ void sc_zero(mscalar a);
 
 void sc_one(mscalar a);
 
+#ifdef KIJKEN
 void sc_copy(mscalar a, mscalar b);
+#else
+#define sc_copy(a,b)		{(b)->e=(a)->e;mpz_set((b)->i,(a)->i);}
+#endif
 
 void sc_negate(mscalar a);
 
 void ito_sc(int a, mscalar b);
 
+#ifdef KIJKEN
 int sc_is_zero(mscalar a);
+#else
+#define sc_is_zero(a)		((a)->e == rr)
+#endif

@@ -64,8 +64,6 @@ void make_term(struct term **mon)
 	}
 	*mon = reserve;
 	reserve = reserve->next;
-	(*mon)->e = rr;
-	mpz_set_ui((*mon)->i, 0);
 	(*mon)->next = NULL;
 }
 
