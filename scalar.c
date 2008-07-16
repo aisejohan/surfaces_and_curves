@@ -103,6 +103,13 @@ void test_scalar(mscalar a)
 }
 #endif
 
+void close_scalars(void )
+{
+	mpz_clear(temp);
+	mpz_clear(modulus);
+	mpz_clear(prime);
+}
+
 void printmscalar(mscalar a)
 {
 #ifdef KIJKEN
