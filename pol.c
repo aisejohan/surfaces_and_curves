@@ -119,7 +119,8 @@ void free_reserves(void )
 /* sc_copy does allocation.						*/
 void copy_term(struct term *mon1, struct term *mon2)
 {
-	sc_copy(mon1->c, mon2->c);
+	mpz_set(mon2->c->i, mon1->c->i);
+	mon2->c->e = mon1->c->e;
 	mon2->n1 = mon1->n1;
 	mon2->n2 = mon1->n2;
 	mon2->n3 = mon1->n3;
