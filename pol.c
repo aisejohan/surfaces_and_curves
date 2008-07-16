@@ -31,6 +31,7 @@
 
 #define NR_RESERVE	1024
 static struct term *reserve = NULL;
+static struct term *lists = NULL;
 
 /* Makes a term.				*/
 void make_term(struct term **mon)
@@ -45,7 +46,8 @@ void make_term(struct term **mon)
 		int i;
 		struct term *list;
 
-		list = (struct term *) malloc(NR_RESERVE*sizeof (struct term));
+		list = (struct term *)
+				malloc((NR_RESERVE + 1)*sizeof(struct term));
 		if (!list) {
 			perror("Malloc failed.");
 			exit(1);
@@ -57,6 +59,8 @@ void make_term(struct term **mon)
 		}
 		make_scalar(list[NR_RESERVE - 1].c);
 		list[NR_RESERVE - 1].next = NULL;
+		list[NR_RESERVE].next = lists;
+		lists = list;
 	}
 	*mon = reserve;
 	reserve = reserve->next;
@@ -91,6 +95,24 @@ void free_term(struct term *mon)
 	mon->next = reserve;
 	reserve = mon;
 	mon = NULL;
+}
+
+void free_reserves(void )
+{
+	int i, nr;
+	struct term *list;
+
+	nr = 0;
+	while (lists) {
+		nr++;
+		list = lists;
+		lists = list[NR_RESERVE].next;
+		for (i = NR_RESERVE - 1; i >= 0; i--) {
+			free_scalar(list[i].c);
+		}
+		free(list);
+	}
+	printf("Freed %d lists.\n", nr);
 }
 
 /* Copies data not pointer.						*/
