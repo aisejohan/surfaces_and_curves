@@ -282,14 +282,22 @@ int compute_frobenius_matrix(void )
 	k = extra + e + 1;
 	k -= clean_matrix(blen1 + blen2 + blen3,
 					blen1 + blen2 + blen3, Fmatrix);
+	printf("*/\n");
+	printf("A = \\\n");
 	print_matrix(blen1 + blen2 + blen3,
 					blen1 + blen2 + blen3, Fmatrix);
 
 	if (k == 0) {
+		printf("/* \n");
 		printf("This should be the matrix of frobenius!\n");
+		printf("*/ \n");
+		printf("B = A; \n");
 	} else {
+		printf("/* \n");
 		printf("This matrix times %d^(-%d)"
 		" should be the matrix of frobenius.\n", p, k);
+		printf("*/ \n");
+		printf("B = %d^(-%d) * A; \n", p, k);
 	}
 
 	/************************************************

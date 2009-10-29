@@ -112,7 +112,7 @@ void free_reserves(void )
 		}
 		free(list);
 	}
-	printf("Freed %d lists.\n", nr);
+	printf("/* Freed %d lists. */\n", nr);
 }
 
 /* Copies data not pointer.						*/

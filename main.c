@@ -41,6 +41,7 @@ int main(void )
 {
 	int i, retry;
 
+	printf("/* Comments begin... \n");
 #ifdef KIJKEN
 	printf("Debug is set! To unset do not define KIJKEN.\n");
 #endif
