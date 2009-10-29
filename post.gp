@@ -103,3 +103,13 @@ do_it(A)=
 	print("The factorization of g is ",factor(g));
 	return(g);
 }
+
+repeat()=
+{
+	system("./tester | tee uit");
+	read("uit");
+	g = do_it(B);
+	print(g);
+	p = factor(abs(subst(g, x, 0)))[1,1];
+	newtonpoly(g, p);
+}
