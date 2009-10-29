@@ -4,7 +4,7 @@ all:
 
 clean:
 	rm -f tester tijdelijk gmon.out
-	rm -f basis.o  compute.o  delta.o  grobner.o  helper.o  pol.o  reduce.o  scalar.o test_scalars.o make_list.o
+	rm -f main.o  char_p_0.o  basis.o  compute.o  delta.o  grobner.o  helper.o  pol.o  reduce.o  scalar.o  test_scalars.o  make_list.o
 
 debug:
 	gcc -g -DKIJKEN -Wall -pedantic -std=c99 -c main.c  basis.c  compute.c  delta.c  grobner.c  helper.c  pol.c  reduce.c  scalar.c  char_p_0.c

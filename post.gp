@@ -109,5 +109,7 @@ repeat()=
 	system("./tester | tee uit");
 	read("uit");
 	g = do_it(B);
-	newtonpoly(g, 2)
+	print(g);
+	p = factor(abs(subst(g, x, 0)))[1,1];
+	newtonpoly(g, p);
 }
