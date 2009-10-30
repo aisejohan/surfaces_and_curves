@@ -82,11 +82,11 @@ int main()
 	B = make_random(11);
 	clean_pol(&B);
 	H = copy_pol(B);
-	print_pol(B);
-	printf("\n");
+/*	print_pol(B);
+	printf("\n"); */
 	C = pol_mult(A, B);
-	print_pol(C);
-	printf("\n");
+/*	print_pol(C);
+	printf("\n"); */
 	D = pol_mult(B, A);
 /*	print_pol(D);
 	printf("\n"); */
