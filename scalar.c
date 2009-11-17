@@ -46,6 +46,13 @@ void setup_scalars(void)
 	mpz_ui_pow_ui(modulus, (unsigned long) p, (unsigned long) r);
 }
 
+void close_scalars(void )
+{
+	mpz_clear(temp);
+	mpz_clear(modulus);
+	mpz_clear(prime);
+}
+
 void printmscalar(mscalar a)
 {
 	mpz_cdiv_q_ui(temp, modulus, 2);

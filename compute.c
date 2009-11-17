@@ -146,6 +146,26 @@ static void allocate_MMold(int at_least)
 	Mold = (struct pair *) realloc(Mold, M_len*sizeof(struct pair));
 }
 
+void deallocate_GVMnewMMold(void )
+{
+	int i;
+
+	free(Mnew);
+	for (i = 0; i < G_len; i++) free(V[i]);
+	free(V);
+	for (i = 0; i < G_len; i++) {
+		free(G.BC[i]);
+		free(G.ff[i]);
+		free(G.ee[i]);
+	}
+	free(G.ee);
+	free(G.ff);
+	free(G.BC);
+	G.len = 0;
+	free(Mold);
+	free(M);
+	M_len = 0;
+}
 
 /* Note that this produces a segfault or hangs if either	*
  * f.leading is NULL or if f.leading->c == 0.			*/

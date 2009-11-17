@@ -51,3 +51,4 @@ extern struct polynomial myf;
 
 /* Functions used in other files. */
 int setup(int silent);
+void deallocate_GVMnewMMold(void );
