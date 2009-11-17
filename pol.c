@@ -107,7 +107,7 @@ void free_reserves(void )
 		lists = list[NR_RESERVE].next;
 		free(list);
 	}
-	printf("Freed %d lists.\n", nr);
+	printf("/* Freed %d lists. */\n", nr);
 }
 
 /* Copies data not pointer.						*/
