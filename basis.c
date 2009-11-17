@@ -301,13 +301,13 @@ int compute_frobenius_matrix(void )
 		printf("/* \n");
 		printf("This should be the matrix of frobenius!\n");
 		printf("*/ \n");
-		printf("B = A; \n");
+		printf("B = subst(A, p, %d); \n", p);
 	} else {
 		printf("/* \n");
 		printf("This matrix times %d^(-%d)"
 		" should be the matrix of frobenius.\n", p, k);
 		printf("*/ \n");
-		printf("B = %d^(-%d) * A; \n", p, k);
+		printf("B = %d^(-%d) * subst(A, p, %d); \n", p, k, p);
 	}
 
 	/************************************************

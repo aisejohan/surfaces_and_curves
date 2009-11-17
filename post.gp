@@ -106,10 +106,11 @@ do_it(A)=
 
 repeat()=
 {
+	local(pp, g);
 	system("./tester | tee uit");
 	read("uit");
 	g = do_it(B);
 	print(g);
-	p = factor(abs(subst(g, x, 0)))[1,1];
-	newtonpoly(g, p);
+	pp = factor(abs(subst(g, x, 0)))[1,1];
+	newtonpoly(g, pp);
 }
