@@ -26,6 +26,7 @@ extern mpz_t prime;
 extern mpz_t temp;
 
 void setup_scalars(void);
+void close_scalars(void);
 
 void printmscalar(mscalar a);
 
@@ -67,4 +68,4 @@ void sc_div(mscalar a, mscalar b, mscalar c);
 
 #define ito_sc(a,b)		{mpz_set_si(temp,(long)a);mpz_mod(b,temp,modulus);}
 
-#define sc_is_zero(a)		mpz_divisible_p(a,modulus)
+#define sc_is_zero(a)		(!mpz_cmp_ui(a, 0))
