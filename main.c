@@ -41,6 +41,7 @@ int main(void )
 {
 	int i, retry, random;
 
+	printf("/* Comments begin... \n");
 #ifdef KIJKEN
 	printf("Debug is set! To unset do not define KIJKEN.\n");
 #endif
@@ -84,6 +85,9 @@ int main(void )
 		free_tail(G.BC[i]->bc4.leading);
 		free_tail(G.ff[i]->leading);
 	}
+	deallocate_GVMnewMMold();
+	free_reserves();
+	close_scalars();
 
 	return(0);
 }
