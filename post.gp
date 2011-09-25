@@ -89,7 +89,7 @@ do_it(A)=
 	local(p,lijst,m,c,l,d,f,g);
 	f = charpoly(A);
 	d = matdet(denominator(A)*A);
-	lijst = factor(d,1);
+	lijst = factor(d,0);
 	l = matsize(lijst)[1];
 	m = lijst[1,2];
 	c = 1;
@@ -106,11 +106,10 @@ do_it(A)=
 
 repeat()=
 {
-	local(pp, g);
 	system("./tester | tee uit");
 	read("uit");
 	g = do_it(B);
 	print(g);
-	pp = factor(abs(subst(g, x, 0)))[1,1];
-	newtonpoly(g, pp);
+	p = factor(abs(subst(g, x, 0)))[1,1];
+	newtonpoly(g, p);
 }
