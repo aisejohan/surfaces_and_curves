@@ -36,6 +36,7 @@
 #include "reduce.h"
 #include "char_p_0.h"
 #include "basis.h"
+#include "count.h"
 
 int main(void )
 {
@@ -58,6 +59,10 @@ int main(void )
 		myf = get_f();
 		retry = setup(0);
 	}
+
+	/* Compute nr of points */
+	i = count_points(1);
+	printf("Nr of points is %d.\n", i);
 
 	/* Compute the frobenius matrix. */
 	compute_frobenius_matrix();

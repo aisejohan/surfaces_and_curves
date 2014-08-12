@@ -111,5 +111,9 @@ repeat()=
 	g = do_it(B);
 	print(g);
 	p = factor(abs(subst(g, x, 0)))[1,1];
-	newtonpoly(g, p);
+	NR = -polcoeff(g, poldegree(g)-1)+1+p+p^2;
+	print("Number of points: ", NR);
+	print("Number times p - 1: ", NR*(p - 1));
+	print("Newton polygon: ",newtonpoly(g, p));
+	return(g);
 }

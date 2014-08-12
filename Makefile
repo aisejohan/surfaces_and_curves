@@ -1,6 +1,6 @@
 all:
-	gcc -Wall -O3 -march=native -c main.c  basis.c  compute.c  delta.c  grobner.c  helper.c  pol.c  reduce.c  scalar.c  char_p_0.c
-	gcc -O3 -march=native -o tester main.o  basis.o  compute.o  delta.o  grobner.o  helper.o  pol.o  reduce.o  scalar.o  char_p_0.o -lgmp
+	gcc -Wall -O3 -march=native -c main.c  basis.c  compute.c  delta.c  grobner.c  helper.c  pol.c  reduce.c  scalar.c  char_p_0.c count.c
+	gcc -O3 -march=native -o tester main.o  basis.o  compute.o  delta.o  grobner.o  helper.o  pol.o  reduce.o  scalar.o  char_p_0.o count.o -lgmp
 
 clean:
 	rm -f tester tijdelijk gmon.out
